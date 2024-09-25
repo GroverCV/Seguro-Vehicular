@@ -1,0 +1,53 @@
+/* styles.css */
+
+nav {
+    background-color: #4A5568; /* bg-gray-800 */
+    padding: 16px;
+  }
+  
+  nav .container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  nav .menu {
+    display: flex;
+    gap: 16px;
+  }
+  
+  nav .menu a {
+    color: white;
+    padding: 8px 16px;
+    border-radius: 4px;
+    text-decoration: none;
+  }
+  
+  nav .menu a:hover {
+    background-color: #2D3748; /* hover:bg-gray-700 */
+  }
+  
+  /* Estilos para móviles */
+  @media (max-width: 768px) {
+    nav .menu {
+      display: none; /* Ocultar menú por defecto en móviles */
+    }
+    
+    nav .menu-mobile {
+      display: flex; /* Mostrar menú móvil */
+      flex-direction: column;
+      position: absolute;
+      top: 60px;
+      left: 0;
+      background-color: #4A5568;
+      width: 100%;
+    }
+  
+    nav .menu-mobile a {
+      padding: 16px;
+      text-align: center;
+    }
+  }
+
+
+  
