@@ -1,126 +1,57 @@
 /* styles.css */
-body {
-  font-family: 'Arial, sans-serif';
-  background-color: #f9f9f9;
-  margin: 0;
-  padding: 20px;
+
+/* Estilo del modal */
+.ant-modal {
+  border-radius: 8px; /* Bordes redondeados */
 }
 
-h1 {
-  text-align: center;
-  color: #333;
+/* Título del modal */
+.ant-modal-title {
+  font-size: 20px; /* Tamaño de fuente del título */
+  font-weight: bold; /* Peso de fuente del título */
 }
 
-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 20px;
-  background-color: #fff;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+/* Estilo de los elementos del formulario */
+.ant-form-item {
+  margin-bottom: 16px; /* Espacio entre elementos del formulario */
 }
 
-th {
-  padding: 12px 15px;
-  text-align: left;
-  border-bottom: 1px solid #ddd;
-  background-color: #007bff;
-  color: white;
+/* Etiquetas del formulario */
+.ant-form-item-label > label {
+  font-weight: 500; /* Peso de fuente de las etiquetas */
 }
 
-td {
-  padding: 12px 15px;
-  text-align: left;
-  border-bottom: 1px solid #ddd;
+/* Botones del formulario */
+.ant-btn-primary {
+  background-color: #4CAF50; /* Color de fondo del botón "Guardar" */
+  border-color: #4CAF50; /* Color del borde del botón "Guardar" */
 }
 
-tr:nth-child(even) {
-  background-color: #f9f9f9;
+.ant-btn-primary:hover {
+  background-color: #45a049; /* Color de fondo al pasar el mouse */
 }
 
-tr:nth-child(odd) {
-  background-color: #ffffff;
+.ant-btn {
+  border-radius: 4px; /* Bordes redondeados en los botones */
 }
 
-button {
-  margin-right: 10px;
-  padding: 5px 10px;
-  cursor: pointer;
+/* Estilo de los selectores */
+.ant-select {
+  width: 100%; /* Ancho completo para los selectores */
 }
 
-.modal {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background-color: white;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  z-index: 1000;
-  width: 400px;
+/* Estilo de los inputs */
+.ant-input {
+  border-radius: 4px; /* Bordes redondeados en los inputs */
 }
 
-.overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
-  z-index: 999;
+/* Estilo de los mensajes de error */
+.ant-form-item-explain {
+  color: red; /* Color de los mensajes de error */
+  font-size: 12px; /* Tamaño de fuente de los mensajes de error */
 }
 
-input {
-  width: 100%;
-  padding: 10px;
-  margin: 5px 0;
-  border-radius: 4px;
-  border: 1px solid #ccc;
-}
-
-.submit-button {
-  padding: 10px 15px;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-/* Responsive styles */
-@media (max-width: 768px) {
-  body {
-    padding: 10px;
-  }
-
-  h1 {
-    font-size: 24px;
-  }
-
-  table {
-    font-size: 14px;
-  }
-
-  .modal {
-    width: 90%; /* Ajusta el ancho de la modal en móviles */
-  }
-
-  button {
-    width: 100%; /* Botones ocupan el 100% en móviles */
-    margin: 5px 0; /* Espaciado vertical */
-  }
-
-  input {
-    font-size: 14px; /* Ajusta el tamaño de fuente en móviles */
-  }
-}
-
-@media (max-width: 480px) {
-  h1 {
-    font-size: 20px;
-  }
-
-  table {
-    font-size: 12px; /* Tamaño de fuente más pequeño para pantallas muy pequeñas */
-  }
+/* Espaciado entre el botón "Guardar" y "Cancelar" */
+.ant-btn + .ant-btn {
+  margin-left: 10px; /* Margen entre los botones */
 }

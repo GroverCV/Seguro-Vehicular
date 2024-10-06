@@ -16,6 +16,7 @@ import CerrarSesion from "../views/CerrarSesion";
 import Contacto from "../views/menu/Contacto";
 import GestionarTipoCita from "../views/Componentes/GestionarTipoCita";
 import GestionarTipoNotificacion from "../views/Componentes/GestionarTipoNotificacion";
+import AdministrarBitacora from "../views/Componentes/AdministrarBitacora";
 
 
 export const AppRouter = () => {
@@ -35,6 +36,7 @@ export const AppRouter = () => {
           <Route path="register" element={<Register />} />
           <Route path="cerrarsesion" element={<CerrarSesion />} />
           <Route path="gestionarusuario" element={<GestionarUsuario />} />
+          <Route path="administrarbitacora" element={<AdministrarBitacora/>} />
           <Route path="gestionarrol" element={<GestionarRol />} />
           <Route path="asignarpermisos" element={<AsignarPermisos/>} />
           <Route path="gestionarmarca" element={<GestionarMarca/>} />

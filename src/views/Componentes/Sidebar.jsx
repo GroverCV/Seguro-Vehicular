@@ -203,10 +203,10 @@ const Sidebar = () => {
                 label: "CU22. Gestionar Tipo Cita",
                 to: "/dashboard/gestionartipocita",
               },
-              {/*{
-                label: "CU08. Gestinoar Bitacora",
-                to: "/dashboard/gestionarbitacora",
-              },*/},
+              {
+                label: "CU08. Administrar Bitacora",
+                to: "/dashboard/administrarbitacora",
+              },
 
             ]}
           />

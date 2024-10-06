@@ -8,7 +8,8 @@ const styles = {
     justifyContent: "center",
     alignItems: "flex-start",
     height: "100vh",
-    backgroundImage: "url('https://alianzaautomotriz.com/wp-content/uploads/2020/05/seguro-autos.jpg')", // Aquí va la URL de la imagen de fondo
+    backgroundImage:
+      "url('https://alianzaautomotriz.com/wp-content/uploads/2020/05/seguro-autos.jpg')", // Aquí va la URL de la imagen de fondo
     backgroundSize: "cover", // Para que la imagen cubra toda la pantalla
     backgroundPosition: "center", // Centrar la imagen de fondo
     padding: "20px",
@@ -79,19 +80,54 @@ export const Login = () => {
   const onLogin = async (e) => {
     e.preventDefault();
     setError("");
-
+  
     try {
-      const response = await fetch("https://backend-seguros.campozanodevlab.com/api/usuarios");
+      const response = await fetch(
+        "https://backend-seguros.campozanodevlab.com/api/usuarios"
+      );
       const users = await response.json();
-
+  
       const user = users.find(
         (user) => user.email === name && user.contrasena === password
       );
-
+  
       if (user) {
         const token = "simulated-token"; // Cambiar a un token real si es necesario
         localStorage.setItem("token", token);
-        
+  
+        // Obtener la IP del usuario
+        const getUserIp = async () => {
+          try {
+            const response = await fetch("https://api.ipify.org?format=json");
+            const data = await response.json();
+            return data.ip;
+          } catch (error) {
+            console.error("Error obteniendo IP:", error);
+            return "IP desconocida";
+          }
+        };
+  
+        const userIp = await getUserIp();
+  
+        // Datos a enviar a la bitácora
+        const logData = {
+          usuario_id: user.id, // Asegúrate de tener el ID del usuario
+          accion: "Inició Sesión",
+          detalles: "Ingreso al Sistema",
+          ip: userIp,
+        };
+  
+        // Enviar la acción a la bitácora
+        await fetch("https://backend-seguros.campozanodevlab.com/api/bitacora", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`, // Si es necesario un token para la autenticación
+          },
+          body: JSON.stringify(logData),
+        });
+  
+        // Navegar al dashboard
         navigate("/dashboard", {
           replace: true,
           state: { logged: true, name: user.nombre },
@@ -102,10 +138,9 @@ export const Login = () => {
     } catch (error) {
       setError("Error al autenticar. Inténtalo más tarde.");
     }
-
+  
     onResetForm();
   };
-
   return (
     <div style={styles.wrapper}>
       <form onSubmit={onLogin} style={styles.form}>
@@ -122,7 +157,10 @@ export const Login = () => {
             autoComplete="off"
             style={styles.input}
           />
-          <label htmlFor="name" style={{ ...styles.label, ...(name ? styles.labelActive : {}) }}>
+          <label
+            htmlFor="name"
+            style={{ ...styles.label, ...(name ? styles.labelActive : {}) }}
+          >
             Email:
           </label>
         </div>
@@ -137,11 +175,16 @@ export const Login = () => {
             autoComplete="off"
             style={styles.input}
           />
-          <label htmlFor="password" style={{ ...styles.label, ...(password ? styles.labelActive : {}) }}>
+          <label
+            htmlFor="password"
+            style={{ ...styles.label, ...(password ? styles.labelActive : {}) }}
+          >
             Contraseña:
           </label>
         </div>
-        <button type="submit" style={styles.button}>Entrar</button>
+        <button type="submit" style={styles.button}>
+          Entrar
+        </button>
       </form>
     </div>
   );
