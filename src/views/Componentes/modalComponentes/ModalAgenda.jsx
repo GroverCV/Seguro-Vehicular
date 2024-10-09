@@ -1,52 +1,73 @@
-import React from 'react';
-import { Badge, Calendar } from 'antd';
-
-const getListData = (value) => {
-  let listData = [];
-  switch (value.date()) {
-    case 8:
-      listData = [
-        { type: 'warning', content: 'This is warning event.' },
-        { type: 'success', content: 'This is usual event.' },
-      ];
-      break;
-    case 10:
-      listData = [
-        { type: 'warning', content: 'This is warning event.' },
-        { type: 'success', content: 'This is usual event.' },
-        { type: 'error', content: 'This is error event.' },
-      ];
-      break;
-    case 15:
-      listData = [
-        { type: 'warning', content: 'This is warning event' },
-        { type: 'success', content: 'This is very long usual event......' },
-        { type: 'error', content: 'This is error event 1.' },
-        { type: 'error', content: 'This is error event 2.' },
-        { type: 'error', content: 'This is error event 3.' },
-        { type: 'error', content: 'This is error event 4.' },
-      ];
-      break;
-    default:
-  }
-  return listData || [];
-};
-
-const getMonthData = (value) => {
-  if (value.month() === 8) {
-    return 1394;
-  }
-};
+import React, { useState, useEffect } from 'react';
+import { Badge, Calendar, Spin, Modal, List } from 'antd';
+import dayjs from 'dayjs';
+import axios from 'axios';
 
 const ModalAgenda = () => {
-  const monthCellRender = (value) => {
-    const num = getMonthData(value);
-    return num ? (
-      <div className="notes-month">
-        <section>{num}</section>
-        <span>Backlog number</span>
-      </div>
-    ) : null;
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [selectedDate, setSelectedDate] = useState(null);
+  const [selectedCitas, setSelectedCitas] = useState([]);
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [citas, setCitas] = useState([]);
+  const [usuarios, setUsuarios] = useState({}); // Estado para almacenar usuarios
+
+  // Obtener datos de citas y usuarios
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // Obtener citas
+        const citasResponse = await axios.get("https://backend-seguros.campozanodevlab.com/api/citas");
+        setCitas(citasResponse.data);
+
+        // Obtener todos los usuarios
+        const usuariosResponse = await axios.get("https://backend-seguros.campozanodevlab.com/api/usuarios");
+        const usuariosData = {};
+        usuariosResponse.data.forEach(usuario => {
+          usuariosData[usuario.id] = { nombre: usuario.nombre, apellido: usuario.apellido }; // Suponiendo que los campos son nombre y apellido
+        });
+        setUsuarios(usuariosData); // Guardar usuarios en el estado
+
+      } catch (err) {
+        setError('Error al cargar las citas o usuarios');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  const citasPorFecha = () => {
+    return citas.reduce((acc, cita) => {
+      const fechaCita = dayjs(cita.fecha).format('DD/MM/YYYY');
+      if (!acc[fechaCita]) {
+        acc[fechaCita] = [];
+      }
+      acc[fechaCita].push({
+        ...cita,
+        Fecha: dayjs(cita.fecha).format('DD/MM/YYYY, HH:mm:ss'),
+        FechaCreada: dayjs(cita.fechaCreacion).format('DD/MM/YYYY'),
+      });
+      return acc;
+    }, {});
+  };
+
+  const getListData = (value) => {
+    const fechaActual = value.format('DD/MM/YYYY');
+    const citasDelDia = citasPorFecha()[fechaActual] || [];
+
+    citasDelDia.sort((a, b) => dayjs(a.fecha).diff(dayjs(b.fecha)));
+
+    return citasDelDia.map((cita) => {
+      const solicitante = usuarios[cita.solicitante_id] || { nombre: 'Desconocido', apellido: '' };
+      const recepcionista = usuarios[cita.recepcion_id] || { nombre: 'Desconocido', apellido: '' };
+
+      return {
+        type: cita.estado === 'atendido' ? 'success' : 'warning',
+        content: `${cita.motivo || 'Cita'} - ${dayjs(cita.fecha).format('HH:mm')} (${solicitante.nombre} ${solicitante.apellido} / ${recepcionista.nombre} ${recepcionista.apellido})`,
+      };
+    });
   };
 
   const dateCellRender = (value) => {
@@ -62,25 +83,77 @@ const ModalAgenda = () => {
     );
   };
 
+  const onSelectDate = (value) => {
+    const fechaActual = value.format('DD/MM/YYYY');
+    const citasDelDia = citasPorFecha()[fechaActual] || [];
+
+    citasDelDia.sort((a, b) => dayjs(a.fecha).diff(dayjs(b.fecha)));
+
+    setSelectedCitas(citasDelDia);
+    setSelectedDate(fechaActual);
+    setIsModalVisible(true);
+  };
+
+  const handleCancel = () => {
+    setIsModalVisible(false);
+  };
+
   const cellRender = (current, info) => {
     if (info.type === 'date') return dateCellRender(current);
-    if (info.type === 'month') return monthCellRender(current);
     return info.originNode;
   };
 
-  // Estilos en línea
   const calendarContainerStyle = {
     width: '1000px',
     height: '650px',
     overflow: 'hidden',
-    transform: 'scale(0.8)',
+    transform: 'scale(1)',
     transformOrigin: 'bottom',
     margin: '0 auto',
   };
 
+  if (loading) {
+    return <Spin tip="Cargando citas..." />;
+  }
+
+  if (error) {
+    return <p>{error}</p>;
+  }
+
   return (
-    <div style={calendarContainerStyle}>
-      <Calendar cellRender={cellRender} />
+    <div>
+      <div style={calendarContainerStyle}>
+        <Calendar cellRender={cellRender} onSelect={onSelectDate} />
+      </div>
+
+      <Modal
+        title={`Citas para el día ${selectedDate}`}
+        visible={isModalVisible}
+        onCancel={handleCancel}
+        footer={null}
+      >
+        {selectedCitas.length > 0 ? (
+          <List
+            itemLayout="horizontal"
+            dataSource={selectedCitas}
+            renderItem={(cita) => {
+              const solicitante = usuarios[cita.solicitante_id] || { nombre: 'Desconocido', apellido: '' };
+              const recepcionista = usuarios[cita.recepcion_id] || { nombre: 'Desconocido', apellido: '' };
+
+              return (
+                <List.Item>
+                  <List.Item.Meta
+                    title={`Motivo: ${cita.motivo || 'No especificado'}`}
+                    description={`Fecha Creada: ${dayjs(cita.fechaCreacion).format('DD/MM/YYYY')} - Hora: ${dayjs(cita.fecha).format('HH:mm:ss')} - Duración: ${cita.duracion} minutos - Solicitud: ${solicitante.nombre} ${solicitante.apellido} - Recepcionista: ${recepcionista.nombre} ${recepcionista.apellido}`}
+                  />
+                </List.Item>
+              );
+            }}
+          />
+        ) : (
+          <p>No hay citas para esta fecha.</p>
+        )}
+      </Modal>
     </div>
   );
 };

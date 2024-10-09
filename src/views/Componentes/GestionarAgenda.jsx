@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { confirmAction } from "./modalComponentes/ModalConfirm";
+import ModalAgenda from "./modalComponentes/ModalAgenda";
 
 const GestionarAgenda = () => {
   const [citas, setCitas] = useState([]);
@@ -9,9 +10,8 @@ const GestionarAgenda = () => {
   const [error, setError] = useState(null);
   const [editingCita, setEditingCita] = useState(null);
   const [formData, setFormData] = useState({});
-  const [tiposCita, setTiposCita] = useState([]);
-  const [editingTipoCita, setEditingTipoCita] = useState(null);
   const [showForm, setShowForm] = useState(false);
+  const [showCalendar, setShowCalendar] = useState(false);
 
   const fetchCitas = async () => {
     try {
@@ -266,6 +266,9 @@ const GestionarAgenda = () => {
     setEditingCita(null);
     setShowForm(false);
   };
+  const toggleCalendar = () => {
+    setShowCalendar((prev) => !prev);
+  };
 
   if (loading) return <div>Cargando...</div>;
   if (error) return <div>Error: {error}</div>;
@@ -282,6 +285,19 @@ const GestionarAgenda = () => {
       >
         Crear Cita
       </button>
+
+      
+      <button style={styles.button} onClick={toggleCalendar}>
+        {showCalendar ? "Ocultar Calendario" : "Ver Calendario"}
+      </button>
+      {showCalendar && (
+        <div>
+          <h2>Calendario</h2>
+          <ModalAgenda/>
+        </div>
+      )}
+    
+
       <table style={styles.table}>
         <thead>
           <tr>
