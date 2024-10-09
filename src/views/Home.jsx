@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Inicio from "./menu/Inicio";
 import Contacto from "./menu/Contacto";
+import Informacion from "./menu/Informacion";
 
 const styles = {
   container: {
@@ -65,9 +66,9 @@ export const Home = () => {
         </button>
         <button
           style={styles.button}
-          onClick={() => handleNavigation("/", "cotiza")}
+          onClick={() => handleNavigation("/", "informacion")}
         >
-          Cotiza tu Poliza
+          Informacion de Poliza
         </button>
         <button
           style={styles.button}
@@ -86,6 +87,7 @@ export const Home = () => {
       <div style={styles.content}>
         {selectedButton === "inicio" && <Inicio />}
         {selectedButton === "contacto" && <Contacto />}
+        {selectedButton === "informacion" && <Informacion />}
       </div>
 
       <Inicio />

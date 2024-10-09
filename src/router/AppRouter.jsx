@@ -17,6 +17,7 @@ import Contacto from "../views/menu/Contacto";
 import GestionarTipoCita from "../views/Componentes/GestionarTipoCita";
 import GestionarTipoNotificacion from "../views/Componentes/GestionarTipoNotificacion";
 import AdministrarBitacora from "../views/Componentes/AdministrarBitacora";
+import Informacion from "../views/menu/Informacion";
 
 
 export const AppRouter = () => {
@@ -29,6 +30,7 @@ export const AppRouter = () => {
         <Route path="/" element={<Home />} />
         <Route path="/inicio" element={<Inicio />} />
         <Route path="/contacto" element={<Contacto />} />
+        <Route path="/informacion" element={<Informacion />} />
         <Route path="/login" element={<Login />} />
 
         <Route path="/dashboard" element={

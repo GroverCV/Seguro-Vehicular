@@ -29,8 +29,11 @@ const AdministrarBitacora = () => {
             apellido: usuario ? usuario.apellido : 'Desconocido'
           };
         });
-
-        setData(dataConNombre);
+    
+        // Ordena los datos por fechaHora de forma descendente
+        const dataOrdenada = dataConNombre.sort((a, b) => new Date(b.fechaHora) - new Date(a.fechaHora));
+    
+        setData(dataOrdenada);
       } catch (error) {
         message.error("Error al obtener los datos");
       } finally {

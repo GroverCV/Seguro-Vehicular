@@ -126,6 +126,9 @@ export const Login = () => {
           },
           body: JSON.stringify(logData),
         });
+
+        localStorage.setItem("userId", user.id);
+        localStorage.setItem("userIp", userIp);
   
         // Navegar al dashboard
         navigate("/dashboard", {
