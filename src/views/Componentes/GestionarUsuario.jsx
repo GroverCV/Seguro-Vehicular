@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { SearchOutlined } from '@ant-design/icons';
 import { Button, Input, Space, Table } from 'antd';
 import Highlighter from 'react-highlight-words';
+import { confirmAction } from "./modalComponentes/ModalConfirm";
 
 const GestionarUsuario = () => {
     const [usuarios, setUsuarios] = useState([]);
@@ -14,31 +15,31 @@ const GestionarUsuario = () => {
     const [searchedColumn, setSearchedColumn] = useState('');
     const searchInput = useRef(null);
 
+    const fetchUsuarios = async () => {
+        try {
+            const response = await fetch('https://backend-seguros.campozanodevlab.com/api/usuarios');
+            if (!response.ok) throw new Error('Error al obtener los usuarios');
+            const data = await response.json();
+            setUsuarios(data);
+        } catch (error) {
+            setError(error.message);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const fetchRoles = async () => {
+        try {
+            const response = await fetch('https://backend-seguros.campozanodevlab.com/api/roles');
+            if (!response.ok) throw new Error('Error al obtener los roles');
+            const data = await response.json();
+            setRoles(data);
+        } catch (error) {
+            setError(error.message);
+        }
+    };
+
     useEffect(() => {
-        const fetchUsuarios = async () => {
-            try {
-                const response = await fetch('https://backend-seguros.campozanodevlab.com/api/usuarios');
-                if (!response.ok) throw new Error('Error al obtener los usuarios');
-                const data = await response.json();
-                setUsuarios(data);
-            } catch (error) {
-                setError(error.message);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        const fetchRoles = async () => {
-            try {
-                const response = await fetch('https://backend-seguros.campozanodevlab.com/api/roles');
-                if (!response.ok) throw new Error('Error al obtener los roles');
-                const data = await response.json();
-                setRoles(data);
-            } catch (error) {
-                setError(error.message);
-            }
-        };
-
         fetchUsuarios();
         fetchRoles();
     }, []);
@@ -63,6 +64,7 @@ const GestionarUsuario = () => {
       };
 
     const handleDelete = async (id) => {
+        confirmAction(async () => {
         try {
           await fetch(`https://backend-seguros.campozanodevlab.com/api/usuarios/${id}`, {
             method: 'DELETE',
@@ -82,7 +84,8 @@ const GestionarUsuario = () => {
           setError('Error al eliminar el usuario');
           console.error("Error al eliminar el usuario:", error);
         }
-      };
+    });
+  };
       
       const logAction = async (logData) => {
         const token = "simulated-token"; // Aquí deberías usar un token válido si es necesario
@@ -104,6 +107,7 @@ const GestionarUsuario = () => {
       
       const handleSubmit = async (e) => {
         e.preventDefault();
+        confirmAction(async () => {
         try {
             // Obtener el usuario que se está editando antes de la actualización
             const previousUserResponse = await fetch(`https://backend-seguros.campozanodevlab.com/api/usuarios/${editingUser.id}`);
@@ -116,14 +120,8 @@ const GestionarUsuario = () => {
             });
             const updatedUser = await response.json();
             setUsuarios((prev) => prev.map((usuario) => (usuario.id === updatedUser.id ? updatedUser : usuario)));
-    
-            // Registro de la acción en la bitácora
             const userIp = await getUserIp();
-            
-            // Atributos a verificar
             const attributesToCheck = ['Nombre', 'Apellido', 'Email', 'Teléfono', 'Celular', 'Dirección', 'Rol'];
-    
-            // Identificar el atributo editado
             const editedAttribute = attributesToCheck.find((key) => formData[key] !== previousUser[key]);
     
             let logDetails = '';
@@ -137,21 +135,17 @@ const GestionarUsuario = () => {
                 detalles: `El Usuario ID: ${userId} editó al Usuario ID: ${editingUser.id}. ${logDetails}`,
                 ip: userIp,
             };
-    
+
+            fetchUsuarios();
             await logAction(logData);
             setEditingUser(null);
         } catch (error) {
             setError('Error al actualizar el usuario');
             console.error("Error al actualizar el usuario:", error);
         }
-    };
+    });
+};
     
-      
-      
-      
-      
-      
-
 
     const styles = {
         body: {

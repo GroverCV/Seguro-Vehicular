@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import emailjs from "emailjs-com"; // Importa la biblioteca
+import { confirmAction } from "./modalComponentes/ModalConfirm";
 
 const GestionarNotificacion = () => {
   const [notificaciones, setNotificaciones] = useState([]);
@@ -10,48 +11,55 @@ const GestionarNotificacion = () => {
   const [editingNotificacion, setEditingNotificacion] = useState(null);
   const [formData, setFormData] = useState({});
   const [showForm, setShowForm] = useState(false);
-  const [correoUsuarioSeleccionado, setCorreoUsuarioSeleccionado] = useState("");
+  const [correoUsuarioSeleccionado, setCorreoUsuarioSeleccionado] =
+    useState("");
+
+  const fetchNotificaciones = async () => {
+    try {
+      const response = await fetch(
+        "https://backend-seguros.campozanodevlab.com/api/notificacion"
+      );
+      if (!response.ok) {
+        throw new Error("Error al obtener las notificaciones");
+      }
+      const data = await response.json();
+      setNotificaciones(data);
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchUsuarios = async () => {
+    try {
+      const response = await fetch(
+        "https://backend-seguros.campozanodevlab.com/api/usuarios"
+      );
+      if (!response.ok) throw new Error("Error al obtener los usuarios");
+      const data = await response.json();
+      setUsuarios(data);
+    } catch (error) {
+      setError(error.message);
+    }
+  };
+
+  const fetchTiposNotificacion = async () => {
+    try {
+      const response = await fetch(
+        "https://backend-seguros.campozanodevlab.com/api/tipo_notificacion"
+      );
+      if (!response.ok) {
+        throw new Error("Error al obtener los tipos de notificación");
+      }
+      const data = await response.json();
+      setTiposNotificacion(data);
+    } catch (error) {
+      setError(error.message);
+    }
+  };
 
   useEffect(() => {
-    const fetchNotificaciones = async () => {
-      try {
-        const response = await fetch("https://backend-seguros.campozanodevlab.com/api/notificacion");
-        if (!response.ok) {
-          throw new Error("Error al obtener las notificaciones");
-        }
-        const data = await response.json();
-        setNotificaciones(data);
-      } catch (error) {
-        setError(error.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    const fetchUsuarios = async () => {
-      try {
-        const response = await fetch("https://backend-seguros.campozanodevlab.com/api/usuarios");
-        if (!response.ok) throw new Error("Error al obtener los usuarios");
-        const data = await response.json();
-        setUsuarios(data);
-      } catch (error) {
-        setError(error.message);
-      }
-    };
-
-    const fetchTiposNotificacion = async () => {
-      try {
-        const response = await fetch("https://backend-seguros.campozanodevlab.com/api/tipo_notificacion");
-        if (!response.ok) {
-          throw new Error("Error al obtener los tipos de notificación");
-        }
-        const data = await response.json();
-        setTiposNotificacion(data);
-      } catch (error) {
-        setError(error.message);
-      }
-    };
-
     fetchNotificaciones();
     fetchUsuarios();
     fetchTiposNotificacion();
@@ -142,15 +150,126 @@ const GestionarNotificacion = () => {
     setShowForm(true);
   };
 
-  const handleDelete = async (id) => {
+  const getUserIp = async () => {
     try {
-      await fetch(`https://backend-seguros.campozanodevlab.com/api/notificacion/${id}`, {
-        method: "DELETE",
-      });
-      setNotificaciones(notificaciones.filter((notificacion) => notificacion.id !== id));
+      const response = await fetch("https://api.ipify.org?format=json");
+      const data = await response.json();
+      return data.ip;
     } catch (error) {
-      console.error("Error al eliminar la notificación:", error);
+      console.error("Error obteniendo IP:", error);
+      return "IP desconocida";
     }
+  };
+
+  const userId = localStorage.getItem("userId");
+
+  const handleDelete = async (id) => {
+    confirmAction(async () => {
+      try {
+        await fetch(
+          `https://backend-seguros.campozanodevlab.com/api/notificacion/${id}`,
+          { method: "DELETE" }
+        );
+        setNotificaciones(
+          notificaciones.filter((notificacion) => notificacion.id !== id)
+        );
+
+        const userIp = await getUserIp();
+        const logData = {
+          usuario_id: userId,
+          accion: "Eliminó",
+          detalles: `El Usuario ID: ${userId} eliminó la Notificación ID: ${id}`,
+          ip: userIp,
+        };
+
+        await logAction(logData);
+      } catch (error) {
+        console.error("Error al eliminar la notificación:", error);
+      }
+    });
+  };
+
+  const logAction = async (logData) => {
+    const token = "simulated-token";
+    try {
+      await fetch("https://backend-seguros.campozanodevlab.com/api/bitacora", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(logData),
+      });
+    } catch (error) {
+      console.error("Error al registrar la acción en la bitácora.");
+      console.error("Error al registrar la acción:", error);
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    confirmAction(async () => {
+      try {
+        const response = await fetch(
+          editingNotificacion
+            ? `https://backend-seguros.campozanodevlab.com/api/notificacion/${editingNotificacion.id}`
+            : "https://backend-seguros.campozanodevlab.com/api/notificacion",
+          {
+            method: editingNotificacion ? "PUT" : "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(formData),
+          }
+        );
+
+        const updatedNotificacion = await response.json();
+
+        setNotificaciones((prev) =>
+          editingNotificacion
+            ? prev.map((notificacion) =>
+                notificacion.id === updatedNotificacion.id
+                  ? updatedNotificacion
+                  : notificacion
+              )
+            : [...prev, updatedNotificacion]
+        );
+
+        // Enviar correo después de guardar la notificación
+        const usuario = usuarios.find(
+          (user) => user.id === formData.usuario_id
+        );
+        const tipoNotificacion = tiposNotificacion.find(
+          (tipo) => tipo.id === formData.tipo_id
+        );
+
+        if (usuario && tipoNotificacion) {
+          await sendEmail(usuario, tipoNotificacion, formData.mensaje);
+        }
+
+        setEditingNotificacion(null);
+        setShowForm(false);
+
+        const userIp = await getUserIp();
+        const logData = {
+          usuario_id: userId,
+          accion: editingNotificacion ? "Editó" : "Creó",
+          detalles: `El Usuario ID: ${userId} ${
+            editingNotificacion ? "editó" : "creó"
+          } la Notificación ID: ${
+            editingNotificacion
+              ? editingNotificacion.id
+              : updatedNotificacion.id
+          }`,
+          ip: userIp,
+        };
+
+        fetchNotificaciones();
+        await logAction(logData);
+      } catch (error) {
+        console.error("Error al actualizar o crear la notificación:", error);
+      }
+    });
   };
 
   const sendEmail = async (usuario, tipoNotificacion, mensaje) => {
@@ -173,62 +292,20 @@ const GestionarNotificacion = () => {
     }
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      const response = await fetch(
-        editingNotificacion
-          ? `https://backend-seguros.campozanodevlab.com/api/notificacion/${editingNotificacion.id}`
-          : "https://backend-seguros.campozanodevlab.com/api/notificacion",
-        {
-          method: editingNotificacion ? "PUT" : "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(formData),
-        }
-      );
-      const updatedNotificacion = await response.json();
-      setNotificaciones((prev) =>
-        editingNotificacion
-          ? prev.map((notificacion) =>
-              notificacion.id === updatedNotificacion.id
-                ? updatedNotificacion
-                : notificacion
-            )
-          : [...prev, updatedNotificacion]
-      );
-
-      // Enviar correo después de guardar la notificación
-      const usuario = usuarios.find((user) => user.id === formData.usuario_id);
-      const tipoNotificacion = tiposNotificacion.find(
-        (tipo) => tipo.id === formData.tipo_id
-      );
-
-      if (usuario && tipoNotificacion) {
-        await sendEmail(usuario, tipoNotificacion, formData.mensaje);
-      }
-
-      setEditingNotificacion(null);
-      setShowForm(false);
-    } catch (error) {
-      console.error("Error al actualizar o crear la notificación:", error);
-    }
-  };
-
   const handleUsuarioChange = (e) => {
     const usuarioId = e.target.value;
     setFormData({ ...formData, usuario_id: usuarioId });
-    const usuarioSeleccionado = usuarios.find((usuario) => usuario.id === usuarioId);
-    setCorreoUsuarioSeleccionado(usuarioSeleccionado ? usuarioSeleccionado.correo : "");
+    const usuarioSeleccionado = usuarios.find(
+      (usuario) => usuario.id === usuarioId
+    );
+    setCorreoUsuarioSeleccionado(
+      usuarioSeleccionado ? usuarioSeleccionado.correo : ""
+    );
   };
 
   if (loading) return <div>Cargando...</div>;
   if (error) return <div>Error: {error}</div>;
 
-
-
-  
   return (
     <div style={styles.body}>
       <h1 style={styles.h1}>GESTIONAR NOTIFICACIONES</h1>
@@ -249,7 +326,7 @@ const GestionarNotificacion = () => {
             <th style={styles.th}>Mensaje</th>
             <th style={styles.th}>Fecha Creación</th>
             <th style={styles.th}>Fecha Envío</th>
-            
+
             <th style={styles.th}>Estado</th>
             <th style={styles.th}>Usuario</th>
             <th style={styles.th}>Correo</th>
@@ -265,19 +342,19 @@ const GestionarNotificacion = () => {
             >
               <td style={styles.td}>{notificacion.id}</td>
               <td style={styles.td}>{notificacion.mensaje}</td>
-              
+
               <td style={styles.td}>
                 {notificacion.fechaCreacion
                   ? new Date(notificacion.fechaCreacion).toLocaleDateString()
                   : "No definido"}
               </td>
-              
+
               <td style={styles.td}>
                 {notificacion.fechaEnvio
                   ? new Date(notificacion.fechaEnvio).toLocaleDateString()
                   : "No definido"}
               </td>
-              
+
               <td style={styles.td}>{notificacion.estado || "Procesando"}</td>
               <td style={styles.td}>
                 {usuarios.find(
@@ -320,13 +397,19 @@ const GestionarNotificacion = () => {
       {showForm && (
         <div style={styles.overlay}>
           <div style={styles.modal}>
-            <h2>{editingNotificacion ? "Editar Notificación" : "Crear Notificación"}</h2>
+            <h2>
+              {editingNotificacion
+                ? "Editar Notificación"
+                : "Crear Notificación"}
+            </h2>
             <form onSubmit={handleSubmit}>
               <input
                 type="text"
                 placeholder="Mensaje"
                 value={formData.mensaje || ""}
-                onChange={(e) => setFormData({ ...formData, mensaje: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, mensaje: e.target.value })
+                }
                 style={styles.input}
                 required
               />
@@ -334,7 +417,9 @@ const GestionarNotificacion = () => {
                 type="date"
                 placeholder="Fecha de Creación"
                 value={formData.fechaCreacion || ""}
-                onChange={(e) => setFormData({ ...formData, fechaCreacion: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, fechaCreacion: e.target.value })
+                }
                 style={styles.input}
                 required
               />
@@ -342,16 +427,20 @@ const GestionarNotificacion = () => {
                 type="date"
                 placeholder="Fecha de Envío"
                 value={formData.fechaEnvio || ""}
-                onChange={(e) => setFormData({ ...formData, fechaEnvio: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, fechaEnvio: e.target.value })
+                }
                 style={styles.input}
                 required
               />
-              
+
               <input
                 type="text"
                 placeholder="Estado"
                 value={formData.estado || ""}
-                onChange={(e) => setFormData({ ...formData, estado: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, estado: e.target.value })
+                }
                 style={styles.input}
                 required
               />
@@ -370,7 +459,9 @@ const GestionarNotificacion = () => {
               </select>
               <select
                 value={formData.tipo_id || ""}
-                onChange={(e) => setFormData({ ...formData, tipo_id: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, tipo_id: e.target.value })
+                }
                 style={styles.input}
                 required
               >
@@ -393,7 +484,9 @@ const GestionarNotificacion = () => {
               </button>
             </form>
             {correoUsuarioSeleccionado && (
-              <p>Correo del usuario seleccionado: {correoUsuarioSeleccionado}</p>
+              <p>
+                Correo del usuario seleccionado: {correoUsuarioSeleccionado}
+              </p>
             )}
           </div>
         </div>

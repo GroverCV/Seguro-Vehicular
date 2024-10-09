@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { confirmAction } from "./modalComponentes/ModalConfirm";
 
 const GestionarAgenda = () => {
   const [citas, setCitas] = useState([]);
@@ -12,56 +13,57 @@ const GestionarAgenda = () => {
   const [editingTipoCita, setEditingTipoCita] = useState(null);
   const [showForm, setShowForm] = useState(false);
 
+  const fetchCitas = async () => {
+    try {
+      const response = await fetch(
+        "https://backend-seguros.campozanodevlab.com/api/citas"
+      );
+      if (!response.ok) {
+        throw new Error("Error al obtener las citas");
+      }
+      const data = await response.json();
+      setCitas(data);
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchUsuarios = async () => {
+    try {
+      const response = await fetch(
+        "https://backend-seguros.campozanodevlab.com/api/usuarios"
+      );
+      if (!response.ok) throw new Error("Error al obtener los usuarios");
+      const data = await response.json();
+      setUsuarios(data);
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchTipoCita = async () => {
+    try {
+      const response = await fetch(
+        "https://backend-seguros.campozanodevlab.com/api/tipo_cita"
+      );
+      if (!response.ok) {
+        throw new Error("Error al obtener los tipos de cita");
+      }
+      const data = await response.json();
+      setTipoCita(data);
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+
   useEffect(() => {
-    const fetchCitas = async () => {
-      try {
-        const response = await fetch(
-          "https://backend-seguros.campozanodevlab.com/api/citas"
-        );
-        if (!response.ok) {
-          throw new Error("Error al obtener las citas");
-        }
-        const data = await response.json();
-        setCitas(data);
-      } catch (error) {
-        setError(error.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    const fetchUsuarios = async () => {
-      try {
-        const response = await fetch(
-          "https://backend-seguros.campozanodevlab.com/api/usuarios"
-        );
-        if (!response.ok) throw new Error("Error al obtener los usuarios");
-        const data = await response.json();
-        setUsuarios(data);
-      } catch (error) {
-        setError(error.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    const fetchTipoCita = async () => {
-      try {
-        const response = await fetch(
-          "https://backend-seguros.campozanodevlab.com/api/tipo_cita"
-        );
-        if (!response.ok) {
-          throw new Error("Error al obtener los tipos de cita");
-        }
-        const data = await response.json();
-        setTipoCita(data);
-      } catch (error) {
-        setError(error.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchUsuarios();
     fetchTipoCita();
     fetchCitas();
@@ -152,49 +154,113 @@ const GestionarAgenda = () => {
     setShowForm(true);
   };
 
-  const handleDelete = async (id) => {
+
+
+  const getUserIp = async () => {
     try {
-      await fetch(
-        `https://backend-seguros.campozanodevlab.com/api/citas/${id}`,
-        {
-          method: "DELETE",
-        }
-      );
-      setCitas(citas.filter((cita) => cita.id !== id));
+      const response = await fetch("https://api.ipify.org?format=json");
+      const data = await response.json();
+      return data.ip;
     } catch (error) {
-      console.error("Error al eliminar la cita:", error);
+      console.error("Error obteniendo IP:", error);
+      return "IP desconocida";
     }
   };
-
+  
+  const userId = localStorage.getItem("userId");
+  
+  const handleDelete = async (id) => {
+    confirmAction(async () => {
+      try {
+        await fetch(
+          `https://backend-seguros.campozanodevlab.com/api/citas/${id}`,
+          { method: "DELETE" }
+        );
+        setCitas(citas.filter((cita) => cita.id !== id));
+  
+        const userIp = await getUserIp();
+        const logData = {
+          usuario_id: userId,
+          accion: "Eliminó",
+          detalles: `El Usuario ID: ${userId} eliminó la Cita ID: ${id}`,
+          ip: userIp,
+        };
+  
+        await logAction(logData);
+      } catch (error) {
+        console.error("Error al eliminar la cita:", error);
+      }
+    });
+  };
+  
+  const logAction = async (logData) => {
+    const token = "simulated-token";
+    try {
+      await fetch("https://backend-seguros.campozanodevlab.com/api/bitacora", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(logData),
+      });
+    } catch (error) {
+      console.error("Error al registrar la acción en la bitácora.");
+      console.error("Error al registrar la acción:", error);
+    }
+  };
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
-    try {
-      const response = await fetch(
-        editingCita
-          ? `https://backend-seguros.campozanodevlab.com/api/citas/${editingCita.id}`
-          : "https://backend-seguros.campozanodevlab.com/api/citas",
-        {
-          method: editingCita ? "PUT" : "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(formData),
-        }
-      );
-      const updatedCita = await response.json();
-      setCitas((prev) =>
-        editingCita
-          ? prev.map((cita) =>
-              cita.id === updatedCita.id ? updatedCita : cita
-            )
-          : [...prev, updatedCita]
-      );
-      setEditingCita(null);
-      setShowForm(false);
-    } catch (error) {
-      console.error("Error al actualizar o crear la cita:", error);
-    }
+    confirmAction(async () => {
+      try {
+        const response = await fetch(
+          editingCita
+            ? `https://backend-seguros.campozanodevlab.com/api/citas/${editingCita.id}`
+            : "https://backend-seguros.campozanodevlab.com/api/citas",
+          {
+            method: editingCita ? "PUT" : "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(formData),
+          }
+        );
+  
+        const updatedCita = await response.json();
+        setCitas((prev) =>
+          editingCita
+            ? prev.map((cita) =>
+                cita.id === updatedCita.id ? updatedCita : cita
+              )
+            : [...prev, updatedCita]
+        );
+  
+        const userIp = await getUserIp();
+        const logData = {
+          usuario_id: userId,
+          accion: editingCita ? "Editó" : "Creó",
+          detalles: `El Usuario ID: ${userId} ${
+            editingCita ? "editó" : "creó"
+          } la Cita ID: ${
+            editingCita ? editingCita.id : updatedCita.id
+          }`,
+          ip: userIp,
+        };
+  
+        await logAction(logData);
+  
+        setEditingCita(null);
+        setShowForm(false);
+        fetchCitas()
+      } catch (error) {
+        console.error("Error al actualizar o crear la cita:", error);
+      }
+    });
   };
+  
+
+
 
   const handleCancel = () => {
     setEditingCita(null);

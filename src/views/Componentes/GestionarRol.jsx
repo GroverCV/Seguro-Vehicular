@@ -8,22 +8,22 @@ const GestionarRol = () => {
     const [formData, setFormData] = useState({});
     const [showForm, setShowForm] = useState(false);
 
-    useEffect(() => {
-        const fetchRoles = async () => {
-            try {
-                const response = await fetch('https://backend-seguros.campozanodevlab.com/api/roles');
-                if (!response.ok) {
-                    throw new Error('Error al obtener los roles');
-                }
-                const data = await response.json();
-                setRoles(data);
-            } catch (error) {
-                setError(error.message);
-            } finally {
-                setLoading(false);
+    const fetchRoles = async () => {
+        try {
+            const response = await fetch('https://backend-seguros.campozanodevlab.com/api/roles');
+            if (!response.ok) {
+                throw new Error('Error al obtener los roles');
             }
-        };
+            const data = await response.json();
+            setRoles(data);
+        } catch (error) {
+            setError(error.message);
+        } finally {
+            setLoading(false);
+        }
+    };
 
+    useEffect(() => {
         fetchRoles();
     }, []);
 
@@ -186,8 +186,7 @@ const GestionarRol = () => {
                     ? prev.map((role) => (role.id === updatedRole.id ? updatedRole : role))
                     : [...prev, updatedRole]
             );
-    
-            // Restablecer el formulario después de la creación/modificación
+            
             setEditingRole(null);
             setShowForm(false);
             setFormData({});
@@ -201,6 +200,8 @@ const GestionarRol = () => {
                 } el Rol ID: ${editingRole ? editingRole.id : updatedRole.id}`,
                 ip: userIp,
             };
+
+            fetchRoles();
     
             await logAction(logData);
         } catch (error) {

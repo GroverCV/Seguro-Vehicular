@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { confirmAction } from "./modalComponentes/ModalConfirm";
 
 const GestionarTipoCita = () => {
   const [tiposCita, setTiposCita] = useState([]);
@@ -8,24 +9,25 @@ const GestionarTipoCita = () => {
   const [formData, setFormData] = useState({});
   const [showForm, setShowForm] = useState(false);
 
-  useEffect(() => {
-    const fetchTiposCita = async () => {
-      try {
-        const response = await fetch(
-          "https://backend-seguros.campozanodevlab.com/api/tipo_cita"
-        );
-        if (!response.ok) {
-          throw new Error("Error al obtener los tipos de cita");
-        }
-        const data = await response.json();
-        setTiposCita(data);
-      } catch (error) {
-        setError(error.message);
-      } finally {
-        setLoading(false);
-      }
-    };
 
+  const fetchTiposCita = async () => {
+    try {
+      const response = await fetch(
+        "https://backend-seguros.campozanodevlab.com/api/tipo_cita"
+      );
+      if (!response.ok) {
+        throw new Error("Error al obtener los tipos de cita");
+      }
+      const data = await response.json();
+      setTiposCita(data);
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchTiposCita();
   }, []);
 
@@ -132,25 +134,27 @@ const GestionarTipoCita = () => {
   const userId = localStorage.getItem("userId");
 
   const handleDelete = async (id) => {
-    try {
-      await fetch(
-        `https://backend-seguros.campozanodevlab.com/api/tipo_cita/${id}`,
-        { method: "DELETE" }
-      );
-      setTiposCita(tiposCita.filter((tipo) => tipo.id !== id));
+    confirmAction(async () => {
+      try {
+        await fetch(
+          `https://backend-seguros.campozanodevlab.com/api/tipo_cita/${id}`,
+          { method: "DELETE" }
+        );
+        setTiposCita(tiposCita.filter((tipo) => tipo.id !== id));
 
-      const userIp = await getUserIp();
-      const logData = {
-        usuario_id: userId,
-        accion: "Eliminó",
-        detalles: `el Usuario ID: ${userId} eliminó el Tipo Cita ID: ${id}`,
-        ip: userIp,
-      };
+        const userIp = await getUserIp();
+        const logData = {
+          usuario_id: userId,
+          accion: "Eliminó",
+          detalles: `el Usuario ID: ${userId} eliminó el Tipo Cita ID: ${id}`,
+          ip: userIp,
+        };
 
-      await logAction(logData);
-    } catch (error) {
-      console.error("Error al eliminar el tipo de cita:", error);
-    }
+        await logAction(logData);
+      } catch (error) {
+        console.error("Error al eliminar el tipo de cita:", error);
+      }
+    });
   };
 
   const logAction = async (logData) => {
@@ -172,56 +176,54 @@ const GestionarTipoCita = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    try {
-      const response = await fetch(
-        editingTipoCita
-          ? `https://backend-seguros.campozanodevlab.com/api/tipo_cita/${editingTipoCita.id}`
-          : "https://backend-seguros.campozanodevlab.com/api/tipo_cita",
-        {
-          method: editingTipoCita ? "PUT" : "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(formData),
-        }
-      );
-
-      const updatedTipoCita = await response.json();
-
-      setTiposCita((prev) =>
-        editingTipoCita
-          ? prev.map((tipo) =>
-              tipo.id === updatedTipoCita.id
-                ? updatedTipoCita
-                : tipo
-            )
-          : [...prev, updatedTipoCita]
-      );
-
-      // Restablecer el formulario después de la creación/modificación
-      setFormData({});
-      setEditingTipoCita(null);
-      setShowForm(false);
-
-      const userIp = await getUserIp();
-
-      const logData = {
-        usuario_id: userId,
-        accion: editingTipoCita ? "Editó" : "Creó",
-        detalles: `El Usuario ID: ${userId} ${
-          editingTipoCita ? "editó" : "creó"
-        } el Tipo Cita ID: ${
+    confirmAction(async () => {
+      try {
+        const response = await fetch(
           editingTipoCita
-            ? editingTipoCita.id
-            : updatedTipoCita.id
-        }`,
-        ip: userIp,
-      };
+            ? `https://backend-seguros.campozanodevlab.com/api/tipo_cita/${editingTipoCita.id}`
+            : "https://backend-seguros.campozanodevlab.com/api/tipo_cita",
+          {
+            method: editingTipoCita ? "PUT" : "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(formData),
+          }
+        );
 
-      await logAction(logData);
-    } catch (error) {
-      console.error("Error al actualizar o crear el tipo de cita:", error);
-    }
+        const updatedTipoCita = await response.json();
+
+        setTiposCita((prev) =>
+          editingTipoCita
+            ? prev.map((tipo) =>
+                tipo.id === updatedTipoCita.id ? updatedTipoCita : tipo
+              )
+            : [...prev, updatedTipoCita]
+        );
+
+        // Restablecer el formulario después de la creación/modificación
+        setFormData({});
+        setEditingTipoCita(null);
+        setShowForm(false);
+
+        const userIp = await getUserIp();
+
+        const logData = {
+          usuario_id: userId,
+          accion: editingTipoCita ? "Editó" : "Creó",
+          detalles: `El Usuario ID: ${userId} ${
+            editingTipoCita ? "editó" : "creó"
+          } el Tipo Cita ID: ${
+            editingTipoCita ? editingTipoCita.id : updatedTipoCita.id
+          }`,
+          ip: userIp,
+        };
+        fetchTiposCita()
+        await logAction(logData);
+      } catch (error) {
+        console.error("Error al actualizar o crear el tipo de cita:", error);
+      }
+    });
   };
 
   const handleCancel = () => {
@@ -263,10 +265,7 @@ const GestionarTipoCita = () => {
               <td style={styles.td}>{tipo.nombre}</td>
               <td style={styles.td}>{tipo.descripcion}</td>
               <td style={styles.td}>
-                <button
-                  style={styles.button}
-                  onClick={() => handleEdit(tipo)}
-                >
+                <button style={styles.button} onClick={() => handleEdit(tipo)}>
                   Editar
                 </button>
                 <button
@@ -309,7 +308,11 @@ const GestionarTipoCita = () => {
               <button type="submit" style={styles.submitButton}>
                 {editingTipoCita ? "Actualizar" : "Crear"}
               </button>
-              <button type="button" style={styles.button} onClick={handleCancel}>
+              <button
+                type="button"
+                style={styles.button}
+                onClick={handleCancel}
+              >
                 Cancelar
               </button>
             </form>
