@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
-import Logout from './Token/Logout'; // Asegúrate de que la ruta sea correcta
+import { FaCar } from "react-icons/fa"; // Importa el ícono de auto
+import Logout from "./Token/Logout"; // Asegúrate de que la ruta sea correcta
 
 const styles = {
   header: {
@@ -21,6 +22,12 @@ const styles = {
     fontSize: "calc(1.5rem + 2vw)",
     textDecoration: "none",
     margin: "10px 0",
+    display: "flex",
+    alignItems: "center",
+  },
+  carIcon: {
+    marginRight: "10px", // Espacio entre el ícono y el texto
+    cursor: "pointer", // Cambia el cursor para indicar que es clickeable
   },
   user: {
     display: "flex",
@@ -50,10 +57,9 @@ const styles = {
     borderRadius: "5px",
     transition: "background-color 0.3s",
   },
-  // Estilos responsivos
   responsiveUser: {
     display: "flex",
-    flexDirection: "column", // Asegura que sea columna en pantallas pequeñas
+    flexDirection: "column",
     alignItems: "flex-start",
   },
 };
@@ -65,9 +71,9 @@ export const Navbar = () => {
   const [username, setUsername] = useState(null);
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    const name = localStorage.getItem('username');
-    
+    const token = localStorage.getItem("token");
+    const name = localStorage.getItem("username");
+
     if (token) {
       setIsAuthenticated(true);
       setUsername(name);
@@ -77,15 +83,23 @@ export const Navbar = () => {
   }, []);
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('username');
+    localStorage.removeItem("token");
+    localStorage.removeItem("username");
     setIsAuthenticated(false);
-    navigate('/login');
+    navigate("/login");
+  };
+
+  const handleCarClick = () => {
+    navigate("/dashboard"); // Navega al dashboard al hacer clic en el ícono de auto
   };
 
   return (
     <>
       <header style={styles.header}>
+        <Link to="/dashboard" style={styles.Titulo}>
+          <FaCar style={styles.carIcon} onClick={handleCarClick} />{" "}
+        </Link>
+        
         <Link to="/" style={styles.Titulo}>
           Seguro Vehicular
         </Link>
@@ -105,7 +119,7 @@ export const Navbar = () => {
           </nav>
         )}
       </header>
-      
+
       <Outlet />
     </>
   );

@@ -69,17 +69,58 @@ const Register = () => {
     setFormData({ ...formData, [name]: value });
   };
 
-  const handleSubmit = async (e) => {
+  const getUserIp = async () => {
+    try {
+        const response = await fetch("https://api.ipify.org?format=json");
+        const data = await response.json();
+        return data.ip;
+    } catch (error) {
+        console.error("Error obteniendo IP:", error);
+        return "IP desconocida";
+    }
+};
+
+const userId = localStorage.getItem("userId");
+
+const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post('https://backend-seguros.campozanodevlab.com/api/usuarios', formData);
-      console.log('Usuario registrado:', response.data);
-      setMensaje('Usuario registrado correctamente.'); // Mensaje de éxito
+        const response = await axios.post('https://backend-seguros.campozanodevlab.com/api/usuarios', formData);
+        console.log('Usuario registrado:', response.data);
+        setMensaje('Usuario registrado correctamente.'); // Mensaje de éxito
+
+        // Registrar la acción en la bitácora
+        const userIp = await getUserIp();
+        const logData = {
+            usuario_id: userId,
+            accion: "Registró",
+            detalles: `El Usuario ID: ${userId} registró al Usuario ID: ${response.data.id}`,
+            ip: userIp,
+        };
+
+        await logAction(logData);
     } catch (error) {
-      console.error('Error al registrar usuario:', error);
-      setMensaje('Error al registrar usuario: ' + (error.response?.data?.message || 'Error desconocido.')); // Mensaje de error
+        console.error('Error al registrar usuario:', error);
+        setMensaje('Error al registrar usuario: ' + (error.response?.data?.message || 'Error desconocido.')); // Mensaje de error
     }
-  };
+};
+
+const logAction = async (logData) => {
+    const token = "simulated-token"; // Reemplazar con el token real si es necesario
+    try {
+        await fetch("https://backend-seguros.campozanodevlab.com/api/bitacora", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify(logData),
+        });
+    } catch (error) {
+        console.error("Error al registrar la acción en la bitácora:", error);
+    }
+};
+
 
   return (
     <div style={styles.wrapper}>

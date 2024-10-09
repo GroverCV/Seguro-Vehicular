@@ -112,35 +112,97 @@ const GestionarRol = () => {
         setShowForm(true);
     };
 
+    const getUserIp = async () => {
+        try {
+            const response = await fetch("https://api.ipify.org?format=json");
+            const data = await response.json();
+            return data.ip;
+        } catch (error) {
+            console.error("Error obteniendo IP:", error);
+            return "IP desconocida";
+        }
+    };
+    
+    const userId = localStorage.getItem("userId");
+    
+    // Manejo de eliminación de rol
     const handleDelete = async (id) => {
         try {
             await fetch(`https://backend-seguros.campozanodevlab.com/api/roles/${id}`, {
                 method: 'DELETE',
             });
             setRoles(roles.filter((role) => role.id !== id));
+    
+            const userIp = await getUserIp();
+            const logData = {
+                usuario_id: userId,
+                accion: "Eliminó",
+                detalles: `El Usuario ID: ${userId} eliminó el Rol ID: ${id}`,
+                ip: userIp,
+            };
+    
+            await logAction(logData);
         } catch (error) {
             console.error('Error al eliminar el rol:', error);
         }
     };
-
+    
+    const logAction = async (logData) => {
+        const token = "simulated-token"; // Reemplazar con el token real si es necesario
+        try {
+            await fetch("https://backend-seguros.campozanodevlab.com/api/bitacora", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify(logData),
+            });
+        } catch (error) {
+            console.error("Error al registrar la acción en la bitácora:", error);
+        }
+    };
+    
+    // Manejo de envío de formulario para rol
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const response = await fetch(editingRole ? `https://backend-seguros.campozanodevlab.com/api/roles/${editingRole.id}` : 'https://backend-seguros.campozanodevlab.com/api/roles', {
-                method: editingRole ? 'PUT' : 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(formData),
-            });
+            const response = await fetch(
+                editingRole
+                    ? `https://backend-seguros.campozanodevlab.com/api/roles/${editingRole.id}`
+                    : 'https://backend-seguros.campozanodevlab.com/api/roles',
+                {
+                    method: editingRole ? 'PUT' : 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData),
+                }
+            );
+    
             const updatedRole = await response.json();
             setRoles((prev) =>
                 editingRole
                     ? prev.map((role) => (role.id === updatedRole.id ? updatedRole : role))
                     : [...prev, updatedRole]
             );
+    
+            // Restablecer el formulario después de la creación/modificación
             setEditingRole(null);
             setShowForm(false);
+            setFormData({});
+    
+            const userIp = await getUserIp();
+            const logData = {
+                usuario_id: userId,
+                accion: editingRole ? "Editó" : "Creó",
+                detalles: `El Usuario ID: ${userId} ${
+                    editingRole ? "editó" : "creó"
+                } el Rol ID: ${editingRole ? editingRole.id : updatedRole.id}`,
+                ip: userIp,
+            };
+    
+            await logAction(logData);
         } catch (error) {
             console.error('Error al actualizar o crear el rol:', error);
         }

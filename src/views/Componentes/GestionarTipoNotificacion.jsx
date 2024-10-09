@@ -29,16 +29,7 @@ const GestionarTipoNotificacion = () => {
     fetchTiposNotificacion();
   }, []);
 
-  const getUserIp = async () => {
-    try {
-      const response = await fetch("https://api.ipify.org?format=json");
-      const data = await response.json();
-      return data.ip;
-    } catch (error) {
-      console.error("Error obteniendo IP:", error);
-      return "IP desconocida";
-    }
-  };
+  
 
   const styles = {
     body: {
@@ -91,7 +82,9 @@ const GestionarTipoNotificacion = () => {
       borderRadius: "8px",
       boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
       zIndex: 1000,
-      width: "400px",
+      width: "700px", // Aumentar el ancho del modal
+      maxHeight: "80%", // Limitar la altura máxima
+      overflowY: "auto", // Hacer scroll si es necesario
     },
     overlay: {
       position: "fixed",
@@ -108,6 +101,8 @@ const GestionarTipoNotificacion = () => {
       margin: "5px 0",
       borderRadius: "4px",
       border: "1px solid #ccc",
+      minHeight: "40px", // Altura mínima
+      resize: "vertical", // Permitir redimensionar verticalmente
     },
     submitButton: {
       padding: "10px 15px",
@@ -123,6 +118,17 @@ const GestionarTipoNotificacion = () => {
     setEditingTipoNotificacion(tipoNotificacion);
     setFormData(tipoNotificacion);
     setShowForm(true);
+  };
+
+  const getUserIp = async () => {
+    try {
+      const response = await fetch("https://api.ipify.org?format=json");
+      const data = await response.json();
+      return data.ip;
+    } catch (error) {
+      console.error("Error obteniendo IP:", error);
+      return "IP desconocida";
+    }
   };
 
   const userId = localStorage.getItem("userId");
@@ -183,8 +189,7 @@ const GestionarTipoNotificacion = () => {
       );
 
       const updatedTipoNotificacion = await response.json();
-      console.log("Respuesta del servidor:", updatedTipoNotificacion); // Verifica que contenga el ID
-
+    
       setTiposNotificacion((prev) =>
         editingTipoNotificacion
           ? prev.map((tipo) =>
@@ -263,7 +268,10 @@ const GestionarTipoNotificacion = () => {
               <td style={styles.td}>{tipo.nombre}</td>
               <td style={styles.td}>{tipo.descripcion}</td>
               <td style={styles.td}>
-                <button style={styles.button} onClick={() => handleEdit(tipo)}>
+                <button
+                  style={styles.button}
+                  onClick={() => handleEdit(tipo)}
+                >
                   Editar
                 </button>
                 <button
@@ -280,13 +288,9 @@ const GestionarTipoNotificacion = () => {
 
       {showForm && (
         <>
-          <div style={styles.overlay} onClick={handleCancel}></div>
+          <div style={styles.overlay} onClick={handleCancel} />
           <div style={styles.modal}>
-            <h2>
-              {editingTipoNotificacion
-                ? "Editar Tipo Notificación"
-                : "Crear Tipo Notificación"}
-            </h2>
+            <h2>{editingTipoNotificacion ? "Editar" : "Crear"} Tipo Notificación</h2>
             <form onSubmit={handleSubmit}>
               <input
                 type="text"
@@ -295,11 +299,9 @@ const GestionarTipoNotificacion = () => {
                 onChange={(e) =>
                   setFormData({ ...formData, nombre: e.target.value })
                 }
-                required
                 style={styles.input}
               />
-              <input
-                type="text"
+              <textarea
                 placeholder="Descripción"
                 value={formData.descripcion || ""}
                 onChange={(e) =>
@@ -307,13 +309,16 @@ const GestionarTipoNotificacion = () => {
                 }
                 style={styles.input}
               />
-              <button type="submit" style={styles.submitButton}>
-                {editingTipoNotificacion ? "Actualizar" : "Crear"}
+              <button style={styles.submitButton} type="submit">
+                Guardar
               </button>
               <button
                 type="button"
                 onClick={handleCancel}
-                style={{ ...styles.submitButton, backgroundColor: "#dc3545" }}
+                style={{
+                  ...styles.submitButton,
+                  backgroundColor: "red",
+                }}
               >
                 Cancelar
               </button>

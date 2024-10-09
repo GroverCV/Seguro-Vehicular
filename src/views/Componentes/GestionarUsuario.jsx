@@ -48,20 +48,67 @@ const GestionarUsuario = () => {
         setFormData(usuario);
     };
 
+
+    const userId = localStorage.getItem("userId");
+
+    const getUserIp = async () => {
+        try {
+          const response = await fetch("https://api.ipify.org?format=json");
+          const data = await response.json();
+          return data.ip;
+        } catch (error) {
+          console.error("Error obteniendo IP:", error);
+          return "IP desconocida";
+        }
+      };
+
     const handleDelete = async (id) => {
         try {
-            await fetch(`https://backend-seguros.campozanodevlab.com/api/usuarios/${id}`, {
-                method: 'DELETE',
-            });
-            setUsuarios(usuarios.filter((usuario) => usuario.id !== id));
+          await fetch(`https://backend-seguros.campozanodevlab.com/api/usuarios/${id}`, {
+            method: 'DELETE',
+          });
+          setUsuarios(usuarios.filter((usuario) => usuario.id !== id));
+      
+          const userIp = await getUserIp();
+          const logData = {
+            usuario_id: userId,
+            accion: "Eliminó",
+            detalles: `El Usuario ID: ${userId} eliminó el Usuario ID: ${id}`,
+            ip: userIp,
+          };
+      
+          await logAction(logData);
         } catch (error) {
-            setError('Error al eliminar el usuario');
+          setError('Error al eliminar el usuario');
+          console.error("Error al eliminar el usuario:", error);
         }
-    };
+      };
+      
+      const logAction = async (logData) => {
+        const token = "simulated-token"; // Aquí deberías usar un token válido si es necesario
+        try {
+          await fetch("https://backend-seguros.campozanodevlab.com/api/bitacora", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify(logData),
+          });
+        } catch (error) {
+          console.error("Error al registrar la acción en la bitácora:", error);
+        }
+      };
+      
 
-    const handleSubmit = async (e) => {
+      
+      const handleSubmit = async (e) => {
         e.preventDefault();
         try {
+            // Obtener el usuario que se está editando antes de la actualización
+            const previousUserResponse = await fetch(`https://backend-seguros.campozanodevlab.com/api/usuarios/${editingUser.id}`);
+            const previousUser = await previousUserResponse.json();
+    
             const response = await fetch(`https://backend-seguros.campozanodevlab.com/api/usuarios/${editingUser.id}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
@@ -69,11 +116,42 @@ const GestionarUsuario = () => {
             });
             const updatedUser = await response.json();
             setUsuarios((prev) => prev.map((usuario) => (usuario.id === updatedUser.id ? updatedUser : usuario)));
+    
+            // Registro de la acción en la bitácora
+            const userIp = await getUserIp();
+            
+            // Atributos a verificar
+            const attributesToCheck = ['Nombre', 'Apellido', 'Email', 'Teléfono', 'Celular', 'Dirección', 'Rol'];
+    
+            // Identificar el atributo editado
+            const editedAttribute = attributesToCheck.find((key) => formData[key] !== previousUser[key]);
+    
+            let logDetails = '';
+            if (editedAttribute) {
+                logDetails = `Atributo editado: ${editedAttribute}`; // Detalle del atributo editado
+            }
+    
+            const logData = {
+                usuario_id: userId,
+                accion: "Editó",
+                detalles: `El Usuario ID: ${userId} editó al Usuario ID: ${editingUser.id}. ${logDetails}`,
+                ip: userIp,
+            };
+    
+            await logAction(logData);
             setEditingUser(null);
         } catch (error) {
             setError('Error al actualizar el usuario');
+            console.error("Error al actualizar el usuario:", error);
         }
     };
+    
+      
+      
+      
+      
+      
+
 
     const styles = {
         body: {
