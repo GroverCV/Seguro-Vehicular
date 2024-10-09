@@ -18,6 +18,8 @@ import GestionarTipoCita from "../views/Componentes/GestionarTipoCita";
 import GestionarTipoNotificacion from "../views/Componentes/GestionarTipoNotificacion";
 import AdministrarBitacora from "../views/Componentes/AdministrarBitacora";
 import Informacion from "../views/menu/Informacion";
+import Calendario from "../views/menu/Calendario";
+import Poliza from "../views/menu/Poliza";
 
 
 export const AppRouter = () => {
@@ -31,6 +33,8 @@ export const AppRouter = () => {
         <Route path="/inicio" element={<Inicio />} />
         <Route path="/contacto" element={<Contacto />} />
         <Route path="/informacion" element={<Informacion />} />
+        <Route path="/calendario" element={<Calendario />} />
+        <Route path="/poliza" element={<Poliza/>} />
         <Route path="/login" element={<Login />} />
 
         <Route path="/dashboard" element={

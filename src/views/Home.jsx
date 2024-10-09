@@ -1,8 +1,10 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import Inicio from "./menu/Inicio";
+import Calendario from "./menu/Calendario";
 import Contacto from "./menu/Contacto";
 import Informacion from "./menu/Informacion";
+import Inicio from "./menu/Inicio";
+import Poliza from "./menu/Poliza";
 
 const styles = {
   container: {
@@ -72,9 +74,15 @@ export const Home = () => {
         </button>
         <button
           style={styles.button}
-          onClick={() => handleNavigation("/", "paga")}
+          onClick={() => handleNavigation("/", "poliza")}
         >
           Paga tu seguro
+        </button>
+        <button
+          style={styles.button}
+          onClick={() => handleNavigation("/", "calendario")}
+        >
+          Calendario
         </button>
         <button
           style={styles.button}
@@ -84,13 +92,16 @@ export const Home = () => {
         </button>
       </div>
 
+
       <div style={styles.content}>
         {selectedButton === "inicio" && <Inicio />}
         {selectedButton === "contacto" && <Contacto />}
         {selectedButton === "informacion" && <Informacion />}
+        {selectedButton === "poliza" && <Poliza />}
+        {selectedButton === "calendario" && <Calendario/>}
       </div>
-
-      <Inicio />
+      <div><Inicio/></div>
+      
     </div>
   );
 };
