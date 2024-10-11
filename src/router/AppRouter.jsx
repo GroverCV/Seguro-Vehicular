@@ -20,6 +20,7 @@ import AdministrarBitacora from "../views/Componentes/AdministrarBitacora";
 import Informacion from "../views/menu/Informacion";
 import Calendario from "../views/menu/Calendario";
 import Poliza from "../views/menu/Poliza";
+import GestionarImagen from "../views/Componentes/GestionarImagen";
 
 
 export const AppRouter = () => {
@@ -50,6 +51,7 @@ export const AppRouter = () => {
           <Route path="gestionaragenda" element={<GestionarAgenda/>} />
           <Route path="gestionartiponotificacion" element={<GestionarTipoNotificacion/>} />
           <Route path="gestionarnotificacion" element={<GestionarNotificacion/>} />
+          <Route path="gestionarimagen" element={<GestionarImagen/>} />
         </Route>
       </Routes>
     </>

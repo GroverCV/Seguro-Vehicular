@@ -212,15 +212,16 @@ const Sidebar = () => {
           />
 
           <SidebarItem
-            label="Documentos y Polizas"
+            label="Vehiculo e Incidentes"
             section="poliza"
             expanded={expanded.poliza}
             toggleExpand={toggleExpand}
             items={[
-              {/*{
-                label: "CU09. Gestionar Marca",
-                to: "/dashboard/gestionarmarca",
+              {
+                label: "CU09. Gestionar Imagen",
+                to: "/dashboard/gestionarimagen",
               },
+              {/*
               {
                 label: "CU11. Gestionar Documento",
                 to: "/dashboard/gestionardocumento",
