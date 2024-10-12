@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { confirmAction } from "./modalComponentes/ModalConfirm";
 
-const GestionarTipoNotificacion = () => {
+const GestionarDocumentoInformacion = () => {
   const [tiposNotificacion, setTiposNotificacion] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -376,4 +376,4 @@ const GestionarTipoNotificacion = () => {
   );
 };
 
-export default GestionarTipoNotificacion;
+export default GestionarDocumentoInformacion;

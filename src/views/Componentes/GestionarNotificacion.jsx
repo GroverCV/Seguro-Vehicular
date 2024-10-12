@@ -11,6 +11,17 @@ const GestionarNotificacion = () => {
   const [editingNotificacion, setEditingNotificacion] = useState(null);
   const [formData, setFormData] = useState({});
   const [showForm, setShowForm] = useState(false);
+
+  const [currentPage, setCurrentPage] = useState(1);
+const itemsPerPage = 5;
+const indexOfLastNotification = currentPage * itemsPerPage;
+const indexOfFirstNotification = indexOfLastNotification - itemsPerPage;
+const currentNotifications = notificaciones.slice(indexOfFirstNotification, indexOfLastNotification);
+const totalPages = Math.ceil(notificaciones.length / itemsPerPage);
+const paginate = (pageNumber) => setCurrentPage(pageNumber);
+
+
+
   const [correoUsuarioSeleccionado, setCorreoUsuarioSeleccionado] =
     useState("");
 
@@ -141,6 +152,23 @@ const GestionarNotificacion = () => {
       border: "none",
       borderRadius: "4px",
       cursor: "pointer",
+    },
+    pagination: {
+      display: "flex",
+      justifyContent: "center",
+      marginTop: "20px",
+    },
+    pageButton: {
+      margin: "0 5px",
+      padding: "5px 10px",
+      cursor: "pointer",
+      border: "1px solid #007bff",
+      borderRadius: "4px",
+      backgroundColor: "#007bff",
+      color: "white",
+    },
+    activePageButton: {
+      backgroundColor: "#0056b3",
     },
   };
 
@@ -335,7 +363,7 @@ const GestionarNotificacion = () => {
           </tr>
         </thead>
         <tbody>
-          {notificaciones.map((notificacion, index) => (
+          {currentNotifications.map((notificacion, index) => (
             <tr
               key={notificacion.id}
               style={index % 2 === 0 ? styles.trEven : styles.trOdd}
@@ -394,6 +422,24 @@ const GestionarNotificacion = () => {
           ))}
         </tbody>
       </table>
+
+
+      {/* Paginación */}
+      <div style={styles.pagination}>
+        {Array.from({ length: totalPages }, (_, index) => (
+          <button
+            key={index + 1}
+            style={{
+              ...styles.pageButton,
+              ...(currentPage === index + 1 ? styles.activePageButton : {}),
+            }}
+            onClick={() => paginate(index + 1)}
+          >
+            {index + 1}
+          </button>
+        ))}
+      </div>
+
       {showForm && (
         <div style={styles.overlay}>
           <div style={styles.modal}>

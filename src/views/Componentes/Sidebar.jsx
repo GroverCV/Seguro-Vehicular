@@ -174,7 +174,7 @@ const Sidebar = () => {
         <hr />
         <ul className="mt-3 font-bold">
           <SidebarItem
-            label="Usuario"
+            label="Usuarios y Agenda"
             section="usuario"
             expanded={expanded.usuario}
             toggleExpand={toggleExpand}
@@ -212,7 +212,7 @@ const Sidebar = () => {
           />
 
           <SidebarItem
-            label="Vehiculo e Incidentes"
+            label="Vehiculos y Propietarios"
             section="poliza"
             expanded={expanded.poliza}
             toggleExpand={toggleExpand}
@@ -241,23 +241,22 @@ const Sidebar = () => {
             ]}
           />
           <SidebarItem
-            label="Incidentes y Proveedores"
+            label="Documentos e Incidentes"
             section="incidente"
             expanded={expanded.incidente}
             toggleExpand={toggleExpand}
             items={[
-              {/*{ label: "CU18. Registrar Incidente", to: "/dashboard/gestionarincidente" },
-              { label: "CU19. Gestionar Proveedor", to: "/dashboard/gestionarproveedor" },*/}
+              { label: "CU18. Gestionar Documento Informacion", to: "/dashboard/gestionardocumentoinformacion" },
             ]}
           />
           <SidebarItem
-            label="Financiero y Notificacion"
+            label="Pagos y Notificaciones"
             section="finanza"
             expanded={expanded.finanza}
             toggleExpand={toggleExpand}
             items={[
               {
-                label: "CU23. Gestionar Tipo de Notificacion",
+                label: "CU23. Gestionar Tipo Notificacion",
                 to: "/dashboard/gestionartiponotificacion",
               },
               {

@@ -8,6 +8,13 @@ const GestionarTipoCita = () => {
   const [editingTipoCita, setEditingTipoCita] = useState(null);
   const [formData, setFormData] = useState({});
   const [showForm, setShowForm] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
+
+  const indexOfLastTipoCita = currentPage * itemsPerPage;
+  const indexOfFirstTipoCita = indexOfLastTipoCita - itemsPerPage;
+  const currentTiposCita = tiposCita.slice(indexOfFirstTipoCita, indexOfLastTipoCita);
+  const totalPages = Math.ceil(tiposCita.length / itemsPerPage);
 
 
   const fetchTiposCita = async () => {
@@ -111,6 +118,23 @@ const GestionarTipoCita = () => {
       border: "none",
       borderRadius: "4px",
       cursor: "pointer",
+    },
+    pagination: {
+      display: "flex",
+      justifyContent: "center",
+      marginTop: "20px",
+    },
+    pageButton: {
+      padding: "10px 15px",
+      margin: "0 5px",
+      cursor: "pointer",
+      border: "1px solid #007bff",
+      backgroundColor: "white",
+      color: "#007bff",
+    },
+    activePageButton: {
+      backgroundColor: "#007bff",
+      color: "white",
     },
   };
 
@@ -256,21 +280,21 @@ const GestionarTipoCita = () => {
           </tr>
         </thead>
         <tbody>
-          {tiposCita.map((tipo, index) => (
+          {currentTiposCita.map((tipoCita, index) => (
             <tr
-              key={tipo.id}
+              key={tipoCita.id}
               style={index % 2 === 0 ? styles.trEven : styles.trOdd}
             >
-              <td style={styles.td}>{tipo.id}</td>
-              <td style={styles.td}>{tipo.nombre}</td>
-              <td style={styles.td}>{tipo.descripcion}</td>
+              <td style={styles.td}>{tipoCita.id}</td>
+              <td style={styles.td}>{tipoCita.nombre}</td>
+              <td style={styles.td}>{tipoCita.descripcion}</td>
               <td style={styles.td}>
-                <button style={styles.button} onClick={() => handleEdit(tipo)}>
+                <button style={styles.button} onClick={() => handleEdit(tipoCita)}>
                   Editar
                 </button>
                 <button
                   style={styles.button}
-                  onClick={() => handleDelete(tipo.id)}
+                  onClick={() => handleDelete(tipoCita.id)}
                 >
                   Eliminar
                 </button>
@@ -279,6 +303,22 @@ const GestionarTipoCita = () => {
           ))}
         </tbody>
       </table>
+
+      {/* Paginación */}
+      <div style={styles.pagination}>
+        {Array.from({ length: totalPages }, (_, index) => (
+          <button
+            key={index + 1}
+            style={{
+              ...styles.pageButton,
+              ...(currentPage === index + 1 ? styles.activePageButton : {}),
+            }}
+            onClick={() => setCurrentPage(index + 1)}
+          >
+            {index + 1}
+          </button>
+        ))}
+      </div>
 
       {showForm && (
         <>
@@ -291,28 +331,21 @@ const GestionarTipoCita = () => {
                 style={styles.input}
                 placeholder="Nombre"
                 value={formData.nombre || ""}
-                onChange={(e) =>
-                  setFormData({ ...formData, nombre: e.target.value })
-                }
+                onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
                 required
               />
-              <textarea
+              <input
+                type="text"
                 style={styles.input}
                 placeholder="Descripción"
                 value={formData.descripcion || ""}
-                onChange={(e) =>
-                  setFormData({ ...formData, descripcion: e.target.value })
-                }
+                onChange={(e) => setFormData({ ...formData, descripcion: e.target.value })}
                 required
-              ></textarea>
+              />
               <button type="submit" style={styles.submitButton}>
                 {editingTipoCita ? "Actualizar" : "Crear"}
               </button>
-              <button
-                type="button"
-                style={styles.button}
-                onClick={handleCancel}
-              >
+              <button type="button" onClick={handleCancel} style={styles.cancelButton}>
                 Cancelar
               </button>
             </form>

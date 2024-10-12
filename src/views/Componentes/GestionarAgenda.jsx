@@ -2,6 +2,10 @@ import React, { useEffect, useState } from "react";
 import { confirmAction } from "./modalComponentes/ModalConfirm";
 import ModalAgenda from "./modalComponentes/ModalAgenda";
 
+
+
+
+
 const GestionarAgenda = () => {
   const [citas, setCitas] = useState([]);
   const [tipoCita, setTipoCita] = useState([]);
@@ -12,6 +16,16 @@ const GestionarAgenda = () => {
   const [formData, setFormData] = useState({});
   const [showForm, setShowForm] = useState(false);
   const [showCalendar, setShowCalendar] = useState(false);
+
+
+
+  const [currentPage, setCurrentPage] = useState(1);
+const itemsPerPage = 5;
+const indexOfLastCita = currentPage * itemsPerPage;
+const indexOfFirstCita = indexOfLastCita - itemsPerPage;
+const currentCitas = citas.slice(indexOfFirstCita, indexOfLastCita);
+const totalPages = Math.ceil(citas.length / itemsPerPage);
+const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
   const fetchCitas = async () => {
     try {
@@ -145,6 +159,23 @@ const GestionarAgenda = () => {
       border: "none",
       borderRadius: "4px",
       cursor: "pointer",
+    },
+    pagination: {
+      display: "flex",
+      justifyContent: "center",
+      marginTop: "20px",
+    },
+    pageButton: {
+      margin: "0 5px",
+      padding: "5px 10px",
+      cursor: "pointer",
+      border: "1px solid #007bff",
+      borderRadius: "4px",
+      backgroundColor: "#007bff",
+      color: "white",
+    },
+    activePageButton: {
+      backgroundColor: "#0056b3",
     },
   };
 
@@ -314,7 +345,7 @@ const GestionarAgenda = () => {
           </tr>
         </thead>
         <tbody>
-          {citas.map((cita, index) => (
+        {currentCitas.map((cita, index) => (
             <tr
               key={cita.id}
               style={index % 2 === 0 ? styles.trEven : styles.trOdd}
@@ -377,6 +408,22 @@ const GestionarAgenda = () => {
           ))}
         </tbody>
       </table>
+
+      {/* Paginación */}
+      <div style={styles.pagination}>
+        {Array.from({ length: totalPages }, (_, index) => (
+          <button
+            key={index + 1}
+            style={{
+              ...styles.pageButton,
+              ...(currentPage === index + 1 ? styles.activePageButton : {}),
+            }}
+            onClick={() => paginate(index + 1)}
+          >
+            {index + 1}
+          </button>
+        ))}
+      </div>
 
       {showForm && (
         <>

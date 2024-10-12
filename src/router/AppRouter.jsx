@@ -22,6 +22,7 @@ import Inicio from "../views/menu/Inicio";
 import Notificaciones from "../views/menu/Notificaciones";
 import Poliza from "../views/menu/Poliza";
 import { PrivateRoute } from "./PrivateRout";
+import GestionarDocumentoInformacion from "../views/Componentes/GestionarDocumentoInformacion";
 
 
 export const AppRouter = () => {
@@ -54,6 +55,7 @@ export const AppRouter = () => {
           <Route path="gestionartiponotificacion" element={<GestionarTipoNotificacion/>} />
           <Route path="gestionarnotificacion" element={<GestionarNotificacion/>} />
           <Route path="gestionarimagen" element={<GestionarImagen/>} />
+          <Route path="gestionardocumentoinformacion" element={<GestionarDocumentoInformacion/>} />
         </Route>
       </Routes>
     </>
