@@ -75,21 +75,7 @@ const Logout = () => {
     }
   };
 
-  // Manejar el evento de cerrar la pestaña o navegar fuera
-  const handleBeforeUnload = () => {
-    // Eliminar el token para que el usuario deba iniciar sesión nuevamente
-    localStorage.removeItem("token");
-  };
 
-  useEffect(() => {
-    // Agregar el evento beforeunload
-    window.addEventListener("beforeunload", handleBeforeUnload);
-
-    // Limpiar el evento al desmontar el componente
-    return () => {
-      window.removeEventListener("beforeunload", handleBeforeUnload);
-    };
-  }, []);
 
   return (
     <button
