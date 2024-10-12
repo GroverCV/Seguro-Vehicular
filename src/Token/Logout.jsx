@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 const styles = {
@@ -20,11 +20,13 @@ const styles = {
 };
 
 const Logout = () => {
+  const [isLoggingOut, setIsLoggingOut] = useState(false); // Estado para manejar el cierre de sesión
   const navigate = useNavigate();
 
   const handleLogout = async () => {
+    setIsLoggingOut(true); // Cambiar estado al iniciar el cierre de sesión
     const token = localStorage.getItem("token");
-    const userId = 1; // Reemplaza con el ID real del usuario (puedes almacenarlo en el localStorage o obtenerlo de alguna forma)
+    const userId = 1; // Reemplaza con el ID real del usuario
 
     // Obtener la IP del usuario
     const getUserIp = async () => {
@@ -42,7 +44,7 @@ const Logout = () => {
 
     // Datos a enviar a la bitácora
     const logData = {
-      usuario_id: userId, // Asegúrate de que este ID esté disponible
+      usuario_id: userId,
       accion: "Cerró Sesión",
       detalles: "Salida del Sistema",
       ip: userIp,
@@ -54,7 +56,7 @@ const Logout = () => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`, // Si es necesario un token para la autenticación
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(logData),
       });
@@ -64,10 +66,30 @@ const Logout = () => {
 
       // Redirigir al usuario a la página de inicio de sesión
       navigate("/login", { replace: true });
+
+      // Recargar la página
+      window.location.reload(); // O también puedes usar: window.location.href = window.location.href
     } catch (error) {
       console.error("Error al registrar en la bitácora:", error);
+      setIsLoggingOut(false); // Resetear el estado en caso de error
     }
   };
+
+  // Manejar el evento de cerrar la pestaña o navegar fuera
+  const handleBeforeUnload = () => {
+    // Eliminar el token para que el usuario deba iniciar sesión nuevamente
+    localStorage.removeItem("token");
+  };
+
+  useEffect(() => {
+    // Agregar el evento beforeunload
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    // Limpiar el evento al desmontar el componente
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, []);
 
   return (
     <button
@@ -79,8 +101,9 @@ const Logout = () => {
         (e.currentTarget.style.backgroundColor = styles.button.backgroundColor)
       }
       onClick={handleLogout}
+      disabled={isLoggingOut} // Deshabilitar el botón mientras se realiza el cierre de sesión
     >
-      Cerrar Sesión
+      {isLoggingOut ? "Cerrando Sesión..." : "Cerrar Sesión"}
     </button>
   );
 };

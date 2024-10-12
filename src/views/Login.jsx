@@ -135,6 +135,7 @@ export const Login = () => {
           replace: true,
           state: { logged: true, name: user.nombre },
         });
+        window.location.reload();
       } else {
         setError("Email o contraseña incorrectos");
       }

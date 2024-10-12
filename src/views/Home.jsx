@@ -1,9 +1,11 @@
 import React, { useState } from "react";
+import { FaBell, FaCalendarAlt, FaHome, FaInfoCircle, FaPhone, FaShieldAlt } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import Calendario from "./menu/Calendario";
 import Contacto from "./menu/Contacto";
 import Informacion from "./menu/Informacion";
 import Inicio from "./menu/Inicio";
+import Notificaciones from "./menu/Notificaciones";
 import Poliza from "./menu/Poliza";
 
 const styles = {
@@ -16,35 +18,29 @@ const styles = {
     color: "white",
     flexWrap: "wrap", // Permitir que los botones se envuelvan
   },
-  button: {
+  iconButton: {
     margin: "5px",
-    padding: "10px 20px",
+    padding: "10px",
     backgroundColor: "transparent",
-    border: "1px solid white",
+    border: "none",
     color: "white",
     cursor: "pointer",
-    fontSize: "16px",
-    flex: "1 0 100px", // Permitir que los botones crezcan y se ajusten
-    textAlign: "center", // Centrar texto
+    display: "flex",
+    flexDirection: "column", // Para alinear el icono y el texto verticalmente
+    alignItems: "center", // Centrar el contenido horizontalmente
+  },
+  icon: {
+    fontSize: "40px", // Tamaño del icono
+  },
+  label: {
+    marginTop: "5px",
+    fontSize: "16px", // Tamaño del texto debajo del icono
   },
   content: {
     padding: "20px",
     backgroundColor: "#f4f4f4",
     color: "#333",
     marginTop: "20px",
-  },
-  searchBar: {
-    padding: "5px",
-    margin: "0 10px",
-    border: "none",
-    borderRadius: "4px",
-  },
-  cartButton: {
-    background: "none",
-    border: "none",
-    color: "white",
-    fontSize: "1.5rem",
-    cursor: "pointer",
   },
 };
 
@@ -61,47 +57,57 @@ export const Home = () => {
     <div>
       <div style={styles.container}>
         <button
-          style={styles.button}
+          style={styles.iconButton}
           onClick={() => handleNavigation("/", "inicio")}
         >
-          Inicio
+          <FaHome style={styles.icon} />
+          <span style={styles.label}>Inicio</span>
         </button>
         <button
-          style={styles.button}
+          style={styles.iconButton}
           onClick={() => handleNavigation("/", "informacion")}
         >
-          Informacion de Poliza
+          <FaInfoCircle style={styles.icon} />
+          <span style={styles.label}>Información</span>
         </button>
         <button
-          style={styles.button}
+          style={styles.iconButton}
           onClick={() => handleNavigation("/", "poliza")}
         >
-          Paga tu seguro
+          <FaShieldAlt style={styles.icon} />
+          <span style={styles.label}>Paga tu seguro</span>
         </button>
         <button
-          style={styles.button}
+          style={styles.iconButton}
           onClick={() => handleNavigation("/", "calendario")}
         >
-          Calendario
+          <FaCalendarAlt style={styles.icon} />
+          <span style={styles.label}>Calendario</span>
         </button>
         <button
-          style={styles.button}
+          style={styles.iconButton}
           onClick={() => handleNavigation("/", "contacto")}
         >
-          Contacto
+          <FaPhone style={styles.icon} />
+          <span style={styles.label}>Contacto</span>
+        </button>
+        <button
+          style={styles.iconButton}
+          onClick={() => handleNavigation("/", "notificaciones")}
+        >
+          <FaBell style={styles.icon} />
+          <span style={styles.label}>Notificaciones</span>
         </button>
       </div>
-
 
       <div style={styles.content}>
         {selectedButton === "inicio" && <Inicio />}
         {selectedButton === "contacto" && <Contacto />}
         {selectedButton === "informacion" && <Informacion />}
         {selectedButton === "poliza" && <Poliza />}
-        {selectedButton === "calendario" && <Calendario/>}
+        {selectedButton === "calendario" && <Calendario />}
+        {selectedButton === "notificaciones" && <Notificaciones />}
       </div>
-      <div><Inicio/></div>
-      
     </div>
   );
 };

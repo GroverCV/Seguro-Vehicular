@@ -1,26 +1,27 @@
 import { Route, Routes } from "react-router-dom";
 import Navbar from "../Navbar";
+import CerrarSesion from "../views/CerrarSesion";
+import AdministrarBitacora from "../views/Componentes/AdministrarBitacora";
+import AsignarPermisos from "../views/Componentes/AsignarPermisos";
+import GestionarAgenda from "../views/Componentes/GestionarAgenda";
+import GestionarImagen from "../views/Componentes/GestionarImagen";
+import GestionarMarca from "../views/Componentes/GestionarMarca";
+import GestionarNotificacion from "../views/Componentes/GestionarNotificacion";
+import GestionarRol from "../views/Componentes/GestionarRol";
+import GestionarTipoCita from "../views/Componentes/GestionarTipoCita";
+import GestionarTipoNotificacion from "../views/Componentes/GestionarTipoNotificacion";
 import GestionarUsuario from "../views/Componentes/GestionarUsuario";
 import Dashboard from "../views/Dashboard";
 import Home from "../views/Home";
 import Login from "../views/Login";
 import Register from "../views/Register";
-import Inicio from "../views/menu/Inicio";
-import { PrivateRoute } from "./PrivateRout";
-import GestionarRol from "../views/Componentes/GestionarRol";
-import AsignarPermisos from "../views/Componentes/AsignarPermisos";
-import GestionarMarca from "../views/Componentes/GestionarMarca";
-import GestionarAgenda from "../views/Componentes/GestionarAgenda";
-import GestionarNotificacion from "../views/Componentes/GestionarNotificacion";
-import CerrarSesion from "../views/CerrarSesion";
-import Contacto from "../views/menu/Contacto";
-import GestionarTipoCita from "../views/Componentes/GestionarTipoCita";
-import GestionarTipoNotificacion from "../views/Componentes/GestionarTipoNotificacion";
-import AdministrarBitacora from "../views/Componentes/AdministrarBitacora";
-import Informacion from "../views/menu/Informacion";
 import Calendario from "../views/menu/Calendario";
+import Contacto from "../views/menu/Contacto";
+import Informacion from "../views/menu/Informacion";
+import Inicio from "../views/menu/Inicio";
+import Notificaciones from "../views/menu/Notificaciones";
 import Poliza from "../views/menu/Poliza";
-import GestionarImagen from "../views/Componentes/GestionarImagen";
+import { PrivateRoute } from "./PrivateRout";
 
 
 export const AppRouter = () => {
@@ -35,6 +36,7 @@ export const AppRouter = () => {
         <Route path="/contacto" element={<Contacto />} />
         <Route path="/informacion" element={<Informacion />} />
         <Route path="/calendario" element={<Calendario />} />
+        <Route path="/notificaciones" element={<Notificaciones />} />
         <Route path="/poliza" element={<Poliza/>} />
         <Route path="/login" element={<Login />} />
 

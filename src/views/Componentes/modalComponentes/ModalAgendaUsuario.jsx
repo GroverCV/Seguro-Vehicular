@@ -11,6 +11,7 @@ const ModalAgendaUsuario = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [citas, setCitas] = useState([]);
   const [usuarios, setUsuarios] = useState({});
+  const [ip, setIp] = useState("");
 
   // Obtener el ID del usuario autenticado
   const userId = Number(localStorage.getItem("userId"));
@@ -58,6 +59,55 @@ const ModalAgendaUsuario = () => {
       return acc;
     }, {});
   };
+
+  const fetchIp = async () => {
+    try {
+      const response = await fetch("https://api.ipify.org?format=json");
+      const data = await response.json();
+      setIp(data.ip);
+    } catch (error) {
+      console.error("Error al obtener la IP:", error);
+    }
+  };
+
+  // Registrar en Bitácora
+  const registrarBitacora = async () => {
+    const userId = parseInt(localStorage.getItem("userId"), 10);
+
+    const bitacoraEntry = {
+      usuario_id: userId,
+      accion: "Visitó Agenda",
+      detalles: "Revisó Citas",
+      ip: ip,
+    };
+
+    try {
+      const response = await fetch(
+        "https://backend-seguros.campozanodevlab.com/api/bitacora",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(bitacoraEntry),
+        }
+      );
+      if (!response.ok) throw new Error("Error al registrar en bitácora");
+      console.log("Registro en bitácora exitoso");
+    } catch (error) {
+      console.error("Error al registrar en bitácora:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchIp();
+  }, []);
+
+  useEffect(() => {
+    if (ip) {
+      registrarBitacora(); // Solo registra en bitácora después de obtener la IP
+    }
+  }, [ip]);
 
   const getListData = (value) => {
     const fechaActual = value.format('DD/MM/YYYY');
