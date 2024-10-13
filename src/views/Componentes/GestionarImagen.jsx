@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { confirmAction } from "./modalComponentes/ModalConfirm";
+import Cloudinary from "./modalComponentes/Cloudinary";
+
 
 const GestionarImagen = () => {
   const [tiposNotificacion, setTiposNotificacion] = useState([]);
@@ -8,7 +10,9 @@ const GestionarImagen = () => {
   const [editingTipoNotificacion, setEditingTipoNotificacion] = useState(null);
   const [formData, setFormData] = useState({});
   const [showForm, setShowForm] = useState(false);
-
+  
+  const [imageToShow, setImageToShow] = useState("");
+  const [showImageModal, setShowImageModal] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
   const indexOfLastTipo = currentPage * itemsPerPage;
@@ -16,6 +20,23 @@ const GestionarImagen = () => {
   const currentTipos = tiposNotificacion.slice(indexOfFirstTipo, indexOfLastTipo);
   const totalPages = Math.ceil(tiposNotificacion.length / itemsPerPage);
    const paginate = (pageNumber) => setCurrentPage(pageNumber);
+
+   const handleImageUpload = (imageUrl) => {
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      descripcion: imageUrl, // Actualizar la descripción con la URL de la imagen
+    }));
+  };
+
+  const handleImageClick = (imageUrl) => {
+    setImageToShow(imageUrl); // Establecer la imagen seleccionada
+    setShowImageModal(true);  // Mostrar el modal
+  };
+
+  const closeModal = () => {
+    setShowImageModal(false);
+    setImageToShow(""); // Limpiar la imagen cuando se cierre el modal
+  };
 
   const fetchTiposNotificacion = async () => {
     try {
@@ -37,6 +58,9 @@ const GestionarImagen = () => {
   useEffect(() => {
     fetchTiposNotificacion();
   }, []);
+
+
+  
 
   const styles = {
     body: {
@@ -240,8 +264,8 @@ const GestionarImagen = () => {
           usuario_id: userId,
           accion: editingTipoNotificacion ? "Editó" : "Creó",
           detalles: `El Usuario ID: ${userId} ${
-            editingTipoNotificacion ? "editó" : "creó"
-          } el Tipo Notificación ID: ${
+            editingTipoNotificacion ? "editó" : "subió"
+          } una Imagen ID: ${
             editingTipoNotificacion
               ? editingTipoNotificacion.id
               : updatedTipoNotificacion.id
@@ -253,7 +277,7 @@ const GestionarImagen = () => {
         await logAction(logData);
       } catch (error) {
         console.error(
-          "Error al actualizar o crear el tipo de notificación:",
+          "Error al actualizar o crear la Imagen:",
           error
         );
       }
@@ -270,7 +294,7 @@ const GestionarImagen = () => {
 
   return (
     <div style={styles.body}>
-      <h1 style={styles.h1}>GESTIONAR TIPO NOTIFICACION</h1>
+      <h1 style={styles.h1}>GESTIONAR IMAGEN</h1>
       <button
         style={styles.submitButton}
         onClick={() => {
@@ -278,14 +302,15 @@ const GestionarImagen = () => {
           setFormData({});
         }}
       >
-        Crear Tipo Notificación
+        Subir Imagen
       </button>
       <table style={styles.table}>
         <thead>
           <tr>
             <th style={styles.th}>ID</th>
             <th style={styles.th}>Nombre</th>
-            <th style={styles.th}>Descripción</th>
+            <th style={styles.th}>Enlace</th>
+            <th style={styles.th}>Imagen</th> {/* Columna Imagen */}
             <th style={styles.th}>Acciones</th>
           </tr>
         </thead>
@@ -298,6 +323,24 @@ const GestionarImagen = () => {
               <td style={styles.td}>{tipo.id}</td>
               <td style={styles.td}>{tipo.nombre}</td>
               <td style={styles.td}>{tipo.descripcion}</td>
+              <td style={styles.td}>
+                {tipo.descripcion ? (
+                  <img
+                    src={tipo.descripcion}
+                    alt={tipo.nombre}
+                    style={{
+                      width: '100px',
+                      height: '100px',
+                      objectFit: 'cover',
+                      borderRadius: '8px',
+                      cursor: 'pointer', // Cambia el cursor a "mano" cuando esté sobre la imagen
+                    }}
+                    onClick={() => handleImageClick(tipo.descripcion)} // Mostrar modal al hacer clic
+                  />
+                ) : (
+                  <p>No hay imagen</p>
+                )}
+              </td>
               <td style={styles.td}>
                 <button style={styles.button} onClick={() => handleEdit(tipo)}>
                   Editar
@@ -330,12 +373,29 @@ const GestionarImagen = () => {
         ))}
       </div>
 
+      {/* Modal para la imagen */}
+      {showImageModal && (
+        <div style={styles.modalOverlay} onClick={closeModal}>
+          <div style={styles.imageModal}>
+            <img
+              src={imageToShow}
+              alt="Imagen Grande"
+              style={{
+                maxWidth: '80%',
+                maxHeight: '80%',
+                borderRadius: '10px',
+              }}
+            />
+          </div>
+        </div>
+      )}
+
       {showForm && (
         <>
           <div style={styles.overlay} onClick={handleCancel} />
           <div style={styles.modal}>
             <h2>
-              {editingTipoNotificacion ? "Editar" : "Crear"} Tipo Notificación
+              {editingTipoNotificacion ? "Editar" : "Crear"} Imagen
             </h2>
             <form onSubmit={handleSubmit}>
               <input
@@ -347,13 +407,11 @@ const GestionarImagen = () => {
                 }
                 style={styles.input}
               />
+              <Cloudinary onImageUpload={handleImageUpload} />
               <textarea
                 placeholder="Descripción"
                 value={formData.descripcion || ""}
-                onChange={(e) =>
-                  setFormData({ ...formData, descripcion: e.target.value })
-                }
-                style={styles.input}
+                readOnly // Este campo se llenará automáticamente con la URL de la imagen
               />
               <button style={styles.submitButton} type="submit">
                 Guardar

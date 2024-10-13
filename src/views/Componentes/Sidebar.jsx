@@ -246,7 +246,7 @@ const Sidebar = () => {
             expanded={expanded.incidente}
             toggleExpand={toggleExpand}
             items={[
-              { label: "CU18. Gestionar Documento Informacion", to: "/dashboard/gestionardocumentoinformacion" },
+              { label: "CU18. Gestionar Informacion", to: "/dashboard/gestionardocumentoinformacion" },
             ]}
           />
           <SidebarItem
