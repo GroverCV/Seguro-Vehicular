@@ -5,6 +5,7 @@ import AdministrarBitacora from "../views/Componentes/AdministrarBitacora";
 import AsignarPermisos from "../views/Componentes/AsignarPermisos";
 import GestionarAgenda from "../views/Componentes/GestionarAgenda";
 import GestionarImagen from "../views/Componentes/GestionarImagen";
+import GestionarInformacion from "../views/Componentes/GestionarInformacion";
 import GestionarMarca from "../views/Componentes/GestionarMarca";
 import GestionarNotificacion from "../views/Componentes/GestionarNotificacion";
 import GestionarRol from "../views/Componentes/GestionarRol";
@@ -22,7 +23,6 @@ import Inicio from "../views/menu/Inicio";
 import Notificaciones from "../views/menu/Notificaciones";
 import Poliza from "../views/menu/Poliza";
 import { PrivateRoute } from "./PrivateRout";
-import GestionarDocumentoInformacion from "../views/Componentes/GestionarDocumentoInformacion";
 
 
 export const AppRouter = () => {
@@ -55,7 +55,7 @@ export const AppRouter = () => {
           <Route path="gestionartiponotificacion" element={<GestionarTipoNotificacion/>} />
           <Route path="gestionarnotificacion" element={<GestionarNotificacion/>} />
           <Route path="gestionarimagen" element={<GestionarImagen/>} />
-          <Route path="gestionardocumentoinformacion" element={<GestionarDocumentoInformacion/>} />
+          <Route path="gestionarinformacion" element={<GestionarInformacion/>} />
         </Route>
       </Routes>
     </>
