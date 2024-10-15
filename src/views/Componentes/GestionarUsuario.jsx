@@ -443,7 +443,7 @@ const GestionarUsuario = () => {
           ?.nombre || "No definido",
     },
     {
-      title: "Rol",
+      title: "Permisos Rol",
       dataIndex: "rol_id",
       key: "rol_id",
       render: (rol_id) =>
