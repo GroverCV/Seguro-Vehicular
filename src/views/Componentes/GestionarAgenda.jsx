@@ -245,6 +245,7 @@ const paginate = (pageNumber) => setCurrentPage(pageNumber);
     e.preventDefault();
     confirmAction(async () => {
       try {
+        
         const response = await fetch(
           editingCita
             ? `https://backend-seguros.campozanodevlab.com/api/citas/${editingCita.id}`
@@ -441,16 +442,13 @@ const paginate = (pageNumber) => setCurrentPage(pageNumber);
                 style={styles.input}
                 required
               />
-              <input
-                style={styles.input}
-                type="text"
-                placeholder="Fecha"
-                value={formData.fecha || ""}
-                onChange={(e) =>
-                  setFormData({ ...formData, fecha: e.target.value })
-                }
-                required
-              />
+               <input
+            type="datetime-local"
+            value={formData.fecha || ""}
+            onChange={(e) => setFormData({ ...formData, fecha: e.target.value })}
+            style={styles.input}
+            required
+          />
               <input
                 style={styles.input}
                 type="text"
