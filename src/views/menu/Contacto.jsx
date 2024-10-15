@@ -130,7 +130,7 @@ const Contacto = () => {
     asunto: '',
     pais: '',
     departamento: '',
-    mensaje: ''
+    message: ''
   });
 
   const [errors, setErrors] = useState({});
@@ -217,7 +217,7 @@ const Contacto = () => {
     const message = encodeURIComponent(
       "Hola, me gustaría obtener más información sobre sus seguros."
     );
-    window.open(`https://wa.me/${phoneNumber}?text=${message}`, "_blank");
+    window.open(https://wa.me/${phoneNumber}?text=${message}, "_blank");
   };
   
 
