@@ -332,6 +332,12 @@ const GestionarTipoVehiculo = () => {
 
   const columns = [
     {
+      title: "ID",
+      dataIndex: "id",
+      key: "id",
+      ...getColumnSearchProps("id"),
+    },
+    {
       title: "Nombre",
       dataIndex: "nombre",
       key: "nombre",

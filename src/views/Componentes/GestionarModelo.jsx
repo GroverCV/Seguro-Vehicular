@@ -253,6 +253,14 @@ const GestionarModelo = () => {
       borderRadius: "4px",
       cursor: "pointer",
     },
+    formContainer: {
+      maxHeight: "400px", // Altura máxima del formulario
+      overflowY: "auto", // Habilitar scroll vertical si excede la altura
+      padding: "20px",
+      backgroundColor: "#fff",
+      borderRadius: "8px",
+      boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
+    },
   };
 
   const handleSearch = (selectedKeys, confirm, dataIndex) => {

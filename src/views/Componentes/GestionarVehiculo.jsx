@@ -8,11 +8,9 @@ import Cloudinary from "./modalComponentes/Cloudinary";
 const GestionarVehiculo = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [editingUser, setEditingUser] = useState(null);
   const [formData, setFormData] = useState({});
   const [searchText, setSearchText] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");
-  const [showForm, setShowForm] = useState(false);
   const searchInput = useRef(null);
   const [usuarios, setUsuarios] = useState([]);
   const [tipoVehiculos, setTipoVehiculos] = useState([]);
@@ -23,6 +21,8 @@ const GestionarVehiculo = () => {
   const [creatingVehiculo, setCreatingVehiculo] = useState(false);
   const [showImageModal, setShowImageModal] = useState(false);
   const [imageToShow, setImageToShow] = useState("");
+
+  const [currentPage, setCurrentPage] = useState(1); // Página actual
 
   const fetchUsuarios = async () => {
     try {
@@ -91,7 +91,7 @@ const GestionarVehiculo = () => {
       ); // Corrected URL case
       if (!response.ok) throw new Error("Error al obtener los vehiculos"); // Corrected message
       const data = await response.json();
-      setVehiculos(data); // Corrected variable name
+      setVehiculos(data.reverse());
     } catch (error) {
       setError(error.message);
     } finally {
@@ -119,11 +119,6 @@ const GestionarVehiculo = () => {
   const handleImageClick = (imageUrl) => {
     setImageToShow(imageUrl); // Establecer la imagen seleccionada
     setShowImageModal(true); // Mostrar el modal
-  };
-
-  const handleCreate = () => {
-    setCreatingVehiculo(true);
-    setFormData({ nombre: "" }); // Limpiar el formulario para una nueva marca
   };
 
   const userId = localStorage.getItem("userId");
@@ -156,7 +151,7 @@ const GestionarVehiculo = () => {
           }
         );
         setVehiculos(vehiculos.filter((vehiculo) => vehiculo.id !== id));
-  
+
         const userIp = await getUserIp();
         const logData = {
           usuario_id: userId,
@@ -164,7 +159,7 @@ const GestionarVehiculo = () => {
           detalles: `El Usuario ID: ${userId} eliminó el Vehículo ID: ${id}`,
           ip: userIp,
         };
-  
+
         await logAction(logData);
       } catch (error) {
         setError("Error al eliminar el vehículo");
@@ -172,7 +167,6 @@ const GestionarVehiculo = () => {
       }
     });
   };
-  
 
   const logAction = async (logData) => {
     const token = "simulated-token"; // Aquí deberías usar un token válido si es necesario
@@ -194,27 +188,38 @@ const GestionarVehiculo = () => {
     e.preventDefault();
     confirmAction(async () => {
       try {
-        // Obtener el vehículo que se está editando antes de la actualización
-        const previousVehiculoResponse = await fetch(
-          `https://backend-seguros.campozanodevlab.com/api/vehiculos/${editingVehiculo.id}`
-        );
-        const previousVehiculo = await previousVehiculoResponse.json();
-  
-        const response = await fetch(
-          `https://backend-seguros.campozanodevlab.com/api/vehiculos/${editingVehiculo.id}`,
-          {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(formData),
-          }
-        );
+        // Si se está editando un vehículo, obtenemos el anterior; si no, no es necesario
+        let previousVehiculo = null;
+        if (editingVehiculo) {
+          const previousVehiculoResponse = await fetch(
+            `https://backend-seguros.campozanodevlab.com/api/vehiculos/${editingVehiculo.id}`
+          );
+          previousVehiculo = await previousVehiculoResponse.json();
+        }
+
+        const method = editingVehiculo ? "PUT" : "POST"; // Determinar el método
+        const url = editingVehiculo
+          ? `https://backend-seguros.campozanodevlab.com/api/vehiculos/${editingVehiculo.id}`
+          : `https://backend-seguros.campozanodevlab.com/api/vehiculos`; // URL para crear o editar
+
+        const response = await fetch(url, {
+          method: method,
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(formData),
+        });
+
         const updatedVehiculo = await response.json();
-        setVehiculos((prev) =>
-          prev.map((vehiculo) =>
-            vehiculo.id === updatedVehiculo.id ? updatedVehiculo : vehiculo
-          )
-        );
-  
+
+        if (method === "PUT") {
+          setVehiculos((prev) =>
+            prev.map((vehiculo) =>
+              vehiculo.id === updatedVehiculo.id ? updatedVehiculo : vehiculo
+            )
+          );
+        } else {
+          setVehiculos((prev) => [updatedVehiculo, ...prev]); // Agregar el nuevo vehículo
+        }
+
         const userIp = await getUserIp();
         const attributesToCheck = [
           "anio",
@@ -227,32 +232,41 @@ const GestionarVehiculo = () => {
           "tipoVehiculo_id",
           "propietario_id",
         ];
-        const editedAttribute = attributesToCheck.find(
-          (key) => formData[key] !== previousVehiculo[key]
-        );
-  
+
         let logDetails = "";
-        if (editedAttribute) {
-          logDetails = `Atributo editado: ${editedAttribute}`; // Detalle del atributo editado
+        if (editingVehiculo) {
+          const editedAttribute = attributesToCheck.find(
+            (key) => formData[key] !== previousVehiculo[key]
+          );
+          if (editedAttribute) {
+            logDetails = `Atributo editado: ${editedAttribute}`; // Detalle del atributo editado
+          }
+        } else {
+          logDetails = `Se creó un nuevo vehículo.`;
         }
-  
+
         const logData = {
           usuario_id: userId,
-          accion: "Editó",
-          detalles: `El Usuario ID: ${userId} editó el Vehículo ID: ${editingVehiculo.id}. ${logDetails}`,
+          accion: editingVehiculo ? "Editó" : "Creó",
+          detalles: `El Usuario ID: ${userId} ${
+            editingVehiculo ? "editó" : "creó"
+          } el Vehículo ID: ${
+            editingVehiculo ? editingVehiculo.id : updatedVehiculo.id
+          }. ${logDetails}`,
           ip: userIp,
         };
-  
-        fetchVehiculos(); // Asumiendo que tienes una función para refrescar la lista de vehículos
+
+        fetchVehiculos(); // Refrescar la lista de vehículos
         await logAction(logData);
-        setEditingVehiculo(null);
+        setEditingVehiculo(null); // Limpiar el estado de edición después de la operación
       } catch (error) {
-        setError("Error al actualizar el vehículo");
-        console.error("Error al actualizar el vehículo:", error);
+        setError("Error al actualizar o crear el vehículo");
+        console.error("Error al actualizar o crear el vehículo:", error);
       }
+      setEditingVehiculo(null);
+      setCreatingVehiculo(false);
     });
   };
-  
 
   const styles = {
     body: {
@@ -391,82 +405,58 @@ const GestionarVehiculo = () => {
       </div>
     ),
     filterIcon: (filtered) => (
-      <SearchOutlined style={{ color: filtered ? "#1890ff" : undefined }} />
+      <SearchOutlined style={{ color: filtered ? "#1677ff" : undefined }} />
     ),
     onFilter: (value, record) =>
       record[dataIndex].toString().toLowerCase().includes(value.toLowerCase()),
-  });
-
-  const columns = [
-    {
-      title: "Id",
-      dataIndex: "id",
-      key: "id",
-      ...getColumnSearchProps("id"),
-      render: (text) => (
+    onFilterDropdownOpenChange: (visible) => {
+      if (visible) {
+        setTimeout(() => searchInput.current?.select(), 100);
+      }
+    },
+    render: (text) =>
+      searchedColumn === dataIndex ? (
         <Highlighter
           highlightStyle={{ backgroundColor: "#ffc069", padding: 0 }}
           searchWords={[searchText]}
           autoEscape
           textToHighlight={text ? text.toString() : ""}
         />
+      ) : (
+        text
       ),
+  });
+
+  const columns = [
+    {
+      title: "ID",
+      dataIndex: "id",
+      key: "id",
+      sorter: (a, b) => a.id - b.id,
     },
     {
       title: "Año",
       dataIndex: "anio",
       key: "anio",
       ...getColumnSearchProps("anio"),
-      render: (text) => (
-        <Highlighter
-          highlightStyle={{ backgroundColor: "#ffc069", padding: 0 }}
-          searchWords={[searchText]}
-          autoEscape
-          textToHighlight={text ? text.toString() : ""}
-        />
-      ),
     },
     {
       title: "Placa",
       dataIndex: "placa",
       key: "placa",
       ...getColumnSearchProps("placa"),
-      render: (text) => (
-        <Highlighter
-          highlightStyle={{ backgroundColor: "#ffc069", padding: 0 }}
-          searchWords={[searchText]}
-          autoEscape
-          textToHighlight={text ? text.toString() : ""}
-        />
-      ),
     },
     {
       title: "Kilometraje",
       dataIndex: "kilometraje",
       key: "kilometraje",
       ...getColumnSearchProps("kilometraje"),
-      render: (text) => (
-        <Highlighter
-          highlightStyle={{ backgroundColor: "#ffc069", padding: 0 }}
-          searchWords={[searchText]}
-          autoEscape
-          textToHighlight={text ? text.toString() : ""}
-        />
-      ),
     },
     {
       title: "Fecha de Adquisicion",
       dataIndex: "fecha_adquisicion",
       key: "fecha_adquisicion",
       ...getColumnSearchProps("fecha_adquisicion"),
-      render: (text) => (
-        <Highlighter
-          highlightStyle={{ backgroundColor: "#ffc069", padding: 0 }}
-          searchWords={[searchText]}
-          autoEscape
-          textToHighlight={text ? text.toString() : ""}
-        />
-      ),
     },
     {
       title: "Imagen",
@@ -539,20 +529,26 @@ const GestionarVehiculo = () => {
       <h1 style={styles.h1}>GESTIONAR VEHÍCULOS</h1>
       <Button
         type="primary"
-        onClick={handleCreate}
+        onClick={() => {
+          setCreatingVehiculo(true);
+          setEditingVehiculo(null);
+          setFormData({}); // Limpiar el formulario para la creación
+        }}
         style={{ marginBottom: "20px" }}
       >
         Crear Vehículo
       </Button>
       <Table
-        columns={columns}
-        dataSource={vehiculos}
-        rowKey="id"
-        pagination={{ pageSize: 5 }}
-        loading={loading}
-        locale={{
-          emptyText: "No se encontraron resultados",
+        dataSource={vehiculos} // Usa paginatedData aquí
+        columns={columns} // Coloca las columnas aquí
+        pagination={{
+          current: currentPage,
+          pageSize: 5, // Tamaño de página directamente aquí
+          total: vehiculos.length, // Total de datos para la paginación
+          onChange: (page) => setCurrentPage(page),
         }}
+        loading={loading}
+        rowKey="id" // Asegúrate de que 'id' sea la clave única en tu data
       />
 
       {showImageModal && (
@@ -645,8 +641,6 @@ const GestionarVehiculo = () => {
                   onClick={() => handleImageClick(formData.url_imagen)} // Cambiar a formData.url_imagen
                 />
 
-               
-
                 <label htmlFor="marca_id">Marca:</label>
                 <select
                   id="marca_id"
@@ -722,22 +716,20 @@ const GestionarVehiculo = () => {
                   ))}
                 </select>
 
-                <div>
-                  <button type="submit" style={styles.submitButton}>
-                    Guardar
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setEditingVehiculo(null);
-                      setCreatingVehiculo(false); // Cerrar modal de creación
-                      setFormData({});
-                    }}
-                    style={styles.submitButton}
-                  >
-                    Cancelar
-                  </button>
-                </div>
+                <button type="submit" style={styles.submitButton}>
+                  Guardar
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEditingVehiculo(null);
+                    setCreatingVehiculo(false);
+                    setFormData({}); // Limpiar el formulario al cancelar
+                  }}
+                  style={styles.submitButton}
+                >
+                  Cancelar
+                </button>
               </form>
             </div>
           </div>
