@@ -13,14 +13,15 @@ const GestionarNotificacion = () => {
   const [showForm, setShowForm] = useState(false);
 
   const [currentPage, setCurrentPage] = useState(1);
-const itemsPerPage = 5;
-const indexOfLastNotification = currentPage * itemsPerPage;
-const indexOfFirstNotification = indexOfLastNotification - itemsPerPage;
-const currentNotifications = notificaciones.slice(indexOfFirstNotification, indexOfLastNotification);
-const totalPages = Math.ceil(notificaciones.length / itemsPerPage);
-const paginate = (pageNumber) => setCurrentPage(pageNumber);
-
-
+  const itemsPerPage = 5;
+  const indexOfLastNotification = currentPage * itemsPerPage;
+  const indexOfFirstNotification = indexOfLastNotification - itemsPerPage;
+  const currentNotifications = notificaciones.slice(
+    indexOfFirstNotification,
+    indexOfLastNotification
+  );
+  const totalPages = Math.ceil(notificaciones.length / itemsPerPage);
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
   const [correoUsuarioSeleccionado, setCorreoUsuarioSeleccionado] =
     useState("");
@@ -423,7 +424,6 @@ const paginate = (pageNumber) => setCurrentPage(pageNumber);
         </tbody>
       </table>
 
-
       {/* Paginación */}
       <div style={styles.pagination}>
         {Array.from({ length: totalPages }, (_, index) => (
@@ -452,7 +452,7 @@ const paginate = (pageNumber) => setCurrentPage(pageNumber);
               <input
                 type="text"
                 placeholder="Mensaje"
-                value={formData.mensaje || ""}
+                value={formData.mensaje || "Aviso"}
                 onChange={(e) =>
                   setFormData({ ...formData, mensaje: e.target.value })
                 }
@@ -462,17 +462,23 @@ const paginate = (pageNumber) => setCurrentPage(pageNumber);
               <input
                 type="date"
                 placeholder="Fecha de Creación"
-                value={formData.fechaCreacion || ""}
+                value={
+                  formData.fechaCreacion ||
+                  new Date().toISOString().split("T")[0]
+                } // Establecer la fecha actual como valor por defecto
                 onChange={(e) =>
                   setFormData({ ...formData, fechaCreacion: e.target.value })
                 }
                 style={styles.input}
                 required
               />
+
               <input
                 type="date"
                 placeholder="Fecha de Envío"
-                value={formData.fechaEnvio || ""}
+                value={
+                  formData.fechaEnvio || new Date().toISOString().split("T")[0]
+                }
                 onChange={(e) =>
                   setFormData({ ...formData, fechaEnvio: e.target.value })
                 }
@@ -483,23 +489,24 @@ const paginate = (pageNumber) => setCurrentPage(pageNumber);
               <input
                 type="text"
                 placeholder="Estado"
-                value={formData.estado || ""}
+                value={formData.estado || "Enviado"} // Establecer "Procesando" como valor por defecto
                 onChange={(e) =>
                   setFormData({ ...formData, estado: e.target.value })
                 }
                 style={styles.input}
                 required
               />
+
               <select
                 value={formData.usuario_id || ""}
                 onChange={handleUsuarioChange}
                 style={styles.input}
                 required
               >
-                <option value="">Seleccione un Usuario</option>
+                <option value="">Seleccione al Usuario</option>
                 {usuarios.map((usuario) => (
                   <option key={usuario.id} value={usuario.id}>
-                    {usuario.nombre}
+                    {`${usuario.nombre} ${usuario.apellido} - CI: ${usuario.ci}`}
                   </option>
                 ))}
               </select>

@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { confirmAction } from "./modalComponentes/ModalConfirm";
 import Cloudinary from "./modalComponentes/Cloudinary";
+import { confirmAction } from "./modalComponentes/ModalConfirm";
 
 
-const GestionarImagen = () => {
+const GestionarInformacion = () => {
   const [tiposNotificacion, setTiposNotificacion] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -294,7 +294,7 @@ const GestionarImagen = () => {
 
   return (
     <div style={styles.body}>
-      <h1 style={styles.h1}>GESTIONAR IMAGEN</h1>
+      <h1 style={styles.h1}>GESTIONAR INFORMACION</h1>
       <button
         style={styles.submitButton}
         onClick={() => {
@@ -310,7 +310,7 @@ const GestionarImagen = () => {
             <th style={styles.th}>ID</th>
             <th style={styles.th}>Nombre</th>
             <th style={styles.th}>Enlace</th>
-            <th style={styles.th}>Imagen</th> {/* Columna Imagen */}
+            <th style={styles.th}>DescargarDocumento</th> {/* Columna Imagen */}
             <th style={styles.th}>Acciones</th>
           </tr>
         </thead>
@@ -434,4 +434,4 @@ const GestionarImagen = () => {
   );
 };
 
-export default GestionarImagen;
+export default GestionarInformacion;
