@@ -122,35 +122,29 @@ const GestionarUsuario = () => {
   const handleDelete = async (id) => {
     confirmAction(async () => {
       try {
-        // Realiza la solicitud DELETE a la API para eliminar el valor comercial
-        await fetch(`https://backend-seguros.campozanodevlab.com/api/valor_comercial/${id}`, {
-          method: "DELETE",
-        });
-  
-        // Actualiza el estado de valores comerciales eliminando el registro eliminado
-        setValoresComerciales(valoresComerciales.filter((valor) => valor.id !== id));
-  
-        // Obtiene la IP del usuario que realiza la acción
+        await fetch(
+          `https://backend-seguros.campozanodevlab.com/api/usuarios/${id}`,
+          {
+            method: "DELETE",
+          }
+        );
+        setUsuarios(usuarios.filter((usuario) => usuario.id !== id));
+
         const userIp = await getUserIp();
-        
-        // Datos para registrar la acción
         const logData = {
-          usuario_id: userId, // Asegúrate de que userId esté definido en tu contexto
+          usuario_id: userId,
           accion: "Eliminó",
-          detalles: `El Usuario ID: ${userId} eliminó el Valor Comercial ID: ${id}`,
+          detalles: `El Usuario ID: ${userId} eliminó el Usuario ID: ${id}`,
           ip: userIp,
         };
-  
-        // Llama a la función para registrar la acción
+
         await logAction(logData);
       } catch (error) {
-        // Manejo de errores
-        setError("Error al eliminar el valor comercial");
-        console.error("Error al eliminar el valor comercial:", error);
+        setError("Error al eliminar el usuario");
+        console.error("Error al eliminar el usuario:", error);
       }
     });
   };
-  
 
   const logAction = async (logData) => {
     const token = "simulated-token"; // Aquí deberías usar un token válido si es necesario

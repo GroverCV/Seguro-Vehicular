@@ -195,16 +195,20 @@ const Sidebar = () => {
                 to: "/dashboard/asignarpermisos",
               },
               {
-                label: "CU07. Gestinoar Agenda",
+                label: "CU00. Gestionar Tipo Usuario",
+                to: "/dashboard/gestionartipousuario",
+              },
+              {
+                label: "CU09. Gestinoar Agenda",
                 to: "/dashboard/gestionaragenda",
               },
 
               {
-                label: "CU22. Gestionar Tipo Cita",
+                label: "CU08. Gestionar Tipo Cita",
                 to: "/dashboard/gestionartipocita",
               },
               {
-                label: "CU08. Administrar Bitacora",
+                label: "CU23. Administrar Bitacora",
                 to: "/dashboard/administrarbitacora",
               },
             ]}
@@ -217,33 +221,33 @@ const Sidebar = () => {
             toggleExpand={toggleExpand}
             items={[
               {
-                label: "CU13. Gestionar Vehiculo",
+                label: "CU20. Gestionar Vehiculo",
                 to: "/dashboard/gestionarvehiculo",
               },
               {
-                label: "CU13. Gestionar Tipo Vehiculo",
+                label: "CU19. Gestionar Tipo Vehiculo",
                 to: "/dashboard/gestionartipovehiculo",
               },
 
               {
-                label: "CU11. Gestionar Modelo",
+                label: "CU16. Gestionar Modelo",
                 to: "/dashboard/gestionarmodelo",
               },
               {
-                label: "CU12. Gestionar Marca",
+                label: "CU15. Gestionar Marca",
                 to: "/dashboard/gestionarmarca",
               },
 
               {
-                label: "CU13. Gestionar Valor Comercial",
+                label: "CU17. Gestionar Valor Comercial",
                 to: "/dashboard/gestionarvalorcomercial",
               },
               {
-                label: "CU14. Gestionar Depreciacion",
+                label: "CU18. Gestionar Depreciacion",
                 to: "/dashboard/gestionardepreciacion",
               },
               {
-                label: "CU09. Gestionar Imagen",
+                label: "CU25. Gestionar Imagen",
                 to: "/dashboard/gestionarimagen",
               },
             ]}
@@ -255,7 +259,7 @@ const Sidebar = () => {
             toggleExpand={toggleExpand}
             items={[
               {
-                label: "CU18. Gestionar Informacion",
+                label: "CU13. Gestionar Informacion",
                 to: "/dashboard/gestionarinformacion",
               },
             ]}
@@ -267,11 +271,11 @@ const Sidebar = () => {
             toggleExpand={toggleExpand}
             items={[
               {
-                label: "CU23. Gestionar Tipo Notificacion",
+                label: "CU08. Gestionar Tipo Notificacion",
                 to: "/dashboard/gestionartiponotificacion",
               },
               {
-                label: "CU08. Gestionar Notificacion",
+                label: "CU11. Gestionar Notificacion",
                 to: "/dashboard/gestionarnotificacion",
               },
               {
@@ -289,7 +293,7 @@ const Sidebar = () => {
             }}
           >
             <NavLink
-              to="/dashboard/reportes"
+              to="/dashboard/administrarbitacora"
               className="px-3 h-full flex items-center"
               style={({ isActive }) => ({
                 color: isActive ? sidebarStyles.itemActive.color : "#FFFFFF",
@@ -299,7 +303,27 @@ const Sidebar = () => {
                 textDecoration: "none", // Quitar subrayado
               })}
             >
-              Reportes
+              ADMINISTRAR BITACORA
+            </NavLink>
+          </li>
+          <li
+            style={{
+              ...sidebarStyles.listItem,
+              ...sidebarStyles.itemHover,
+            }}
+          >
+            <NavLink
+              to="/dashboard/generarreporte"
+              className="px-3 h-full flex items-center"
+              style={({ isActive }) => ({
+                color: isActive ? sidebarStyles.itemActive.color : "#FFFFFF",
+                backgroundColor: isActive
+                  ? sidebarStyles.itemActive.backgroundColor
+                  : "transparent",
+                textDecoration: "none", // Quitar subrayado
+              })}
+            >
+              GENERAR REPORTE
             </NavLink>
           </li>
         </ul>

@@ -28,6 +28,8 @@ import GestionarDepreciacion from "../views/Componentes/GestionarDepreciacion";
 import GestionarTipoVehiculo from "../views/Componentes/GestionarTipoVehiculo";
 import GestionarValorComercial from "../views/Componentes/GestionarValorComercial";
 import GestionarVehiculo from "../views/Componentes/GestionarVehiculo";
+import GenerarReporte from "../views/Componentes/GenerarReporte";
+import GestionarTipoUsuario from "../views/Componentes/GestionarTipoUsuario";
 
 
 export const AppRouter = () => {
@@ -51,6 +53,7 @@ export const AppRouter = () => {
           <Route path="register" element={<Register />} />
           <Route path="cerrarsesion" element={<CerrarSesion />} />
           <Route path="gestionarusuario" element={<GestionarUsuario />} />
+          <Route path="gestionartipousuario" element={<GestionarTipoUsuario />} />
           <Route path="administrarbitacora" element={<AdministrarBitacora/>} />
           <Route path="gestionarrol" element={<GestionarRol />} />
           <Route path="asignarpermisos" element={<AsignarPermisos/>} />
@@ -67,6 +70,7 @@ export const AppRouter = () => {
           <Route path="gestionartipovehiculo" element={<GestionarTipoVehiculo/>} />
           <Route path="gestionarvalorcomercial" element={<GestionarValorComercial/>} />
           <Route path="gestionarvehiculo" element={<GestionarVehiculo/>} />
+          <Route path="generarreporte" element={<GenerarReporte/>} />
         </Route>
       </Routes>
     </>
