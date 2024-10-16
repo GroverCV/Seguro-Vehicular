@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Badge, Calendar, Spin, Modal, List } from 'antd';
 import dayjs from 'dayjs';
 import axios from 'axios';
+import '../CSS/ModalAgendaUsuario.css';
 
 const ModalAgenda = () => {
   const [loading, setLoading] = useState(true);
@@ -111,6 +112,7 @@ const ModalAgenda = () => {
     transformOrigin: 'bottom',
     margin: '0 auto',
   };
+  
 
   if (loading) {
     return <Spin tip="Cargando citas..." />;

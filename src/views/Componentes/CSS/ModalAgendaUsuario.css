@@ -1,0 +1,16 @@
+.events {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .events.has-citas {
+    background-color: #e6f7ff; /* Color de fondo para fechas con citas */
+    border-radius: 5px;
+    padding: 5px;
+  }
+  
+  .events li {
+    margin-bottom: 5px;
+  }
+  

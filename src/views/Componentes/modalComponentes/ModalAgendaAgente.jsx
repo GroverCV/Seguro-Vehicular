@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Badge, Calendar, Spin, Modal, List } from 'antd';
 import dayjs from 'dayjs';
 import axios from 'axios';
+import '../CSS/ModalAgendaUsuario.css';
 
 const ModalAgendaAgente = () => {
   const [loading, setLoading] = useState(true);
@@ -178,10 +179,6 @@ const ModalAgendaAgente = () => {
 
   return (
     <div>
-        <div className="flex justify-center items-center h-screen">
-            <h1 className='text-center'>MI AGENDA</h1>
-        </div>
-
       <div style={calendarContainerStyle}>
         <Calendar cellRender={cellRender} onSelect={onSelectDate} />
       </div>

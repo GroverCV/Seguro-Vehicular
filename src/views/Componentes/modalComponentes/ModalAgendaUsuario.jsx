@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Badge, Calendar, Spin, Modal, List } from 'antd';
 import dayjs from 'dayjs';
 import axios from 'axios';
+import '../CSS/ModalAgendaUsuario.css';
 
 const ModalAgendaUsuario = () => {
   const [loading, setLoading] = useState(true);
@@ -13,27 +14,21 @@ const ModalAgendaUsuario = () => {
   const [usuarios, setUsuarios] = useState({});
   const [ip, setIp] = useState("");
 
-  // Obtener el ID del usuario autenticado
   const userId = Number(localStorage.getItem("userId"));
 
-  // Obtener datos de citas y usuarios
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Obtener citas
         const citasResponse = await axios.get("https://backend-seguros.campozanodevlab.com/api/citas");
-
-        // Filtrar solo las citas del usuario autenticado
         const citasDelUsuario = citasResponse.data.filter(cita => cita.solicitante_id === userId);
         setCitas(citasDelUsuario);
 
-        // Obtener todos los usuarios
         const usuariosResponse = await axios.get("https://backend-seguros.campozanodevlab.com/api/usuarios");
         const usuariosData = {};
         usuariosResponse.data.forEach(usuario => {
-          usuariosData[usuario.id] = { nombre: usuario.nombre, apellido: usuario.apellido }; // Suponiendo que los campos son nombre y apellido
+          usuariosData[usuario.id] = { nombre: usuario.nombre, apellido: usuario.apellido };
         });
-        setUsuarios(usuariosData); // Guardar usuarios en el estado
+        setUsuarios(usuariosData);
 
       } catch (err) {
         setError('Error al cargar las citas o usuarios');
@@ -43,7 +38,7 @@ const ModalAgendaUsuario = () => {
     };
 
     fetchData();
-  }, [userId]); // El useEffect depende del userId
+  }, [userId]);
 
   const citasPorFecha = () => {
     return citas.reduce((acc, cita) => {
@@ -70,7 +65,6 @@ const ModalAgendaUsuario = () => {
     }
   };
 
-  // Registrar en Bitácora
   const registrarBitacora = async () => {
     const userId = parseInt(localStorage.getItem("userId"), 10);
 
@@ -105,7 +99,7 @@ const ModalAgendaUsuario = () => {
 
   useEffect(() => {
     if (ip) {
-      registrarBitacora(); // Solo registra en bitácora después de obtener la IP
+      registrarBitacora();
     }
   }, [ip]);
 
@@ -128,8 +122,10 @@ const ModalAgendaUsuario = () => {
 
   const dateCellRender = (value) => {
     const listData = getListData(value);
+    const hasCitas = listData.length > 0;
+
     return (
-      <ul className="events">
+      <ul className={`events ${hasCitas ? 'has-citas' : ''}`}>
         {listData.map((item) => (
           <li key={item.content}>
             <Badge status={item.type} text={item.content} />
@@ -142,9 +138,7 @@ const ModalAgendaUsuario = () => {
   const onSelectDate = (value) => {
     const fechaActual = value.format('DD/MM/YYYY');
     const citasDelDia = citasPorFecha()[fechaActual] || [];
-
     citasDelDia.sort((a, b) => dayjs(a.fecha).diff(dayjs(b.fecha)));
-
     setSelectedCitas(citasDelDia);
     setSelectedDate(fechaActual);
     setIsModalVisible(true);
@@ -160,7 +154,8 @@ const ModalAgendaUsuario = () => {
   };
 
   const calendarContainerStyle = {
-    width: '1000px',
+    width: '100%',
+    maxWidth: '1000px',
     height: '650px',
     overflow: 'hidden',
     transform: 'scale(1)',
