@@ -30,6 +30,7 @@ import GestionarValorComercial from "../views/Componentes/GestionarValorComercia
 import GestionarVehiculo from "../views/Componentes/GestionarVehiculo";
 import GenerarReporte from "../views/Componentes/GenerarReporte";
 import GestionarTipoUsuario from "../views/Componentes/GestionarTipoUsuario";
+import ModalAgendaAgente from "../views/Componentes/modalComponentes/ModalAgendaAgente";
 
 
 export const AppRouter = () => {
@@ -70,6 +71,7 @@ export const AppRouter = () => {
           <Route path="gestionartipovehiculo" element={<GestionarTipoVehiculo/>} />
           <Route path="gestionarvalorcomercial" element={<GestionarValorComercial/>} />
           <Route path="gestionarvehiculo" element={<GestionarVehiculo/>} />
+          <Route path="modalagendaagente" element={<ModalAgendaAgente/>} />
           <Route path="generarreporte" element={<GenerarReporte/>} />
         </Route>
       </Routes>

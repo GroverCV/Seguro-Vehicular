@@ -293,6 +293,26 @@ const Sidebar = () => {
             }}
           >
             <NavLink
+              to="/dashboard/ModalAgendaAgente"
+              className="px-3 h-full flex items-center"
+              style={({ isActive }) => ({
+                color: isActive ? sidebarStyles.itemActive.color : "#FFFFFF",
+                backgroundColor: isActive
+                  ? sidebarStyles.itemActive.backgroundColor
+                  : "transparent",
+                textDecoration: "none", // Quitar subrayado
+              })}
+            >
+              MI AGENDA
+            </NavLink>
+          </li>
+          <li
+            style={{
+              ...sidebarStyles.listItem,
+              ...sidebarStyles.itemHover,
+            }}
+          >
+            <NavLink
               to="/dashboard/administrarbitacora"
               className="px-3 h-full flex items-center"
               style={({ isActive }) => ({
