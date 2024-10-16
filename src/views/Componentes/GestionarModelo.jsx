@@ -4,25 +4,25 @@ import { Button, Input, Space, Table } from "antd";
 import Highlighter from "react-highlight-words";
 import { confirmAction } from "./modalComponentes/ModalConfirm";
 
-const GestionarMarca = () => {
-  const [marcas, setMarcas] = useState([]);
+const GestionarModelo = () => {
+  const [modelos, setModelos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [editingMarca, setEditingMarca] = useState(null);
-  const [creatingMarca, setCreatingMarca] = useState(false);
+  const [editingModelo, setEditingModelo] = useState(null);
+  const [creatingModelo, setCreatingModelo] = useState(false); // Nueva variable para creación
   const [formData, setFormData] = useState({});
   const [searchText, setSearchText] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");
   const searchInput = useRef(null);
 
-  const fetchMarca = async () => {
+  const fetchModeloVehiculo = async () => {
     try {
       const response = await fetch(
-        "https://backend-seguros.campozanodevlab.com/api/marca"
+        "https://backend-seguros.campozanodevlab.com/api/modelo_vehiculo"
       );
-      if (!response.ok) throw new Error("Error al obtener las marcas");
+      if (!response.ok) throw new Error("Error al obtener los modelos");
       const data = await response.json();
-      setMarcas(data);
+      setModelos(data);
     } catch (error) {
       setError(error.message);
     } finally {
@@ -31,17 +31,17 @@ const GestionarMarca = () => {
   };
 
   useEffect(() => {
-    fetchMarca();
+    fetchModeloVehiculo();
   }, []);
 
-  const handleEdit = (marca) => {
-    setEditingMarca(marca);
-    setFormData(marca);
+  const handleEdit = (modelo) => {
+    setEditingModelo(modelo);
+    setFormData(modelo);
   };
 
   const handleCreate = () => {
-    setCreatingMarca(true);
-    setFormData({ nombre: "" }); // Limpiar el formulario para una nueva marca
+    setCreatingModelo(true);
+    setFormData({ nombre: "" }); // Limpiar el formulario para un nuevo modelo
   };
 
   const userId = localStorage.getItem("userId");
@@ -61,25 +61,25 @@ const GestionarMarca = () => {
     confirmAction(async () => {
       try {
         await fetch(
-          `https://backend-seguros.campozanodevlab.com/api/marca/${id}`,
+          `https://backend-seguros.campozanodevlab.com/api/modelo_vehiculo/${id}`,
           {
             method: "DELETE",
           }
         );
-        setMarcas(marcas.filter((marca) => marca.id !== id));
+        setModelos(modelos.filter((modelo) => modelo.id !== id));
 
         const userIp = await getUserIp();
         const logData = {
           usuario_id: userId,
           accion: "Eliminó",
-          detalles: `El Usuario ID: ${userId} eliminó la Marca ID: ${id}`,
+          detalles: `El Usuario ID: ${userId} eliminó el Modelo ID: ${id}`,
           ip: userIp,
         };
 
         await logAction(logData);
       } catch (error) {
-        setError("Error al eliminar la marca");
-        console.error("Error al eliminar la marca:", error);
+        setError("Error al eliminar el modelo");
+        console.error("Error al eliminar el modelo:", error);
       }
     });
   };
@@ -104,54 +104,54 @@ const GestionarMarca = () => {
     e.preventDefault();
     confirmAction(async () => {
       try {
-        if (creatingMarca) {
-          // Si estamos creando una nueva marca
+        if (creatingModelo) {
+          // Si estamos creando un nuevo modelo
           const response = await fetch(
-            "https://backend-seguros.campozanodevlab.com/api/marca",
+            "https://backend-seguros.campozanodevlab.com/api/modelo_vehiculo",
             {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify(formData),
             }
           );
-          const newMarca = await response.json();
-          setMarcas([...marcas, newMarca]);
+          const newModelo = await response.json();
+          setModelos([...modelos, newModelo]);
 
           const userIp = await getUserIp();
           const logData = {
             usuario_id: userId,
             accion: "Creó",
-            detalles: `El Usuario ID: ${userId} creó una nueva Marca: ${newMarca.nombre}`,
+            detalles: `El Usuario ID: ${userId} creó un nuevo Modelo: ${newModelo.nombre}`,
             ip: userIp,
           };
           await logAction(logData);
-          setCreatingMarca(false); // Cerrar el modal de creación
+          setCreatingModelo(false); // Cerrar el modal de creación
         } else {
-          // Si estamos editando una marca existente
-          const previousMarcaResponse = await fetch(
-            `https://backend-seguros.campozanodevlab.com/api/marca/${editingMarca.id}`
+          // Si estamos editando un modelo existente
+          const previousModeloResponse = await fetch(
+            `https://backend-seguros.campozanodevlab.com/api/modelo_vehiculo/${editingModelo.id}`
           );
-          const previousMarca = await previousMarcaResponse.json();
+          const previousModelo = await previousModeloResponse.json();
 
           const response = await fetch(
-            `https://backend-seguros.campozanodevlab.com/api/marca/${editingMarca.id}`,
+            `https://backend-seguros.campozanodevlab.com/api/modelo_vehiculo/${editingModelo.id}`,
             {
               method: "PUT",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify(formData),
             }
           );
-          const updatedMarca = await response.json();
-          setMarcas((prev) =>
-            prev.map((marca) =>
-              marca.id === updatedMarca.id ? updatedMarca : marca
+          const updatedModelo = await response.json();
+          setModelos((prev) =>
+            prev.map((modelo) =>
+              modelo.id === updatedModelo.id ? updatedModelo : modelo
             )
           );
 
           const userIp = await getUserIp();
           const attributesToCheck = ["Nombre"];
           const editedAttribute = attributesToCheck.find(
-            (key) => formData[key] !== previousMarca[key]
+            (key) => formData[key] !== previousModelo[key]
           );
 
           let logDetails = "";
@@ -162,17 +162,16 @@ const GestionarMarca = () => {
           const logData = {
             usuario_id: userId,
             accion: "Editó",
-            detalles: `El Usuario ID: ${userId} editó la Marca ID: ${editingMarca.id}. ${logDetails}`,
+            detalles: `El Usuario ID: ${userId} editó el Modelo ID: ${editingModelo.id}. ${logDetails}`,
             ip: userIp,
           };
-
           await logAction(logData);
-          setEditingMarca(null);
+          setEditingModelo(null);
         }
-        fetchMarca();
+        fetchModeloVehiculo();
       } catch (error) {
-        setError("Error al guardar la marca");
-        console.error("Error al guardar la marca:", error);
+        setError("Error al guardar el modelo");
+        console.error("Error al guardar el modelo:", error);
       }
     });
   };
@@ -280,7 +279,9 @@ const GestionarMarca = () => {
           ref={searchInput}
           placeholder={`Buscar ${dataIndex}`}
           value={selectedKeys[0]}
-          onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
+          onChange={(e) =>
+            setSelectedKeys(e.target.value ? [e.target.value] : [])
+          }
           onPressEnter={() => handleSearch(selectedKeys, confirm, dataIndex)}
           style={{ marginBottom: 8, display: "block" }}
         />
@@ -294,11 +295,12 @@ const GestionarMarca = () => {
           >
             Buscar
           </Button>
-          <Button onClick={() => handleReset(clearFilters)} size="small" style={{ width: 90 }}>
+          <Button
+            onClick={() => handleReset(clearFilters)}
+            size="small"
+            style={{ width: 90 }}
+          >
             Reiniciar
-          </Button>
-          <Button onClick={() => close()} size="small" style={{ width: 90 }}>
-            Cerrar
           </Button>
         </Space>
       </div>
@@ -310,6 +312,11 @@ const GestionarMarca = () => {
       record[dataIndex]
         ? record[dataIndex].toString().toLowerCase().includes(value.toLowerCase())
         : "",
+    onFilterDropdownOpenChange: (visible) => {
+      if (visible) {
+        setTimeout(() => searchInput.current?.select(), 100);
+      }
+    },
     render: (text) =>
       searchedColumn === dataIndex ? (
         <Highlighter
@@ -339,34 +346,36 @@ const GestionarMarca = () => {
     {
       title: "Acciones",
       key: "acciones",
-      render: (_, marca) => (
-        <Space size="middle">
-          <Button type="primary" onClick={() => handleEdit(marca)}>
-            Editar
-          </Button>
-          <Button type="danger" onClick={() => handleDelete(marca.id)}>
+      render: (text, modelo) => (
+        <>
+          <Button onClick={() => handleEdit(modelo)}>Editar</Button>
+          <Button
+            onClick={() => handleDelete(modelo.id)}
+            style={{ marginLeft: 8 }}
+          >
             Eliminar
           </Button>
-        </Space>
+        </>
       ),
     },
   ];
+
   if (loading) return <div>Cargando...</div>;
   if (error) return <div>Error: {error}</div>;
 
   return (
     <div style={styles.body}>
-      <h1 style={styles.h1}>GESTIONAR MARCAS</h1>
+      <h1 style={styles.h1}>GESTIONAR MODELOS DE VEHÍCULOS</h1>
       <Button
         type="primary"
         onClick={handleCreate}
         style={{ marginBottom: "20px" }}
       >
-        Crear Marca
+        Crear Modelo
       </Button>
       <Table
         columns={columns}
-        dataSource={marcas}
+        dataSource={modelos}
         rowKey="id"
         pagination={{ pageSize: 5 }}
         loading={loading}
@@ -374,7 +383,7 @@ const GestionarMarca = () => {
           emptyText: "No se encontraron resultados",
         }}
       />
-      {(editingMarca || creatingMarca) && (
+      {(editingModelo || creatingModelo) && (
         <div style={styles.overlay}>
           <div style={styles.modal}>
             <form onSubmit={handleSubmit}>
@@ -396,8 +405,8 @@ const GestionarMarca = () => {
                 <button
                   type="button"
                   onClick={() => {
-                    setEditingMarca(null);
-                    setCreatingMarca(false); // Cerrar modal de creación
+                    setEditingModelo(null);
+                    setCreatingModelo(false); // Cerrar modal de creación
                     setFormData({});
                   }}
                   style={styles.submitButton}
@@ -413,4 +422,4 @@ const GestionarMarca = () => {
   );
 };
 
-export default GestionarMarca;
+export default GestionarModelo;

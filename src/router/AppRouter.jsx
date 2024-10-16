@@ -23,6 +23,11 @@ import Inicio from "../views/menu/Inicio";
 import Notificaciones from "../views/menu/Notificaciones";
 import Poliza from "../views/menu/Poliza";
 import { PrivateRoute } from "./PrivateRout";
+import GestionarModelo from "../views/Componentes/GestionarModelo";
+import GestionarDepreciacion from "../views/Componentes/GestionarDepreciacion";
+import GestionarTipoVehiculo from "../views/Componentes/GestionarTipoVehiculo";
+import GestionarValorComercial from "../views/Componentes/GestionarValorComercial";
+import GestionarVehiculo from "../views/Componentes/GestionarVehiculo";
 
 
 export const AppRouter = () => {
@@ -56,6 +61,12 @@ export const AppRouter = () => {
           <Route path="gestionarnotificacion" element={<GestionarNotificacion/>} />
           <Route path="gestionarimagen" element={<GestionarImagen/>} />
           <Route path="gestionarinformacion" element={<GestionarInformacion/>} />
+          <Route path="gestionarmodelo" element={<GestionarModelo/>} />
+          <Route path="gestionarmarca" element={<GestionarMarca/>} />
+          <Route path="gestionardepreciacion" element={<GestionarDepreciacion/>} />
+          <Route path="gestionartipovehiculo" element={<GestionarTipoVehiculo/>} />
+          <Route path="gestionarvalorcomercial" element={<GestionarValorComercial/>} />
+          <Route path="gestionarvehiculo" element={<GestionarVehiculo/>} />
         </Route>
       </Routes>
     </>

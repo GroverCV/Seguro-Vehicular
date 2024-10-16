@@ -4,25 +4,25 @@ import { Button, Input, Space, Table } from "antd";
 import Highlighter from "react-highlight-words";
 import { confirmAction } from "./modalComponentes/ModalConfirm";
 
-const GestionarMarca = () => {
-  const [marcas, setMarcas] = useState([]);
+const GestionarTipoVehiculo = () => {
+  const [tiposVehiculo, setTiposVehiculo] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [editingMarca, setEditingMarca] = useState(null);
-  const [creatingMarca, setCreatingMarca] = useState(false);
+  const [editingTipo, setEditingTipo] = useState(null);
+  const [creatingTipo, setCreatingTipo] = useState(false);
   const [formData, setFormData] = useState({});
   const [searchText, setSearchText] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");
   const searchInput = useRef(null);
 
-  const fetchMarca = async () => {
+  const fetchTipoVehiculo = async () => {
     try {
       const response = await fetch(
-        "https://backend-seguros.campozanodevlab.com/api/marca"
+        "https://backend-seguros.campozanodevlab.com/api/tipo_vehiculo"
       );
-      if (!response.ok) throw new Error("Error al obtener las marcas");
+      if (!response.ok) throw new Error("Error al obtener los tipos de vehículo");
       const data = await response.json();
-      setMarcas(data);
+      setTiposVehiculo(data);
     } catch (error) {
       setError(error.message);
     } finally {
@@ -31,17 +31,17 @@ const GestionarMarca = () => {
   };
 
   useEffect(() => {
-    fetchMarca();
+    fetchTipoVehiculo();
   }, []);
 
-  const handleEdit = (marca) => {
-    setEditingMarca(marca);
-    setFormData(marca);
+  const handleEdit = (tipo) => {
+    setEditingTipo(tipo);
+    setFormData(tipo);
   };
 
   const handleCreate = () => {
-    setCreatingMarca(true);
-    setFormData({ nombre: "" }); // Limpiar el formulario para una nueva marca
+    setCreatingTipo(true);
+    setFormData({ nombre: "" });
   };
 
   const userId = localStorage.getItem("userId");
@@ -61,25 +61,25 @@ const GestionarMarca = () => {
     confirmAction(async () => {
       try {
         await fetch(
-          `https://backend-seguros.campozanodevlab.com/api/marca/${id}`,
+          `https://backend-seguros.campozanodevlab.com/api/tipo_vehiculo/${id}`,
           {
             method: "DELETE",
           }
         );
-        setMarcas(marcas.filter((marca) => marca.id !== id));
+        setTiposVehiculo(tiposVehiculo.filter((tipo) => tipo.id !== id));
 
         const userIp = await getUserIp();
         const logData = {
           usuario_id: userId,
           accion: "Eliminó",
-          detalles: `El Usuario ID: ${userId} eliminó la Marca ID: ${id}`,
+          detalles: `El Usuario ID: ${userId} eliminó el Tipo ID: ${id}`,
           ip: userIp,
         };
 
         await logAction(logData);
       } catch (error) {
-        setError("Error al eliminar la marca");
-        console.error("Error al eliminar la marca:", error);
+        setError("Error al eliminar el tipo de vehículo");
+        console.error("Error al eliminar el tipo de vehículo:", error);
       }
     });
   };
@@ -104,54 +104,52 @@ const GestionarMarca = () => {
     e.preventDefault();
     confirmAction(async () => {
       try {
-        if (creatingMarca) {
-          // Si estamos creando una nueva marca
+        if (creatingTipo) {
           const response = await fetch(
-            "https://backend-seguros.campozanodevlab.com/api/marca",
+            "https://backend-seguros.campozanodevlab.com/api/tipo_vehiculo",
             {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify(formData),
             }
           );
-          const newMarca = await response.json();
-          setMarcas([...marcas, newMarca]);
+          const newTipo = await response.json();
+          setTiposVehiculo([...tiposVehiculo, newTipo]);
 
           const userIp = await getUserIp();
           const logData = {
             usuario_id: userId,
             accion: "Creó",
-            detalles: `El Usuario ID: ${userId} creó una nueva Marca: ${newMarca.nombre}`,
+            detalles: `El Usuario ID: ${userId} creó un nuevo Tipo: ${newTipo.nombre}`,
             ip: userIp,
           };
           await logAction(logData);
-          setCreatingMarca(false); // Cerrar el modal de creación
+          setCreatingTipo(false);
         } else {
-          // Si estamos editando una marca existente
-          const previousMarcaResponse = await fetch(
-            `https://backend-seguros.campozanodevlab.com/api/marca/${editingMarca.id}`
+          const previousTipoResponse = await fetch(
+            `https://backend-seguros.campozanodevlab.com/api/tipo_vehiculo/${editingTipo.id}`
           );
-          const previousMarca = await previousMarcaResponse.json();
+          const previousTipo = await previousTipoResponse.json();
 
           const response = await fetch(
-            `https://backend-seguros.campozanodevlab.com/api/marca/${editingMarca.id}`,
+            `https://backend-seguros.campozanodevlab.com/api/tipo_vehiculo/${editingTipo.id}`,
             {
               method: "PUT",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify(formData),
             }
           );
-          const updatedMarca = await response.json();
-          setMarcas((prev) =>
-            prev.map((marca) =>
-              marca.id === updatedMarca.id ? updatedMarca : marca
+          const updatedTipo = await response.json();
+          setTiposVehiculo((prev) =>
+            prev.map((tipo) =>
+              tipo.id === updatedTipo.id ? updatedTipo : tipo
             )
           );
 
           const userIp = await getUserIp();
           const attributesToCheck = ["Nombre"];
           const editedAttribute = attributesToCheck.find(
-            (key) => formData[key] !== previousMarca[key]
+            (key) => formData[key] !== previousTipo[key]
           );
 
           let logDetails = "";
@@ -162,17 +160,16 @@ const GestionarMarca = () => {
           const logData = {
             usuario_id: userId,
             accion: "Editó",
-            detalles: `El Usuario ID: ${userId} editó la Marca ID: ${editingMarca.id}. ${logDetails}`,
+            detalles: `El Usuario ID: ${userId} editó el Tipo ID: ${editingTipo.id}. ${logDetails}`,
             ip: userIp,
           };
-
           await logAction(logData);
-          setEditingMarca(null);
+          setEditingTipo(null);
         }
-        fetchMarca();
+        fetchTipoVehiculo();
       } catch (error) {
-        setError("Error al guardar la marca");
-        console.error("Error al guardar la marca:", error);
+        setError("Error al guardar el tipo de vehículo");
+        console.error("Error al guardar el tipo de vehículo:", error);
       }
     });
   };
@@ -280,7 +277,9 @@ const GestionarMarca = () => {
           ref={searchInput}
           placeholder={`Buscar ${dataIndex}`}
           value={selectedKeys[0]}
-          onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
+          onChange={(e) =>
+            setSelectedKeys(e.target.value ? [e.target.value] : [])
+          }
           onPressEnter={() => handleSearch(selectedKeys, confirm, dataIndex)}
           style={{ marginBottom: 8, display: "block" }}
         />
@@ -297,7 +296,12 @@ const GestionarMarca = () => {
           <Button onClick={() => handleReset(clearFilters)} size="small" style={{ width: 90 }}>
             Reiniciar
           </Button>
-          <Button onClick={() => close()} size="small" style={{ width: 90 }}>
+          <Button
+            type="primary"
+            onClick={close}
+            size="small"
+            style={{ width: 90 }}
+          >
             Cerrar
           </Button>
         </Space>
@@ -313,7 +317,10 @@ const GestionarMarca = () => {
     render: (text) =>
       searchedColumn === dataIndex ? (
         <Highlighter
-          highlightStyle={{ backgroundColor: "#ffc069", padding: 0 }}
+          highlightStyle={{
+            backgroundColor: "#ffc069",
+            padding: 0,
+          }}
           searchWords={[searchText]}
           autoEscape
           textToHighlight={text ? text.toString() : ""}
@@ -325,12 +332,6 @@ const GestionarMarca = () => {
 
   const columns = [
     {
-      title: "ID",
-      dataIndex: "id",
-      key: "id",
-      ...getColumnSearchProps("id"),
-    },
-    {
       title: "Nombre",
       dataIndex: "nombre",
       key: "nombre",
@@ -339,78 +340,63 @@ const GestionarMarca = () => {
     {
       title: "Acciones",
       key: "acciones",
-      render: (_, marca) => (
+      render: (text, tipo) => (
         <Space size="middle">
-          <Button type="primary" onClick={() => handleEdit(marca)}>
-            Editar
-          </Button>
-          <Button type="danger" onClick={() => handleDelete(marca.id)}>
+          <Button onClick={() => handleEdit(tipo)}>Editar</Button>
+          <Button onClick={() => handleDelete(tipo.id)} type="danger">
             Eliminar
           </Button>
         </Space>
       ),
     },
   ];
+
   if (loading) return <div>Cargando...</div>;
   if (error) return <div>Error: {error}</div>;
 
   return (
     <div style={styles.body}>
-      <h1 style={styles.h1}>GESTIONAR MARCAS</h1>
-      <Button
-        type="primary"
-        onClick={handleCreate}
-        style={{ marginBottom: "20px" }}
-      >
-        Crear Marca
+      <h1 style={styles.h1}>Gestionar Tipos de Vehículo</h1>
+      {loading && <p>Cargando tipos de vehículo...</p>}
+      {error && <p>{error}</p>}
+      <Button type="primary" onClick={handleCreate} style={styles.button}>
+        Crear Tipo de Vehículo
       </Button>
       <Table
         columns={columns}
-        dataSource={marcas}
+        dataSource={tiposVehiculo}
         rowKey="id"
         pagination={{ pageSize: 5 }}
         loading={loading}
-        locale={{
-          emptyText: "No se encontraron resultados",
-        }}
       />
-      {(editingMarca || creatingMarca) && (
-        <div style={styles.overlay}>
-          <div style={styles.modal}>
-            <form onSubmit={handleSubmit}>
-              <label htmlFor="nombre">Nombre:</label>
-              <input
-                type="text"
-                id="nombre"
-                name="nombre"
-                value={formData.nombre || ""}
-                onChange={(e) =>
-                  setFormData({ ...formData, nombre: e.target.value })
-                }
-                style={styles.input}
-              />
-              <div>
-                <button type="submit" style={styles.submitButton}>
-                  Guardar
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setEditingMarca(null);
-                    setCreatingMarca(false); // Cerrar modal de creación
-                    setFormData({});
-                  }}
-                  style={styles.submitButton}
-                >
-                  Cancelar
-                </button>
-              </div>
-            </form>
-          </div>
+      {creatingTipo || editingTipo ? (
+        <div style={styles.modal}>
+          <h2>{creatingTipo ? "Crear Tipo de Vehículo" : "Editar Tipo de Vehículo"}</h2>
+          <form onSubmit={handleSubmit}>
+            <input
+              type="text"
+              placeholder="Nombre"
+              value={formData.nombre || ""}
+              onChange={(e) =>
+                setFormData({ ...formData, nombre: e.target.value })
+              }
+              style={styles.input}
+              required
+            />
+            <button type="submit" style={styles.submitButton}>
+              {creatingTipo ? "Crear" : "Guardar"}
+            </button>
+            <Button onClick={() => {
+              setCreatingTipo(false);
+              setEditingTipo(null);
+            }}>
+              Cancelar
+            </Button>
+          </form>
         </div>
-      )}
+      ) : null}
     </div>
   );
 };
 
-export default GestionarMarca;
+export default GestionarTipoVehiculo;

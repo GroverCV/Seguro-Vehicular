@@ -19,7 +19,7 @@ const sidebarStyles = {
     fontWeight: "bold",
     textAlign: "center",
   },
-  
+
   listItem: {
     marginBottom: "0.5rem",
     borderRadius: "0.5rem",
@@ -198,7 +198,7 @@ const Sidebar = () => {
                 label: "CU07. Gestinoar Agenda",
                 to: "/dashboard/gestionaragenda",
               },
-              
+
               {
                 label: "CU22. Gestionar Tipo Cita",
                 to: "/dashboard/gestionartipocita",
@@ -207,7 +207,6 @@ const Sidebar = () => {
                 label: "CU08. Administrar Bitacora",
                 to: "/dashboard/administrarbitacora",
               },
-
             ]}
           />
 
@@ -218,26 +217,35 @@ const Sidebar = () => {
             toggleExpand={toggleExpand}
             items={[
               {
+                label: "CU13. Gestionar Vehiculo",
+                to: "/dashboard/gestionarvehiculo",
+              },
+              {
+                label: "CU13. Gestionar Tipo Vehiculo",
+                to: "/dashboard/gestionartipovehiculo",
+              },
+
+              {
+                label: "CU11. Gestionar Modelo",
+                to: "/dashboard/gestionarmodelo",
+              },
+              {
+                label: "CU12. Gestionar Marca",
+                to: "/dashboard/gestionarmarca",
+              },
+
+              {
+                label: "CU13. Gestionar Valor Comercial",
+                to: "/dashboard/gestionarvalorcomercial",
+              },
+              {
+                label: "CU14. Gestionar Depreciacion",
+                to: "/dashboard/gestionardepreciacion",
+              },
+              {
                 label: "CU09. Gestionar Imagen",
                 to: "/dashboard/gestionarimagen",
               },
-              {/*
-              {
-                label: "CU11. Gestionar Documento",
-                to: "/dashboard/gestionardocumento",
-              },
-              {
-                label: "CU12. Gestionar Polizas",
-                to: "/dashboard/gestionarpolizas",
-              },
-              {
-                label: "CU13. Gestionar Datos del Vehiculo",
-                to: "/dashboard/gestionardatosvehiculo",
-              },
-              {
-                label: "CU14. Asignar Propietario",
-                to: "/dashboard/gestionarpropietario",
-              },*/}
             ]}
           />
           <SidebarItem
@@ -246,7 +254,10 @@ const Sidebar = () => {
             expanded={expanded.incidente}
             toggleExpand={toggleExpand}
             items={[
-              { label: "CU18. Gestionar Informacion", to: "/dashboard/gestionarinformacion" },
+              {
+                label: "CU18. Gestionar Informacion",
+                to: "/dashboard/gestionarinformacion",
+              },
             ]}
           />
           <SidebarItem
@@ -263,10 +274,12 @@ const Sidebar = () => {
                 label: "CU08. Gestionar Notificacion",
                 to: "/dashboard/gestionarnotificacion",
               },
-              {/*{
+              {
+                /*{
                 label: "CU12. Realizar tipo de pago",
                 to: "/dashboard/uploadImage",
-              },*/},
+              },*/
+              },
             ]}
           />
           <li
@@ -290,58 +303,58 @@ const Sidebar = () => {
             </NavLink>
           </li>
         </ul>
-        
+
         {logoutModalVisible && (
-  <div style={sidebarStyles.modal}>
-    <div
-      style={{
-        ...sidebarStyles.modalContent,
-        width: '400px',
-        padding: '20px',
-        borderRadius: '10px',
-        fontSize:'25px',
-        backgroundColor:'#ADD8E6',
-        border: '2px solid black',
-        display: 'flex', // Agregar flexbox
-        flexDirection: 'column', // Alinear en columna
-        alignItems: 'center', // Centrar horizontalmente
-        justifyContent: 'center', // Centrar verticalmente
-      }}
-    >
-      <h2 className="text-2xl mb-4 text-center">Cerrar Sesión</h2>
-      <p className="text-lg text-center">¿Está seguro que desea cerrar sesión?</p>
-      <div className="flex justify-end mt-4">
-        <button
-          style={{
-            ...sidebarStyles.button,
-            ...sidebarStyles.cancelButton,
-            padding: '20px 33px',
-            borderRadius: '5px',
-            fontSize: '25px',
-            marginRight: '10px', // Espaciado entre botones
-          }}
-          onClick={handleLogoutCancel}
-        >
-          Cancelar
-        </button>
-        <button
-          style={{
-            ...sidebarStyles.button,
-            ...sidebarStyles.confirmButton,
-            padding: '20px 40px',
-            borderRadius: '5px',
-            fontSize: '25px',
-          }}
-          onClick={handleLogoutConfirm}
-        >
-          Aceptar
-        </button>
-      </div>
-    </div>
-  </div>
-)}
-
-
+          <div style={sidebarStyles.modal}>
+            <div
+              style={{
+                ...sidebarStyles.modalContent,
+                width: "400px",
+                padding: "20px",
+                borderRadius: "10px",
+                fontSize: "25px",
+                backgroundColor: "#ADD8E6",
+                border: "2px solid black",
+                display: "flex", // Agregar flexbox
+                flexDirection: "column", // Alinear en columna
+                alignItems: "center", // Centrar horizontalmente
+                justifyContent: "center", // Centrar verticalmente
+              }}
+            >
+              <h2 className="text-2xl mb-4 text-center">Cerrar Sesión</h2>
+              <p className="text-lg text-center">
+                ¿Está seguro que desea cerrar sesión?
+              </p>
+              <div className="flex justify-end mt-4">
+                <button
+                  style={{
+                    ...sidebarStyles.button,
+                    ...sidebarStyles.cancelButton,
+                    padding: "20px 33px",
+                    borderRadius: "5px",
+                    fontSize: "25px",
+                    marginRight: "10px", // Espaciado entre botones
+                  }}
+                  onClick={handleLogoutCancel}
+                >
+                  Cancelar
+                </button>
+                <button
+                  style={{
+                    ...sidebarStyles.button,
+                    ...sidebarStyles.confirmButton,
+                    padding: "20px 40px",
+                    borderRadius: "5px",
+                    fontSize: "25px",
+                  }}
+                  onClick={handleLogoutConfirm}
+                >
+                  Aceptar
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
