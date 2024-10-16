@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
 import emailjs from "emailjs-com"; // Importa la biblioteca
+import React, { useEffect, useState } from "react";
 import { confirmAction } from "./modalComponentes/ModalConfirm";
 
 const GestionarNotificacion = () => {
@@ -375,16 +375,18 @@ const GestionarNotificacion = () => {
               <td style={styles.td}>
                 {notificacion.fechaCreacion
                   ? new Date(notificacion.fechaCreacion).toLocaleDateString()
-                  : "No definido"}
+                  : new Date().toLocaleDateString()}{" "}
+                {/* Muestra la fecha actual si no hay fecha definida */}
               </td>
 
               <td style={styles.td}>
                 {notificacion.fechaEnvio
                   ? new Date(notificacion.fechaEnvio).toLocaleDateString()
-                  : "No definido"}
+                  : new Date().toLocaleDateString()}{" "}
+                {/* Muestra la fecha actual si no hay fecha definida */}
               </td>
 
-              <td style={styles.td}>{notificacion.estado || "Procesando"}</td>
+              <td style={styles.td}>{notificacion.estado || "Enviado"}</td>
               <td style={styles.td}>
                 {usuarios.find(
                   (usuario) => usuario.id === notificacion.usuario_id
@@ -452,7 +454,7 @@ const GestionarNotificacion = () => {
               <input
                 type="text"
                 placeholder="Mensaje"
-                value={formData.mensaje || "Aviso"}
+                value={formData.mensaje || ""}
                 onChange={(e) =>
                   setFormData({ ...formData, mensaje: e.target.value })
                 }
@@ -462,39 +464,36 @@ const GestionarNotificacion = () => {
               <input
                 type="date"
                 placeholder="Fecha de Creación"
-                value={
-                  formData.fechaCreacion ||
-                  new Date().toISOString().split("T")[0]
-                } // Establecer la fecha actual como valor por defecto
+                value={formData.fechaCreacion || new Date().toISOString().split("T")[0]}
                 onChange={(e) =>
                   setFormData({ ...formData, fechaCreacion: e.target.value })
                 }
                 style={styles.input}
                 required
+                readOnly
               />
-
               <input
                 type="date"
                 placeholder="Fecha de Envío"
-                value={
-                  formData.fechaEnvio || new Date().toISOString().split("T")[0]
-                }
+                value={formData.fechaEnvio || new Date().toISOString().split("T")[0]}
                 onChange={(e) =>
                   setFormData({ ...formData, fechaEnvio: e.target.value })
                 }
                 style={styles.input}
                 required
+                readOnly
               />
 
               <input
                 type="text"
                 placeholder="Estado"
-                value={formData.estado || "Enviado"} // Establecer "Procesando" como valor por defecto
+                value={formData.estado || "Enviado"}
                 onChange={(e) =>
                   setFormData({ ...formData, estado: e.target.value })
                 }
                 style={styles.input}
                 required
+                readOnly
               />
 
               <select
