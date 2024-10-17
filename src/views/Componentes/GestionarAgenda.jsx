@@ -490,7 +490,7 @@ const paginate = (pageNumber) => setCurrentPage(pageNumber);
                 <option value="">Seleccionar Solicitante</option>
                 {usuarios.map((usuario) => (
                   <option key={usuario.id} value={usuario.id}>
-                    {usuario.nombre} {usuario.apellido}
+                    {usuario.nombre} {usuario.apellido}  -CI:{usuario.ci}
                   </option>
                 ))}
               </select>
@@ -506,7 +506,7 @@ const paginate = (pageNumber) => setCurrentPage(pageNumber);
                 <option value="">Seleccionar Recepcion</option>
                 {usuarios.map((usuario) => (
                   <option key={usuario.id} value={usuario.id}>
-                    {usuario.nombre} {usuario.apellido}
+                    {usuario.nombre} {usuario.apellido} -CI:{usuario.ci} :{usuario.tipoUsuario_id}
                   </option>
                 ))}
               </select>
