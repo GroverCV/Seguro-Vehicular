@@ -169,6 +169,14 @@ const ModalAgendaAgente = () => {
     margin: '0 auto',
   };
 
+  const centro = {
+    display: 'flex',
+    justifyContent: 'center',
+    //alignItems: 'center',
+   // height: '100vh', // Ajusta si es necesario
+    textAlign: 'center',
+  };
+
   if (loading) {
     return <Spin tip="Cargando citas..." />;
   }
@@ -179,6 +187,7 @@ const ModalAgendaAgente = () => {
 
   return (
     <div>
+      <h1 style={centro}>MI AGENDA</h1>
       <div style={calendarContainerStyle}>
         <Calendar cellRender={cellRender} onSelect={onSelectDate} />
       </div>
