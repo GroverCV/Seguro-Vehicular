@@ -1,6 +1,6 @@
+import axios from "axios";
 import React, { useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
-import { confirmAction } from "./modalComponentes/ModalConfirm";
 
 // Definir los estilos como constantes
 const sidebarStyles = {
@@ -163,6 +163,19 @@ const Sidebar = () => {
       ...prevState,
       [section]: !prevState[section],
     }));
+  };
+
+  const handleBackup = async () => {
+    try {
+      const response = await axios.post(
+        "https://5b74-181-41-146-246.ngrok-free.app/api/backup"
+      );
+      console.log("Backup exitoso:", response);
+      alert("¡Backup realizado exitosamente!");
+    } catch (error) {
+      console.error("Error al realizar el backup:", error);
+      alert("Error al realizar el backup");
+    }
   };
 
   return (
@@ -349,33 +362,34 @@ const Sidebar = () => {
           </li>
 
           <li
-  style={{
-    ...sidebarStyles.listItem,
-    ...sidebarStyles.itemHover,
-  }}
->
-  <NavLink
-    to="#"
-    className="px-3 h-full flex items-center"
-    onClick={(e) => {
-      e.preventDefault(); // Evita la navegación predeterminada
-      const confirmed = window.confirm("¿Estás seguro de que deseas realizar un backup?");
-      if (confirmed) {
-        // Navega a Google si el usuario confirma
-        window.location.href = "https://www.google.com";
-      }
-    }}
-    style={({ isActive }) => ({
-      color: isActive ? sidebarStyles.itemActive.color : "#FFFFFF",
-      backgroundColor: isActive
-        ? sidebarStyles.itemActive.backgroundColor
-        : "transparent",
-      textDecoration: "none", // Quitar subrayado
-    })}
-  >
-    REALIZAR BACKUP
-  </NavLink>
-</li>
+            style={{
+              ...sidebarStyles.listItem,
+              ...sidebarStyles.itemHover,
+            }}
+          >
+            <NavLink
+              to="#"
+              className="px-3 h-full flex items-center"
+              onClick={(e) => {
+                e.preventDefault();
+                const confirmed = window.confirm(
+                  "¿Estás seguro de que deseas realizar un backup?"
+                );
+                if (confirmed) {
+                  handleBackup(); 
+                }
+              }}
+              style={({ isActive }) => ({
+                color: isActive ? sidebarStyles.itemActive.color : "#FFFFFF",
+                backgroundColor: isActive
+                  ? sidebarStyles.itemActive.backgroundColor
+                  : "transparent",
+                textDecoration: "none", // Quitar subrayado
+              })}
+            >
+              REALIZAR BACKUP
+            </NavLink>
+          </li>
 
         </ul>
 
