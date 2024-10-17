@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
+import { confirmAction } from "./modalComponentes/ModalConfirm";
+
 
 // Definir los estilos como constantes
 const sidebarStyles = {
@@ -137,6 +139,13 @@ const SidebarItem = ({ label, items, section, expanded, toggleExpand }) => (
     )}
   </li>
 );
+
+const [isModalOpen, setIsModalOpen] = useState(false);
+
+const closeModal = () => {
+  setIsModalOpen(false); // Cambia el estado para ocultar el modal
+};
+
 
 const Sidebar = () => {
   const navigate = useNavigate();
@@ -344,6 +353,34 @@ const Sidebar = () => {
               })}
             >
               GENERAR REPORTE
+            </NavLink>
+          </li>
+
+          <li
+            style={{
+              ...sidebarStyles.listItem,
+              ...sidebarStyles.itemHover,
+            }}
+          >
+            <NavLink
+              onClick={(e) => {
+                e.preventDefault(); // Previene la redirección predeterminada
+
+                if (confirmAction()) {
+                  closeModal(); // Cierra el modal
+                  window.location.href = "https://www.google.com"; // Redirige a la URL
+                }
+              }}
+              className="px-3 h-full flex items-center"
+              style={({ isActive }) => ({
+                color: isActive ? sidebarStyles.itemActive.color : "#FFFFFF",
+                backgroundColor: isActive
+                  ? sidebarStyles.itemActive.backgroundColor
+                  : "transparent",
+                textDecoration: "none", // Quitar subrayado
+              })}
+            >
+              REALIZAR BACKUP
             </NavLink>
           </li>
         </ul>
