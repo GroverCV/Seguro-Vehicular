@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import Permisos from './Permisos'; // Asegúrate de ajustar la ruta según tu estructura de carpetas
+import { api } from '../../api/axios';
 
 const AsignarPermisos = () => {
     const [roles, setRoles] = useState([]);
@@ -8,22 +9,18 @@ const AsignarPermisos = () => {
 
     useEffect(() => {
         const fetchRoles = async () => {
-            try {
-                const response = await fetch('https://backend-seguros.campozanodevlab.com/api/roles');
-                if (!response.ok) {
-                    throw new Error('Error al obtener los roles');
-                }
-                const data = await response.json();
-                setRoles(data);
-            } catch (error) {
-                setError(error.message);
-            } finally {
-                setLoading(false);
-            }
+          try {
+            const response = await api.get("/api/roles"); // Llama a la API usando la instancia de axios
+            setRoles(response.data);
+          } catch (error) {
+            setError("Error al obtener los roles");
+          } finally {
+            setLoading(false);
+          }
         };
-
+    
         fetchRoles();
-    }, []);
+      }, []);
 
     const styles = {
         body: {

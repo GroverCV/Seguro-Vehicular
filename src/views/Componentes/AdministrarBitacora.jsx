@@ -4,6 +4,7 @@ import { SearchOutlined } from "@ant-design/icons";
 import Highlighter from "react-highlight-words";
 import moment from "moment";
 import axios from "axios";
+import { api } from "../../api/axios";
 
 const AdministrarBitacora = () => {
   const [data, setData] = useState([]);
@@ -16,12 +17,8 @@ const AdministrarBitacora = () => {
   const obtenerDatos = async () => {
     setLoading(true);
     try {
-      const responseBitacora = await axios.get(
-        "https://backend-seguros.campozanodevlab.com/api/bitacora"
-      );
-      const responseUsuarios = await axios.get(
-        "https://backend-seguros.campozanodevlab.com/api/usuarios"
-      );
+      const responseBitacora = await api.get("/api/bitacora");
+      const responseUsuarios = await api.get("/api/usuarios");
       setUsuarios(responseUsuarios.data);
 
       const dataConNombre = responseBitacora.data.map((bitacora) => {

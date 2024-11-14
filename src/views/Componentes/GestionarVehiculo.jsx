@@ -4,6 +4,7 @@ import React, { useEffect, useRef, useState } from "react";
 import Highlighter from "react-highlight-words";
 import { confirmAction } from "./modalComponentes/ModalConfirm";
 import Cloudinary from "./modalComponentes/Cloudinary";
+import { api } from "../../api/axios";
 
 const GestionarVehiculo = () => {
   const [loading, setLoading] = useState(true);
@@ -26,12 +27,8 @@ const GestionarVehiculo = () => {
 
   const fetchUsuarios = async () => {
     try {
-      const response = await fetch(
-        "https://backend-seguros.campozanodevlab.com/api/usuarios"
-      );
-      if (!response.ok) throw new Error("Error al obtener los usuarios");
-      const data = await response.json();
-      setUsuarios(data);
+      const response = await api.get("/api/usuarios");
+      setUsuarios(response.data);
     } catch (error) {
       setError(error.message);
     } finally {
@@ -41,13 +38,8 @@ const GestionarVehiculo = () => {
 
   const fetchTipoVehiculo = async () => {
     try {
-      const response = await fetch(
-        "https://backend-seguros.campozanodevlab.com/api/tipo_vehiculo"
-      );
-      if (!response.ok)
-        throw new Error("Error al obtener los tipos de vehículo"); // Corrected message
-      const data = await response.json();
-      setTipoVehiculos(data); // Corrected variable name
+      const response = await api.get("/api/tipo_vehiculo");
+      setTipoVehiculos(response.data);
     } catch (error) {
       setError(error.message);
     } finally {
@@ -57,12 +49,8 @@ const GestionarVehiculo = () => {
 
   const fetchModelo = async () => {
     try {
-      const response = await fetch(
-        "https://backend-seguros.campozanodevlab.com/api/modelo_vehiculo"
-      );
-      if (!response.ok) throw new Error("Error al obtener los modelos"); // Corrected message
-      const data = await response.json();
-      setModelos(data); // Corrected variable name
+      const response = await api.get("/api/modelo_vehiculo");
+      setModelos(response.data);
     } catch (error) {
       setError(error.message);
     } finally {
@@ -72,26 +60,19 @@ const GestionarVehiculo = () => {
 
   const fetchMarca = async () => {
     try {
-      const response = await fetch(
-        "https://backend-seguros.campozanodevlab.com/api/marca"
-      ); // Corrected URL case
-      if (!response.ok) throw new Error("Error al obtener las marcas"); // Corrected message
-      const data = await response.json();
-      setMarcas(data); // Corrected variable name
+      const response = await api.get("/api/marca");
+      setMarcas(response.data);
     } catch (error) {
       setError(error.message);
     } finally {
       setLoading(false);
     }
   };
+
   const fetchVehiculos = async () => {
     try {
-      const response = await fetch(
-        "https://backend-seguros.campozanodevlab.com/api/vehiculos"
-      ); // Corrected URL case
-      if (!response.ok) throw new Error("Error al obtener los vehiculos"); // Corrected message
-      const data = await response.json();
-      setVehiculos(data.reverse());
+      const response = await api.get("/api/vehiculos");
+      setVehiculos(response.data.reverse());
     } catch (error) {
       setError(error.message);
     } finally {
@@ -144,12 +125,7 @@ const GestionarVehiculo = () => {
   const handleDelete = async (id) => {
     confirmAction(async () => {
       try {
-        await fetch(
-          `https://backend-seguros.campozanodevlab.com/api/vehiculos/${id}`,
-          {
-            method: "DELETE",
-          }
-        );
+        await api.delete(`/api/vehiculos/${id}`);
         setVehiculos(vehiculos.filter((vehiculo) => vehiculo.id !== id));
 
         const userIp = await getUserIp();
@@ -171,13 +147,11 @@ const GestionarVehiculo = () => {
   const logAction = async (logData) => {
     const token = "simulated-token"; // Aquí deberías usar un token válido si es necesario
     try {
-      await fetch("https://backend-seguros.campozanodevlab.com/api/bitacora", {
-        method: "POST",
+      await api.post("/api/bitacora", logData, {
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(logData),
       });
     } catch (error) {
       console.error("Error al registrar la acción en la bitácora:", error);
@@ -188,27 +162,26 @@ const GestionarVehiculo = () => {
     e.preventDefault();
     confirmAction(async () => {
       try {
-        // Si se está editando un vehículo, obtenemos el anterior; si no, no es necesario
         let previousVehiculo = null;
         if (editingVehiculo) {
-          const previousVehiculoResponse = await fetch(
-            `https://backend-seguros.campozanodevlab.com/api/vehiculos/${editingVehiculo.id}`
+          const previousVehiculoResponse = await api.get(
+            `/api/vehiculos/${editingVehiculo.id}`
           );
-          previousVehiculo = await previousVehiculoResponse.json();
+          previousVehiculo = previousVehiculoResponse.data;
         }
 
-        const method = editingVehiculo ? "PUT" : "POST"; // Determinar el método
+        const method = editingVehiculo ? "PUT" : "POST";
         const url = editingVehiculo
-          ? `https://backend-seguros.campozanodevlab.com/api/vehiculos/${editingVehiculo.id}`
-          : `https://backend-seguros.campozanodevlab.com/api/vehiculos`; // URL para crear o editar
+          ? `/api/vehiculos/${editingVehiculo.id}`
+          : "/api/vehiculos";
 
-        const response = await fetch(url, {
+        const response = await api.request({
           method: method,
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(formData),
+          url: url,
+          data: formData,
         });
 
-        const updatedVehiculo = await response.json();
+        const updatedVehiculo = response.data;
 
         if (method === "PUT") {
           setVehiculos((prev) =>
@@ -217,7 +190,7 @@ const GestionarVehiculo = () => {
             )
           );
         } else {
-          setVehiculos((prev) => [updatedVehiculo, ...prev]); // Agregar el nuevo vehículo
+          setVehiculos((prev) => [updatedVehiculo, ...prev]);
         }
 
         const userIp = await getUserIp();
@@ -239,7 +212,7 @@ const GestionarVehiculo = () => {
             (key) => formData[key] !== previousVehiculo[key]
           );
           if (editedAttribute) {
-            logDetails = `Atributo editado: ${editedAttribute}`; // Detalle del atributo editado
+            logDetails = `Atributo editado: ${editedAttribute}`;
           }
         } else {
           logDetails = `Se creó un nuevo vehículo.`;
@@ -256,9 +229,9 @@ const GestionarVehiculo = () => {
           ip: userIp,
         };
 
-        fetchVehiculos(); // Refrescar la lista de vehículos
+        fetchVehiculos();
         await logAction(logData);
-        setEditingVehiculo(null); // Limpiar el estado de edición después de la operación
+        setEditingVehiculo(null);
       } catch (error) {
         setError("Error al actualizar o crear el vehículo");
         console.error("Error al actualizar o crear el vehículo:", error);

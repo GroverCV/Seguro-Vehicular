@@ -3,6 +3,7 @@ import { SearchOutlined } from "@ant-design/icons";
 import { Button, Input, Space, Table } from "antd";
 import Highlighter from "react-highlight-words";
 import { confirmAction } from "./modalComponentes/ModalConfirm";
+import { api } from "../../api/axios";
 
 const GestionarModelo = () => {
   const [modelos, setModelos] = useState([]);
@@ -16,15 +17,13 @@ const GestionarModelo = () => {
   const searchInput = useRef(null);
 
   const fetchModeloVehiculo = async () => {
+    setLoading(true);
     try {
-      const response = await fetch(
-        "https://backend-seguros.campozanodevlab.com/api/modelo_vehiculo"
-      );
-      if (!response.ok) throw new Error("Error al obtener los modelos");
-      const data = await response.json();
-      setModelos(data);
+      const response = await api.get("/api/modelo_vehiculo");
+      setModelos(response.data);
     } catch (error) {
       setError(error.message);
+      console.error("Error al obtener los modelos:", error);
     } finally {
       setLoading(false);
     }
@@ -60,12 +59,7 @@ const GestionarModelo = () => {
   const handleDelete = async (id) => {
     confirmAction(async () => {
       try {
-        await fetch(
-          `https://backend-seguros.campozanodevlab.com/api/modelo_vehiculo/${id}`,
-          {
-            method: "DELETE",
-          }
-        );
+        await api.delete(`/api/modelo_vehiculo/${id}`);
         setModelos(modelos.filter((modelo) => modelo.id !== id));
 
         const userIp = await getUserIp();
@@ -75,7 +69,6 @@ const GestionarModelo = () => {
           detalles: `El Usuario ID: ${userId} eliminó el Modelo ID: ${id}`,
           ip: userIp,
         };
-
         await logAction(logData);
       } catch (error) {
         setError("Error al eliminar el modelo");
@@ -87,13 +80,11 @@ const GestionarModelo = () => {
   const logAction = async (logData) => {
     const token = "simulated-token";
     try {
-      await fetch("https://backend-seguros.campozanodevlab.com/api/bitacora", {
-        method: "POST",
+      await api.post("/api/bitacora", logData, {
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(logData),
       });
     } catch (error) {
       console.error("Error al registrar la acción en la bitácora:", error);
@@ -105,16 +96,8 @@ const GestionarModelo = () => {
     confirmAction(async () => {
       try {
         if (creatingModelo) {
-          // Si estamos creando un nuevo modelo
-          const response = await fetch(
-            "https://backend-seguros.campozanodevlab.com/api/modelo_vehiculo",
-            {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify(formData),
-            }
-          );
-          const newModelo = await response.json();
+          const response = await api.post("/api/modelo_vehiculo", formData);
+          const newModelo = response.data;
           setModelos([...modelos, newModelo]);
 
           const userIp = await getUserIp();
@@ -125,23 +108,19 @@ const GestionarModelo = () => {
             ip: userIp,
           };
           await logAction(logData);
-          setCreatingModelo(false); // Cerrar el modal de creación
+          setCreatingModelo(false);
         } else {
-          // Si estamos editando un modelo existente
-          const previousModeloResponse = await fetch(
-            `https://backend-seguros.campozanodevlab.com/api/modelo_vehiculo/${editingModelo.id}`
+          const previousModeloResponse = await api.get(
+            `/api/modelo_vehiculo/${editingModelo.id}`
           );
-          const previousModelo = await previousModeloResponse.json();
+          const previousModelo = previousModeloResponse.data;
 
-          const response = await fetch(
-            `https://backend-seguros.campozanodevlab.com/api/modelo_vehiculo/${editingModelo.id}`,
-            {
-              method: "PUT",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify(formData),
-            }
+          const response = await api.put(
+            `/api/modelo_vehiculo/${editingModelo.id}`,
+            formData
           );
-          const updatedModelo = await response.json();
+          const updatedModelo = response.data;
+
           setModelos((prev) =>
             prev.map((modelo) =>
               modelo.id === updatedModelo.id ? updatedModelo : modelo
@@ -168,6 +147,7 @@ const GestionarModelo = () => {
           await logAction(logData);
           setEditingModelo(null);
         }
+
         fetchModeloVehiculo();
       } catch (error) {
         setError("Error al guardar el modelo");
@@ -318,7 +298,10 @@ const GestionarModelo = () => {
     ),
     onFilter: (value, record) =>
       record[dataIndex]
-        ? record[dataIndex].toString().toLowerCase().includes(value.toLowerCase())
+        ? record[dataIndex]
+            .toString()
+            .toLowerCase()
+            .includes(value.toLowerCase())
         : "",
     onFilterDropdownOpenChange: (visible) => {
       if (visible) {

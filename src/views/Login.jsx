@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "../hook/userform";
+import { api } from "../api/axios";
 
 const styles = {
   wrapper: {
@@ -82,10 +83,8 @@ export const Login = () => {
     setError("");
   
     try {
-      const response = await fetch(
-        "https://backend-seguros.campozanodevlab.com/api/usuarios"
-      );
-      const users = await response.json();
+      const response = await api.get("/api/usuarios");
+      const users = response.data;
   
       const user = users.find(
         (user) => user.email === name && user.contrasena === password
@@ -98,9 +97,8 @@ export const Login = () => {
         // Obtener la IP del usuario
         const getUserIp = async () => {
           try {
-            const response = await fetch("https://api.ipify.org?format=json");
-            const data = await response.json();
-            return data.ip;
+            const response = await api.get("https://api.ipify.org?format=json");
+            return response.data.ip;
           } catch (error) {
             console.error("Error obteniendo IP:", error);
             return "IP desconocida";
@@ -118,15 +116,13 @@ export const Login = () => {
         };
   
         // Enviar la acción a la bitácora
-        await fetch("https://backend-seguros.campozanodevlab.com/api/bitacora", {
-          method: "POST",
+        await api.post("/api/bitacora", logData, {
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`, // Si es necesario un token para la autenticación
           },
-          body: JSON.stringify(logData),
         });
-
+  
         localStorage.setItem("userId", user.id);
         localStorage.setItem("userIp", userIp);
   
@@ -145,6 +141,9 @@ export const Login = () => {
   
     onResetForm();
   };
+  
+
+
   return (
     <div style={styles.wrapper}>
       <form onSubmit={onLogin} style={styles.form}>

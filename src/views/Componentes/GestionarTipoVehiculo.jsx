@@ -3,6 +3,7 @@ import { SearchOutlined } from "@ant-design/icons";
 import { Button, Input, Space, Table } from "antd";
 import Highlighter from "react-highlight-words";
 import { confirmAction } from "./modalComponentes/ModalConfirm";
+import { api } from "../../api/axios";
 
 const GestionarTipoVehiculo = () => {
   const [tiposVehiculo, setTiposVehiculo] = useState([]);
@@ -17,12 +18,8 @@ const GestionarTipoVehiculo = () => {
 
   const fetchTipoVehiculo = async () => {
     try {
-      const response = await fetch(
-        "https://backend-seguros.campozanodevlab.com/api/tipo_vehiculo"
-      );
-      if (!response.ok) throw new Error("Error al obtener los tipos de vehículo");
-      const data = await response.json();
-      setTiposVehiculo(data);
+      const response = await api.get("/api/tipo_vehiculo");
+      setTiposVehiculo(response.data);
     } catch (error) {
       setError(error.message);
     } finally {
@@ -60,12 +57,7 @@ const GestionarTipoVehiculo = () => {
   const handleDelete = async (id) => {
     confirmAction(async () => {
       try {
-        await fetch(
-          `https://backend-seguros.campozanodevlab.com/api/tipo_vehiculo/${id}`,
-          {
-            method: "DELETE",
-          }
-        );
+        await api.delete(`/api/tipo_vehiculo/${id}`);
         setTiposVehiculo(tiposVehiculo.filter((tipo) => tipo.id !== id));
 
         const userIp = await getUserIp();
@@ -87,13 +79,11 @@ const GestionarTipoVehiculo = () => {
   const logAction = async (logData) => {
     const token = "simulated-token";
     try {
-      await fetch("https://backend-seguros.campozanodevlab.com/api/bitacora", {
-        method: "POST",
+      await api.post("/api/bitacora", logData, {
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(logData),
       });
     } catch (error) {
       console.error("Error al registrar la acción en la bitácora:", error);
@@ -105,15 +95,8 @@ const GestionarTipoVehiculo = () => {
     confirmAction(async () => {
       try {
         if (creatingTipo) {
-          const response = await fetch(
-            "https://backend-seguros.campozanodevlab.com/api/tipo_vehiculo",
-            {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify(formData),
-            }
-          );
-          const newTipo = await response.json();
+          const response = await api.post("/api/tipo_vehiculo", formData);
+          const newTipo = response.data;
           setTiposVehiculo([...tiposVehiculo, newTipo]);
 
           const userIp = await getUserIp();
@@ -126,20 +109,16 @@ const GestionarTipoVehiculo = () => {
           await logAction(logData);
           setCreatingTipo(false);
         } else {
-          const previousTipoResponse = await fetch(
-            `https://backend-seguros.campozanodevlab.com/api/tipo_vehiculo/${editingTipo.id}`
+          const previousTipoResponse = await api.get(
+            `/api/tipo_vehiculo/${editingTipo.id}`
           );
-          const previousTipo = await previousTipoResponse.json();
+          const previousTipo = previousTipoResponse.data;
 
-          const response = await fetch(
-            `https://backend-seguros.campozanodevlab.com/api/tipo_vehiculo/${editingTipo.id}`,
-            {
-              method: "PUT",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify(formData),
-            }
+          const response = await api.put(
+            `/api/tipo_vehiculo/${editingTipo.id}`,
+            formData
           );
-          const updatedTipo = await response.json();
+          const updatedTipo = response.data;
           setTiposVehiculo((prev) =>
             prev.map((tipo) =>
               tipo.id === updatedTipo.id ? updatedTipo : tipo
@@ -293,7 +272,11 @@ const GestionarTipoVehiculo = () => {
           >
             Buscar
           </Button>
-          <Button onClick={() => handleReset(clearFilters)} size="small" style={{ width: 90 }}>
+          <Button
+            onClick={() => handleReset(clearFilters)}
+            size="small"
+            style={{ width: 90 }}
+          >
             Reiniciar
           </Button>
           <Button
@@ -312,7 +295,10 @@ const GestionarTipoVehiculo = () => {
     ),
     onFilter: (value, record) =>
       record[dataIndex]
-        ? record[dataIndex].toString().toLowerCase().includes(value.toLowerCase())
+        ? record[dataIndex]
+            .toString()
+            .toLowerCase()
+            .includes(value.toLowerCase())
         : "",
     render: (text) =>
       searchedColumn === dataIndex ? (
@@ -377,7 +363,11 @@ const GestionarTipoVehiculo = () => {
       />
       {creatingTipo || editingTipo ? (
         <div style={styles.modal}>
-          <h2>{creatingTipo ? "Crear Tipo de Vehículo" : "Editar Tipo de Vehículo"}</h2>
+          <h2>
+            {creatingTipo
+              ? "Crear Tipo de Vehículo"
+              : "Editar Tipo de Vehículo"}
+          </h2>
           <form onSubmit={handleSubmit}>
             <input
               type="text"
@@ -392,10 +382,12 @@ const GestionarTipoVehiculo = () => {
             <button type="submit" style={styles.submitButton}>
               {creatingTipo ? "Crear" : "Guardar"}
             </button>
-            <Button onClick={() => {
-              setCreatingTipo(false);
-              setEditingTipo(null);
-            }}>
+            <Button
+              onClick={() => {
+                setCreatingTipo(false);
+                setEditingTipo(null);
+              }}
+            >
               Cancelar
             </Button>
           </form>

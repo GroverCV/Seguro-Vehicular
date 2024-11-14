@@ -3,6 +3,7 @@ import { SearchOutlined } from "@ant-design/icons";
 import { Button, Input, Space, Table } from "antd";
 import Highlighter from "react-highlight-words";
 import { confirmAction } from "./modalComponentes/ModalConfirm";
+import { api } from "../../api/axios";
 
 const GestionarMarca = () => {
   const [marcas, setMarcas] = useState([]);
@@ -17,12 +18,9 @@ const GestionarMarca = () => {
 
   const fetchMarca = async () => {
     try {
-      const response = await fetch(
-        "https://backend-seguros.campozanodevlab.com/api/marca"
-      );
-      if (!response.ok) throw new Error("Error al obtener las marcas");
-      const data = await response.json();
-      setMarcas(data);
+      const response = await api.get("/api/marca");
+  
+      setMarcas(response.data);
     } catch (error) {
       setError(error.message);
     } finally {
@@ -60,14 +58,9 @@ const GestionarMarca = () => {
   const handleDelete = async (id) => {
     confirmAction(async () => {
       try {
-        await fetch(
-          `https://backend-seguros.campozanodevlab.com/api/marca/${id}`,
-          {
-            method: "DELETE",
-          }
-        );
+        await api.delete(`/api/marca/${id}`);
         setMarcas(marcas.filter((marca) => marca.id !== id));
-
+  
         const userIp = await getUserIp();
         const logData = {
           usuario_id: userId,
@@ -75,7 +68,7 @@ const GestionarMarca = () => {
           detalles: `El Usuario ID: ${userId} eliminó la Marca ID: ${id}`,
           ip: userIp,
         };
-
+  
         await logAction(logData);
       } catch (error) {
         setError("Error al eliminar la marca");
@@ -83,40 +76,33 @@ const GestionarMarca = () => {
       }
     });
   };
-
+  
   const logAction = async (logData) => {
     const token = "simulated-token";
     try {
-      await fetch("https://backend-seguros.campozanodevlab.com/api/bitacora", {
-        method: "POST",
+      await api.post("/api/bitacora", logData, {
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(logData),
       });
     } catch (error) {
       console.error("Error al registrar la acción en la bitácora:", error);
     }
   };
-
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
     confirmAction(async () => {
       try {
         if (creatingMarca) {
           // Si estamos creando una nueva marca
-          const response = await fetch(
-            "https://backend-seguros.campozanodevlab.com/api/marca",
-            {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify(formData),
-            }
-          );
-          const newMarca = await response.json();
+          const response = await api.post("/api/marca", formData, {
+            headers: { "Content-Type": "application/json" },
+          });
+          const newMarca = response.data;
           setMarcas([...marcas, newMarca]);
-
+  
           const userIp = await getUserIp();
           const logData = {
             usuario_id: userId,
@@ -128,44 +114,37 @@ const GestionarMarca = () => {
           setCreatingMarca(false); // Cerrar el modal de creación
         } else {
           // Si estamos editando una marca existente
-          const previousMarcaResponse = await fetch(
-            `https://backend-seguros.campozanodevlab.com/api/marca/${editingMarca.id}`
-          );
-          const previousMarca = await previousMarcaResponse.json();
-
-          const response = await fetch(
-            `https://backend-seguros.campozanodevlab.com/api/marca/${editingMarca.id}`,
-            {
-              method: "PUT",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify(formData),
-            }
-          );
-          const updatedMarca = await response.json();
+          const previousMarcaResponse = await api.get(`/api/marca/${editingMarca.id}`);
+          const previousMarca = previousMarcaResponse.data;
+  
+          const response = await api.put(`/api/marca/${editingMarca.id}`, formData, {
+            headers: { "Content-Type": "application/json" },
+          });
+          const updatedMarca = response.data;
           setMarcas((prev) =>
             prev.map((marca) =>
               marca.id === updatedMarca.id ? updatedMarca : marca
             )
           );
-
+  
           const userIp = await getUserIp();
           const attributesToCheck = ["Nombre"];
           const editedAttribute = attributesToCheck.find(
             (key) => formData[key] !== previousMarca[key]
           );
-
+  
           let logDetails = "";
           if (editedAttribute) {
             logDetails = `Atributo editado: ${editedAttribute}`;
           }
-
+  
           const logData = {
             usuario_id: userId,
             accion: "Editó",
             detalles: `El Usuario ID: ${userId} editó la Marca ID: ${editingMarca.id}. ${logDetails}`,
             ip: userIp,
           };
-
+  
           await logAction(logData);
           setEditingMarca(null);
         }

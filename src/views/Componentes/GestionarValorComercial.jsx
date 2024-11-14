@@ -3,6 +3,7 @@ import { Button, Input, message, Space, Table } from "antd";
 import React, { useEffect, useRef, useState } from "react";
 import Highlighter from "react-highlight-words";
 import { confirmAction } from "./modalComponentes/ModalConfirm";
+import { api } from "../../api/axios";
 
 const GestionarValorComercial = () => {
   const [loading, setLoading] = useState(true);
@@ -25,31 +26,26 @@ const GestionarValorComercial = () => {
   const fetchValorComercial = async () => {
     setLoading(true);
     try {
-      const response = await fetch(
-        "https://backend-seguros.campozanodevlab.com/api/valor_comercial"
-      );
-      const result = await response.json();
-      setValorComercial(result);
+      const response = await api.get("/api/valor_comercial");
+      setValorComercial(response.data);
     } catch (error) {
       message.error("Error al cargar los datos");
     } finally {
       setLoading(false);
     }
   };
-
+  
   const fetchVehiculos = async () => {
     try {
-      const response = await fetch(
-        "https://backend-seguros.campozanodevlab.com/api/vehiculos"
-      );
-      const result = await response.json();
-      setVehiculos(result);
+      const response = await api.get("/api/vehiculos");
+      setVehiculos(response.data);
     } catch (error) {
       message.error("Error al cargar los datos de vehiculos");
     } finally {
       setLoading(false);
     }
   };
+  
 
   const styles = {
     body: {
@@ -215,16 +211,11 @@ const GestionarValorComercial = () => {
   const handleDelete = async (id) => {
     confirmAction(async () => {
       try {
-        await fetch(
-          `https://backend-seguros.campozanodevlab.com/api/valor_comercial/${id}`,
-          {
-            method: "DELETE",
-          }
-        );
+        await api.delete(`/api/valor_comercial/${id}`);
         setValorComercial(
           valorComercial.filter((valorComercial) => valorComercial.id !== id)
         );
-
+  
         const userIp = await getUserIp();
         const logData = {
           usuario_id: userId,
@@ -232,7 +223,7 @@ const GestionarValorComercial = () => {
           detalles: `El Usuario ID: ${userId} eliminó el Valor Comercial ID: ${id}`,
           ip: userIp,
         };
-
+  
         await logAction(logData);
       } catch (error) {
         setError("Error al eliminar el Valor Comercial");
@@ -240,23 +231,21 @@ const GestionarValorComercial = () => {
       }
     });
   };
-
+  
   const logAction = async (logData) => {
     const token = "simulated-token"; // Aquí deberías usar un token válido si es necesario
     try {
-      await fetch("https://backend-seguros.campozanodevlab.com/api/bitacora", {
-        method: "POST",
+      await api.post("/api/bitacora", logData, {
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(logData),
       });
     } catch (error) {
       console.error("Error al registrar la acción en la bitácora:", error);
     }
   };
-
+  
   const getUserIp = async () => {
     try {
       const response = await fetch("https://api.ipify.org?format=json");
@@ -275,27 +264,25 @@ const GestionarValorComercial = () => {
         // Si se está editando un valor comercial, obtenemos el anterior; si no, no es necesario
         let previousValorComercial = null;
         if (editingValorComercial) {
-          const previousValorComercialResponse = await fetch(
-            `https://backend-seguros.campozanodevlab.com/api/valor_comercial/${editingValorComercial.id}`
+          const previousValorComercialResponse = await api.get(
+            `/api/valor_comercial/${editingValorComercial.id}`
           );
-          previousValorComercial = await previousValorComercialResponse.json();
+          previousValorComercial = previousValorComercialResponse.data;
         }
-
+  
         const method = editingValorComercial ? "PUT" : "POST"; // Determinar el método
         const url = editingValorComercial
-          ? `https://backend-seguros.campozanodevlab.com/api/valor_comercial/${editingValorComercial.id}`
-          : `https://backend-seguros.campozanodevlab.com/api/valor_comercial`; // URL para crear o editar
-
-        const response = await fetch(url, {
+          ? `/api/valor_comercial/${editingValorComercial.id}`
+          : `/api/valor_comercial`; // URL para crear o editar
+  
+        const response = await api({
           method: method,
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(formData), // Envía los datos del formulario
+          url: url,
+          data: formData, // Envía los datos del formulario
         });
-
-        
-
-        const updatedValorComercial = await response.json();
-
+  
+        const updatedValorComercial = response.data;
+  
         if (method === "PUT") {
           setValorComercial((prev) =>
             prev.map((valorComercial) =>
@@ -307,7 +294,7 @@ const GestionarValorComercial = () => {
         } else {
           setValorComercial((prev) => [updatedValorComercial, ...prev]); // Agregar el nuevo valor comercial
         }
-
+  
         const userIp = await getUserIp();
         const attributesToCheck = [
           "valor_inicial",
@@ -316,7 +303,7 @@ const GestionarValorComercial = () => {
           "tasa_depreciacion",
           "anos_depreciacion",
         ];
-
+  
         let logDetails = "";
         if (editingValorComercial) {
           const editedAttribute = attributesToCheck.find(
@@ -328,7 +315,7 @@ const GestionarValorComercial = () => {
         } else {
           logDetails = `Se creó un nuevo valor comercial.`; // Mensaje para creación
         }
-
+  
         const logData = {
           usuario_id: userId,
           accion: editingValorComercial ? "Editó" : "Creó",
@@ -341,7 +328,7 @@ const GestionarValorComercial = () => {
           }. ${logDetails}`,
           ip: userIp,
         };
-
+  
         fetchValorComercial();
         await logAction(logData);
         seteditingValorComercial(null); // Limpiar el estado de edición después de la operación
@@ -353,6 +340,7 @@ const GestionarValorComercial = () => {
       setCreatingValorComercial(false); // Si usas esta variable para indicar la creación
     });
   };
+  
 
   const columns = [
     {

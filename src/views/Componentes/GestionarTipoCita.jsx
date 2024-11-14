@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { confirmAction } from "./modalComponentes/ModalConfirm";
+import { api } from "../../api/axios";
 
 const GestionarTipoCita = () => {
   const [tiposCita, setTiposCita] = useState([]);
@@ -19,20 +20,15 @@ const GestionarTipoCita = () => {
 
   const fetchTiposCita = async () => {
     try {
-      const response = await fetch(
-        "https://backend-seguros.campozanodevlab.com/api/tipo_cita"
-      );
-      if (!response.ok) {
-        throw new Error("Error al obtener los tipos de cita");
-      }
-      const data = await response.json();
-      setTiposCita(data);
+      const response = await api.get("/api/tipo_cita");
+      setTiposCita(response.data);
     } catch (error) {
       setError(error.message);
     } finally {
       setLoading(false);
     }
   };
+  
 
   useEffect(() => {
     fetchTiposCita();
@@ -160,12 +156,9 @@ const GestionarTipoCita = () => {
   const handleDelete = async (id) => {
     confirmAction(async () => {
       try {
-        await fetch(
-          `https://backend-seguros.campozanodevlab.com/api/tipo_cita/${id}`,
-          { method: "DELETE" }
-        );
+        await api.delete(`/api/tipo_cita/${id}`);
         setTiposCita(tiposCita.filter((tipo) => tipo.id !== id));
-
+  
         const userIp = await getUserIp();
         const logData = {
           usuario_id: userId,
@@ -173,50 +166,42 @@ const GestionarTipoCita = () => {
           detalles: `el Usuario ID: ${userId} eliminó el Tipo Cita ID: ${id}`,
           ip: userIp,
         };
-
+  
         await logAction(logData);
       } catch (error) {
         console.error("Error al eliminar el tipo de cita:", error);
       }
     });
   };
-
+  
   const logAction = async (logData) => {
     const token = "simulated-token";
     try {
-      await fetch("https://backend-seguros.campozanodevlab.com/api/bitacora", {
-        method: "POST",
+      await api.post("/api/bitacora", logData, {
         headers: {
-          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(logData),
       });
     } catch (error) {
       console.error("Error al registrar la acción en la bitácora.");
       console.error("Error al registrar la acción:", error);
     }
   };
-
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
     confirmAction(async () => {
       try {
-        const response = await fetch(
-          editingTipoCita
-            ? `https://backend-seguros.campozanodevlab.com/api/tipo_cita/${editingTipoCita.id}`
-            : "https://backend-seguros.campozanodevlab.com/api/tipo_cita",
-          {
-            method: editingTipoCita ? "PUT" : "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(formData),
-          }
-        );
-
-        const updatedTipoCita = await response.json();
-
+        const response = await api({
+          method: editingTipoCita ? "put" : "post",
+          url: editingTipoCita
+            ? `/api/tipo_cita/${editingTipoCita.id}`
+            : "/api/tipo_cita",
+          data: formData,
+        });
+  
+        const updatedTipoCita = response.data;
+  
         setTiposCita((prev) =>
           editingTipoCita
             ? prev.map((tipo) =>
@@ -224,14 +209,13 @@ const GestionarTipoCita = () => {
               )
             : [...prev, updatedTipoCita]
         );
-
-        // Restablecer el formulario después de la creación/modificación
+  
         setFormData({});
         setEditingTipoCita(null);
         setShowForm(false);
-
+  
         const userIp = await getUserIp();
-
+  
         const logData = {
           usuario_id: userId,
           accion: editingTipoCita ? "Editó" : "Creó",
@@ -242,13 +226,15 @@ const GestionarTipoCita = () => {
           }`,
           ip: userIp,
         };
-        fetchTiposCita()
+        fetchTiposCita();
         await logAction(logData);
       } catch (error) {
         console.error("Error al actualizar o crear el tipo de cita:", error);
       }
     });
   };
+  
+  
 
   const handleCancel = () => {
     setEditingTipoCita(null);

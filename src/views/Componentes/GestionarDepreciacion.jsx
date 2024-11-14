@@ -3,6 +3,7 @@ import { Button, Input, message, Space, Table } from "antd";
 import React, { useEffect, useRef, useState } from "react";
 import Highlighter from "react-highlight-words";
 import { confirmAction } from "./modalComponentes/ModalConfirm";
+import { api } from "../../api/axios";
 
 const GestionarDepreciacion = () => {
   const [loading, setLoading] = useState(true);
@@ -25,11 +26,8 @@ const GestionarDepreciacion = () => {
   const fetchDepreciacion = async () => {
     setLoading(true);
     try {
-      const response = await fetch(
-        "https://backend-seguros.campozanodevlab.com/api/depreciacion"
-      );
-      const result = await response.json();
-      setDepreciacion(result);
+      const response = await api.get("/api/depreciacion"); // Usando la instancia de Axios
+      setDepreciacion(response.data);
     } catch (error) {
       message.error("Error al cargar los datos de depreciación");
     } finally {
@@ -39,16 +37,225 @@ const GestionarDepreciacion = () => {
 
   const fetchValorComercial = async () => {
     try {
-      const response = await fetch(
-        "https://backend-seguros.campozanodevlab.com/api/valor_comercial"
-      );
-      const result = await response.json();
-      setValorComercial(result);
+      const response = await api.get("/api/valor_comercial"); // Usando la instancia de Axios
+      setValorComercial(response.data);
     } catch (error) {
       message.error("Error al cargar los datos de valor comercial");
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleSearch = (selectedKeys, confirm, dataIndex) => {
+    confirm();
+    setSearchText(selectedKeys[0]);
+    setSearchedColumn(dataIndex);
+  };
+
+  const handleReset = (clearFilters) => {
+    clearFilters();
+    setSearchText("");
+  };
+
+  const getColumnSearchProps = (dataIndex) => ({
+    filterDropdown: ({
+      setSelectedKeys,
+      selectedKeys,
+      confirm,
+      clearFilters,
+    }) => (
+      <div style={{ padding: 8 }}>
+        <Input
+          ref={searchInput}
+          placeholder={`Buscar ${dataIndex}`}
+          value={selectedKeys[0]}
+          onChange={(e) =>
+            setSelectedKeys(e.target.value ? [e.target.value] : [])
+          }
+          onPressEnter={() => handleSearch(selectedKeys, confirm, dataIndex)}
+          style={{ marginBottom: 8, display: "block" }}
+        />
+        <Space>
+          <Button
+            type="primary"
+            onClick={() => handleSearch(selectedKeys, confirm, dataIndex)}
+            icon={<SearchOutlined />}
+            size="small"
+            style={{ width: 90 }}
+          >
+            Buscar
+          </Button>
+          <Button
+            onClick={() => handleReset(clearFilters)}
+            size="small"
+            style={{ width: 90 }}
+          >
+            Restablecer
+          </Button>
+        </Space>
+      </div>
+    ),
+    filterIcon: (filtered) => (
+      <SearchOutlined style={{ color: filtered ? "#1890ff" : undefined }} />
+    ),
+    onFilter: (value, record) =>
+      record[dataIndex].toString().toLowerCase().includes(value.toLowerCase()),
+    render: (text) =>
+      searchedColumn === dataIndex ? (
+        <Highlighter
+          highlightStyle={{ backgroundColor: "#ffc069", padding: 0 }}
+          searchWords={[searchText]}
+          autoEscape
+          textToHighlight={text.toString()}
+        />
+      ) : (
+        text
+      ),
+  });
+
+  const handleEdit = (depreciacion) => {
+    setEditingDepreciacion(depreciacion); // Cambia el estado de edición
+    setFormData(depreciacion); // Establece los datos del formulario para editar
+  };
+
+  const userId = localStorage.getItem("userId");
+
+  const handleDelete = async (id) => {
+    confirmAction(async () => {
+      try {
+        // Usamos api.delete para eliminar la depreciación
+        await api.delete(`/api/depreciacion/${id}`);
+
+        setDepreciacion(
+          depreciacion.filter((depreciacion) => depreciacion.id !== id)
+        );
+
+        const userIp = await getUserIp();
+        const logData = {
+          usuario_id: userId,
+          accion: "Eliminó",
+          detalles: `El Usuario ID: ${userId} eliminó la Depreciación ID: ${id}`,
+          ip: userIp,
+        };
+
+        // Usamos api.post para registrar la acción en la bitácora
+        await logAction(logData);
+      } catch (error) {
+        setError("Error al eliminar la Depreciación");
+        console.error("Error al eliminar la Depreciación:", error);
+      }
+    });
+  };
+
+  const logAction = async (logData) => {
+    const token = "simulated-token"; // Aquí deberías usar un token válido si es necesario
+    try {
+      // Usamos api.post para registrar la acción en la bitácora
+      await api.post("/api/bitacora", logData, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+    } catch (error) {
+      console.error("Error al registrar la acción en la bitácora:", error);
+    }
+  };
+
+  const getUserIp = async () => {
+    try {
+      const response = await api.get("https://api.ipify.org?format=json"); // Usamos api.get para obtener la IP
+      return response.data.ip;
+    } catch (error) {
+      console.error("Error obteniendo IP:", error);
+      return "IP desconocida";
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    confirmAction(async () => {
+      try {
+        let previousDepreciacion = null;
+        if (editingDepreciacion) {
+          // Usamos api.get para obtener la depreciación anterior
+          const previousDepreciacionResponse = await api.get(
+            `/api/depreciacion/${editingDepreciacion.id}`
+          );
+          previousDepreciacion = previousDepreciacionResponse.data;
+        }
+
+        const method = editingDepreciacion ? "PUT" : "POST";
+        const url = editingDepreciacion
+          ? `/api/depreciacion/${editingDepreciacion.id}`
+          : `/api/depreciacion`;
+
+        const response = await api.request({
+          method: method,
+          url: url,
+          headers: { "Content-Type": "application/json" },
+          data: formData, // Usamos `data` en lugar de `body` con Axios
+        });
+
+        const updatedDepreciacion = response.data;
+
+        if (method === "PUT") {
+          setDepreciacion((prev) =>
+            prev.map((depreciacion) =>
+              depreciacion.id === updatedDepreciacion.id
+                ? updatedDepreciacion
+                : depreciacion
+            )
+          );
+        } else {
+          setDepreciacion((prev) => [updatedDepreciacion, ...prev]);
+        }
+
+        const userIp = await getUserIp();
+        const attributesToCheck = [
+          "valor_inicial",
+          "valor_depreciado",
+          "fecha_depreciacion",
+          "motivo_depreciacion",
+        ];
+
+        let logDetails = "";
+        if (editingDepreciacion) {
+          const editedAttribute = attributesToCheck.find(
+            (key) => formData[key] !== previousDepreciacion[key]
+          );
+          if (editedAttribute) {
+            logDetails = `Atributo editado: ${editedAttribute}`;
+          }
+        } else {
+          logDetails = `Se creó una nueva depreciación.`;
+        }
+
+        const logData = {
+          usuario_id: userId,
+          accion: editingDepreciacion ? "Editó" : "Creó",
+          detalles: `El Usuario ID: ${userId} ${
+            editingDepreciacion ? "editó" : "creó"
+          } la Depreciación ID: ${
+            editingDepreciacion
+              ? editingDepreciacion.id
+              : updatedDepreciacion.id
+          }. ${logDetails}`,
+          ip: userIp,
+        };
+
+        await logAction(logData);
+        fetchDepreciacion();
+        setEditingDepreciacion(null);
+      } catch (error) {
+        setError(
+          `Error al actualizar o crear la depreciación: ${error.message}`
+        );
+        console.error("Error al actualizar o crear la depreciación:", error);
+      }
+      setEditingDepreciacion(null);
+      setCreatingDepreciacion(false);
+    });
   };
 
   const styles = {
@@ -136,223 +343,6 @@ const GestionarDepreciacion = () => {
       borderRadius: "8px",
       boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
     },
-  };
-
-  const handleSearch = (selectedKeys, confirm, dataIndex) => {
-    confirm();
-    setSearchText(selectedKeys[0]);
-    setSearchedColumn(dataIndex);
-  };
-
-  const handleReset = (clearFilters) => {
-    clearFilters();
-    setSearchText("");
-  };
-
-  const getColumnSearchProps = (dataIndex) => ({
-    filterDropdown: ({
-      setSelectedKeys,
-      selectedKeys,
-      confirm,
-      clearFilters,
-    }) => (
-      <div style={{ padding: 8 }}>
-        <Input
-          ref={searchInput}
-          placeholder={`Buscar ${dataIndex}`}
-          value={selectedKeys[0]}
-          onChange={(e) =>
-            setSelectedKeys(e.target.value ? [e.target.value] : [])
-          }
-          onPressEnter={() => handleSearch(selectedKeys, confirm, dataIndex)}
-          style={{ marginBottom: 8, display: "block" }}
-        />
-        <Space>
-          <Button
-            type="primary"
-            onClick={() => handleSearch(selectedKeys, confirm, dataIndex)}
-            icon={<SearchOutlined />}
-            size="small"
-            style={{ width: 90 }}
-          >
-            Buscar
-          </Button>
-          <Button
-            onClick={() => handleReset(clearFilters)}
-            size="small"
-            style={{ width: 90 }}
-          >
-            Restablecer
-          </Button>
-        </Space>
-      </div>
-    ),
-    filterIcon: (filtered) => (
-      <SearchOutlined style={{ color: filtered ? "#1890ff" : undefined }} />
-    ),
-    onFilter: (value, record) =>
-      record[dataIndex].toString().toLowerCase().includes(value.toLowerCase()),
-    render: (text) =>
-      searchedColumn === dataIndex ? (
-        <Highlighter
-          highlightStyle={{ backgroundColor: "#ffc069", padding: 0 }}
-          searchWords={[searchText]}
-          autoEscape
-          textToHighlight={text.toString()}
-        />
-      ) : (
-        text
-      ),
-  });
-
-  const handleEdit = (depreciacion) => {
-    setEditingDepreciacion(depreciacion); // Cambia el estado de edición
-    setFormData(depreciacion); // Establece los datos del formulario para editar
-  };
-
-  const userId = localStorage.getItem("userId");
-
-  const handleDelete = async (id) => {
-    confirmAction(async () => {
-      try {
-        await fetch(
-          `https://backend-seguros.campozanodevlab.com/api/depreciacion/${id}`,
-          {
-            method: "DELETE",
-          }
-        );
-        setDepreciacion(
-          depreciacion.filter((depreciacion) => depreciacion.id !== id)
-        );
-
-        const userIp = await getUserIp();
-        const logData = {
-          usuario_id: userId,
-          accion: "Eliminó",
-          detalles: `El Usuario ID: ${userId} eliminó la Depreciación ID: ${id}`,
-          ip: userIp,
-        };
-
-        await logAction(logData);
-      } catch (error) {
-        setError("Error al eliminar la Depreciación");
-        console.error("Error al eliminar la Depreciación:", error);
-      }
-    });
-  };
-
-  const logAction = async (logData) => {
-    const token = "simulated-token"; // Aquí deberías usar un token válido si es necesario
-    try {
-      await fetch("https://backend-seguros.campozanodevlab.com/api/bitacora", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(logData),
-      });
-    } catch (error) {
-      console.error("Error al registrar la acción en la bitácora:", error);
-    }
-  };
-
-  const getUserIp = async () => {
-    try {
-      const response = await fetch("https://api.ipify.org?format=json");
-      const data = await response.json();
-      return data.ip;
-    } catch (error) {
-      console.error("Error obteniendo IP:", error);
-      return "IP desconocida";
-    }
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    confirmAction(async () => {
-      try {
-        let previousDepreciacion = null;
-        if (editingDepreciacion) {
-          const previousDepreciacionResponse = await fetch(
-            `https://backend-seguros.campozanodevlab.com/api/depreciacion/${editingDepreciacion.id}`
-          );
-          if (!previousDepreciacionResponse.ok) {
-            throw new Error("Error al obtener la depreciación anterior");
-          }
-          previousDepreciacion = await previousDepreciacionResponse.json();
-        }
-
-        const method = editingDepreciacion ? "PUT" : "POST";
-        const url = editingDepreciacion
-          ? `https://backend-seguros.campozanodevlab.com/api/depreciacion/${editingDepreciacion.id}`
-          : `https://backend-seguros.campozanodevlab.com/api/depreciacion`;
-
-        const response = await fetch(url, {
-          method: method,
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(formData),
-        });
-
-        const updatedDepreciacion = await response.json();
-
-        if (method === "PUT") {
-          setDepreciacion((prev) =>
-            prev.map((depreciacion) =>
-              depreciacion.id === updatedDepreciacion.id
-                ? updatedDepreciacion
-                : depreciacion
-            )
-          );
-        } else {
-          setDepreciacion((prev) => [updatedDepreciacion, ...prev]);
-        }
-
-        const userIp = await getUserIp();
-        const attributesToCheck = [
-          "valor_inicial",
-          "valor_depreciado",
-          "fecha_depreciacion",
-          "motivo_depreciacion",
-        ];
-
-        let logDetails = "";
-        if (editingDepreciacion) {
-          const editedAttribute = attributesToCheck.find(
-            (key) => formData[key] !== previousDepreciacion[key]
-          );
-          if (editedAttribute) {
-            logDetails = `Atributo editado: ${editedAttribute}`;
-          }
-        } else {
-          logDetails = `Se creó una nueva depreciación.`;
-        }
-
-        const logData = {
-          usuario_id: userId,
-          accion: editingDepreciacion ? "Editó" : "Creó",
-          detalles: `El Usuario ID: ${userId} ${
-            editingDepreciacion ? "editó" : "creó"
-          } la Depreciación ID: ${
-            editingDepreciacion
-              ? editingDepreciacion.id
-              : updatedDepreciacion.id
-          }. ${logDetails}`,
-          ip: userIp,
-        };
-
-        await logAction(logData);
-        fetchDepreciacion();
-        setEditingDepreciacion(null);
-      } catch (error) {
-        setError(
-          `Error al actualizar o crear la depreciación: ${error.message}`
-        );
-        console.error("Error al actualizar o crear la depreciación:", error);
-      }
-      setEditingDepreciacion(null);
-      setCreatingDepreciacion(false);
-    });
   };
 
   const columns = [
@@ -446,7 +436,6 @@ const GestionarDepreciacion = () => {
             </h2>
             <div style={styles.formContainer}>
               <form onSubmit={handleSubmit}>
-
                 <label htmlFor="valor_comercial_id">ID Valor Comercial:</label>
 
                 <select

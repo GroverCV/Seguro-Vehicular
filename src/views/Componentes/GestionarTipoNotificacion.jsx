@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { confirmAction } from "./modalComponentes/ModalConfirm";
+import { api } from "../../api/axios";
 
 const GestionarTipoNotificacion = () => {
   const [tiposNotificacion, setTiposNotificacion] = useState([]);
@@ -17,22 +18,17 @@ const GestionarTipoNotificacion = () => {
   const totalPages = Math.ceil(tiposNotificacion.length / itemsPerPage);
    const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
-  const fetchTiposNotificacion = async () => {
+   const fetchTiposNotificacion = async () => {
     try {
-      const response = await fetch(
-        "https://backend-seguros.campozanodevlab.com/api/tipo_notificacion"
-      );
-      if (!response.ok) {
-        throw new Error("Error al obtener los tipos de notificación");
-      }
-      const data = await response.json();
-      setTiposNotificacion(data);
+      const response = await api.get("/api/tipo_notificacion");
+      setTiposNotificacion(response.data);
     } catch (error) {
       setError(error.message);
     } finally {
       setLoading(false);
     }
   };
+  
 
   useEffect(() => {
     fetchTiposNotificacion();
@@ -160,14 +156,9 @@ const GestionarTipoNotificacion = () => {
   const handleDelete = async (id) => {
     confirmAction(async () => {
       try {
-        await fetch(
-          `https://backend-seguros.campozanodevlab.com/api/tipo_notificacion/${id}`,
-          { method: "DELETE" }
-        );
-        setTiposNotificacion(
-          tiposNotificacion.filter((tipo) => tipo.id !== id)
-        );
-
+        await api.delete(`/api/tipo_notificacion/${id}`);
+        setTiposNotificacion(tiposNotificacion.filter((tipo) => tipo.id !== id));
+  
         const userIp = await getUserIp();
         const logData = {
           usuario_id: userId,
@@ -175,50 +166,50 @@ const GestionarTipoNotificacion = () => {
           detalles: `el Usuario ID: ${userId} eliminó el Tipo Notificacion ID: ${id}`,
           ip: userIp,
         };
-
+  
         await logAction(logData);
       } catch (error) {
         console.error("Error al eliminar el tipo de notificación:", error);
       }
     });
   };
-
+  
   const logAction = async (logData) => {
     const token = "simulated-token";
     try {
-      await fetch("https://backend-seguros.campozanodevlab.com/api/bitacora", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(logData),
-      });
+      await api.post(
+        "/api/bitacora",
+        logData,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
     } catch (error) {
       console.error("Error al registrar la acción en la bitácora.");
       console.error("Error al registrar la acción:", error);
     }
   };
-
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
     confirmAction(async () => {
       try {
-        const response = await fetch(
-          editingTipoNotificacion
-            ? `https://backend-seguros.campozanodevlab.com/api/tipo_notificacion/${editingTipoNotificacion.id}`
-            : "https://backend-seguros.campozanodevlab.com/api/tipo_notificacion",
-          {
-            method: editingTipoNotificacion ? "PUT" : "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(formData),
-          }
-        );
-
-        const updatedTipoNotificacion = await response.json();
-
+        const response = await api({
+          method: editingTipoNotificacion ? "PUT" : "POST",
+          url: editingTipoNotificacion
+            ? `/api/tipo_notificacion/${editingTipoNotificacion.id}`
+            : "/api/tipo_notificacion",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          data: formData,
+        });
+  
+        const updatedTipoNotificacion = response.data;
+  
         setTiposNotificacion((prev) =>
           editingTipoNotificacion
             ? prev.map((tipo) =>
@@ -228,14 +219,13 @@ const GestionarTipoNotificacion = () => {
               )
             : [...prev, updatedTipoNotificacion]
         );
-
-        // Restablecer el formulario después de la creación/modificación
+  
         setFormData({});
         setEditingTipoNotificacion(null);
         setShowForm(false);
-
+  
         const userIp = await getUserIp();
-
+  
         const logData = {
           usuario_id: userId,
           accion: editingTipoNotificacion ? "Editó" : "Creó",
@@ -248,7 +238,7 @@ const GestionarTipoNotificacion = () => {
           }`,
           ip: userIp,
         };
-
+  
         fetchTiposNotificacion();
         await logAction(logData);
       } catch (error) {

@@ -3,6 +3,7 @@ import { SearchOutlined } from "@ant-design/icons";
 import { Button, Input, Space, Table } from "antd";
 import Highlighter from "react-highlight-words";
 import { confirmAction } from "./modalComponentes/ModalConfirm";
+import { api } from "../../api/axios";
 
 const GestionarTipoUsuario = () => {
   const [tiposUsuario, setTiposUsuario] = useState([]);
@@ -17,18 +18,15 @@ const GestionarTipoUsuario = () => {
 
   const fetchTipoUsuario = async () => {
     try {
-      const response = await fetch(
-        "https://backend-seguros.campozanodevlab.com/api/tipo_usuario"
-      );
-      if (!response.ok) throw new Error("Error al obtener los tipos de usuario");
-      const data = await response.json();
-      setTiposUsuario(data);
+      const response = await api.get("/api/tipo_usuario");
+      setTiposUsuario(response.data);
     } catch (error) {
       setError(error.message);
     } finally {
       setLoading(false);
     }
   };
+  
 
   useEffect(() => {
     fetchTipoUsuario();
@@ -60,14 +58,9 @@ const GestionarTipoUsuario = () => {
   const handleDelete = async (id) => {
     confirmAction(async () => {
       try {
-        await fetch(
-          `https://backend-seguros.campozanodevlab.com/api/tipo_usuario/${id}`,
-          {
-            method: "DELETE",
-          }
-        );
+        await api.delete(`/api/tipo_usuario/${id}`);
         setTiposUsuario(tiposUsuario.filter((tipoUsuario) => tipoUsuario.id !== id));
-
+  
         const userIp = await getUserIp();
         const logData = {
           usuario_id: userId,
@@ -75,7 +68,7 @@ const GestionarTipoUsuario = () => {
           detalles: `El Usuario ID: ${userId} eliminó el Tipo Usuario ID: ${id}`,
           ip: userIp,
         };
-
+  
         await logAction(logData);
       } catch (error) {
         setError("Error al eliminar el tipo de usuario");
@@ -83,40 +76,31 @@ const GestionarTipoUsuario = () => {
       }
     });
   };
-
+  
   const logAction = async (logData) => {
     const token = "simulated-token";
     try {
-      await fetch("https://backend-seguros.campozanodevlab.com/api/bitacora", {
-        method: "POST",
+      await api.post("/api/bitacora", logData, {
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(logData),
       });
     } catch (error) {
       console.error("Error al registrar la acción en la bitácora:", error);
     }
   };
-
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
     confirmAction(async () => {
       try {
         if (creatingTipoUsuario) {
           // Si estamos creando un nuevo tipo de usuario
-          const response = await fetch(
-            "https://backend-seguros.campozanodevlab.com/api/tipousuario",
-            {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify(formData),
-            }
-          );
-          const newTipoUsuario = await response.json();
+          const response = await api.post("/api/tipousuario", formData);
+          const newTipoUsuario = response.data;
           setTiposUsuario([...tiposUsuario, newTipoUsuario]);
-
+  
           const userIp = await getUserIp();
           const logData = {
             usuario_id: userId,
@@ -128,44 +112,35 @@ const GestionarTipoUsuario = () => {
           setCreatingTipoUsuario(false); // Cerrar el modal de creación
         } else {
           // Si estamos editando un tipo de usuario existente
-          const previousTipoUsuarioResponse = await fetch(
-            `https://backend-seguros.campozanodevlab.com/api/tipousuario/${editingTipoUsuario.id}`
-          );
-          const previousTipoUsuario = await previousTipoUsuarioResponse.json();
-
-          const response = await fetch(
-            `https://backend-seguros.campozanodevlab.com/api/tipousuario/${editingTipoUsuario.id}`,
-            {
-              method: "PUT",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify(formData),
-            }
-          );
-          const updatedTipoUsuario = await response.json();
+          const previousTipoUsuarioResponse = await api.get(`/api/tipousuario/${editingTipoUsuario.id}`);
+          const previousTipoUsuario = previousTipoUsuarioResponse.data;
+  
+          const response = await api.put(`/api/tipousuario/${editingTipoUsuario.id}`, formData);
+          const updatedTipoUsuario = response.data;
           setTiposUsuario((prev) =>
             prev.map((tipoUsuario) =>
               tipoUsuario.id === updatedTipoUsuario.id ? updatedTipoUsuario : tipoUsuario
             )
           );
-
+  
           const userIp = await getUserIp();
           const attributesToCheck = ["Nombre"];
           const editedAttribute = attributesToCheck.find(
             (key) => formData[key] !== previousTipoUsuario[key]
           );
-
+  
           let logDetails = "";
           if (editedAttribute) {
             logDetails = `Atributo editado: ${editedAttribute}`;
           }
-
+  
           const logData = {
             usuario_id: userId,
             accion: "Editó",
             detalles: `El Usuario ID: ${userId} editó el Tipo Usuario ID: ${editingTipoUsuario.id}. ${logDetails}`,
             ip: userIp,
           };
-
+  
           await logAction(logData);
           setEditingTipoUsuario(null);
         }
@@ -176,6 +151,7 @@ const GestionarTipoUsuario = () => {
       }
     });
   };
+  
 
   const styles = {
     body: {

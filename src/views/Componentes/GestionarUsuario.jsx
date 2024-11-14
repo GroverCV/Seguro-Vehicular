@@ -3,6 +3,7 @@ import { SearchOutlined } from "@ant-design/icons";
 import { Button, Input, Space, Table } from "antd";
 import Highlighter from "react-highlight-words";
 import { confirmAction } from "./modalComponentes/ModalConfirm";
+import { api } from "../../api/axios";
 
 const GestionarUsuario = () => {
   const [usuarios, setUsuarios] = useState([]);
@@ -17,81 +18,62 @@ const GestionarUsuario = () => {
   const [tipoUsuarios, setTipoUsuario] = useState([]);
   const [ciudades, setCiudad] = useState([]);
   const [paises, setPais] = useState([]);
+
   const fetchUsuarios = async () => {
-    try {
-      const response = await fetch(
-        "https://backend-seguros.campozanodevlab.com/api/usuarios"
-      );
-      if (!response.ok) throw new Error("Error al obtener los usuarios");
-      const data = await response.json();
-      setUsuarios(data);
-    } catch (error) {
-      setError(error.message);
-    } finally {
-      setLoading(false);
-    }
-  };
+  try {
+    const response = await api.get("/api/usuarios");
+    setUsuarios(response.data);
+  } catch (error) {
+    setError(error.message);
+  } finally {
+    setLoading(false);
+  }
+};
 
-  const fetchTipoUsuario = async () => {
-    try {
-      const response = await fetch(
-        "https://backend-seguros.campozanodevlab.com/api/tipo_usuario"
-      );
-      if (!response.ok)
-        throw new Error("Error al obtener los tipos de usuario");
-      const data = await response.json();
-      setTipoUsuario(data); // setTipoUsuarios es un estado que almacena los tipos de usuario
-    } catch (error) {
-      setError(error.message);
-    } finally {
-      setLoading(false);
-    }
-  };
+const fetchTipoUsuario = async () => {
+  try {
+    const response = await api.get("/api/tipo_usuario");
+    setTipoUsuario(response.data); // setTipoUsuarios es un estado que almacena los tipos de usuario
+  } catch (error) {
+    setError(error.message);
+  } finally {
+    setLoading(false);
+  }
+};
 
-  const fetchCiudad = async () => {
-    try {
-      const response = await fetch(
-        "https://backend-seguros.campozanodevlab.com/api/ciudad"
-      );
-      if (!response.ok) throw new Error("Error al obtener las ciudades");
-      const data = await response.json();
-      setCiudad(data); // setCiudades es un estado que almacena las ciudades
-    } catch (error) {
-      setError(error.message);
-    } finally {
-      setLoading(false);
-    }
-  };
+const fetchCiudad = async () => {
+  try {
+    const response = await api.get("/api/ciudad");
+    setCiudad(response.data); // setCiudades es un estado que almacena las ciudades
+  } catch (error) {
+    setError(error.message);
+  } finally {
+    setLoading(false);
+  }
+};
 
-  const fetchPais = async () => {
-    try {
-      const response = await fetch(
-        "https://backend-seguros.campozanodevlab.com/api/pais"
-      );
-      if (!response.ok) throw new Error("Error al obtener los países");
-      const data = await response.json();
-      setPais(data); // setPaises es un estado que almacena los países
-    } catch (error) {
-      setError(error.message);
-    } finally {
-      setLoading(false);
-    }
-  };
+const fetchPais = async () => {
+  try {
+    const response = await api.get("/api/pais");
+    setPais(response.data); // setPaises es un estado que almacena los países
+  } catch (error) {
+    setError(error.message);
+  } finally {
+    setLoading(false);
+  }
+};
 
-  const fetchRoles = async () => {
-    try {
-      const response = await fetch(
-        "https://backend-seguros.campozanodevlab.com/api/roles"
-      );
-      if (!response.ok) throw new Error("Error al obtener los roles");
-      const data = await response.json();
-      setRoles(data);
-    } catch (error) {
-      setError(error.message);
-    } finally {
-      setLoading(false);
-    }
-  };
+const fetchRoles = async () => {
+  try {
+    const response = await api.get("/api/roles");
+    setRoles(response.data);
+  } catch (error) {
+    setError(error.message);
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   useEffect(() => {
     fetchUsuarios();
@@ -122,14 +104,9 @@ const GestionarUsuario = () => {
   const handleDelete = async (id) => {
     confirmAction(async () => {
       try {
-        await fetch(
-          `https://backend-seguros.campozanodevlab.com/api/usuarios/${id}`,
-          {
-            method: "DELETE",
-          }
-        );
+        await api.delete(`/api/usuarios/${id}`);
         setUsuarios(usuarios.filter((usuario) => usuario.id !== id));
-
+  
         const userIp = await getUserIp();
         const logData = {
           usuario_id: userId,
@@ -137,7 +114,7 @@ const GestionarUsuario = () => {
           detalles: `El Usuario ID: ${userId} eliminó el Usuario ID: ${id}`,
           ip: userIp,
         };
-
+  
         await logAction(logData);
       } catch (error) {
         setError("Error al eliminar el usuario");
@@ -145,47 +122,41 @@ const GestionarUsuario = () => {
       }
     });
   };
-
+  
   const logAction = async (logData) => {
     const token = "simulated-token"; // Aquí deberías usar un token válido si es necesario
     try {
-      await fetch("https://backend-seguros.campozanodevlab.com/api/bitacora", {
-        method: "POST",
+      await api.post("/api/bitacora", logData, {
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(logData),
       });
     } catch (error) {
       console.error("Error al registrar la acción en la bitácora:", error);
     }
   };
-
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
     confirmAction(async () => {
       try {
         // Obtener el usuario que se está editando antes de la actualización
-        const previousUserResponse = await fetch(
-          `https://backend-seguros.campozanodevlab.com/api/usuarios/${editingUser.id}`
+        const previousUserResponse = await api.get(`/api/usuarios/${editingUser.id}`);
+        const previousUser = previousUserResponse.data;
+  
+        const response = await api.put(
+          `/api/usuarios/${editingUser.id}`,
+          formData,
+          { headers: { "Content-Type": "application/json" } }
         );
-        const previousUser = await previousUserResponse.json();
-
-        const response = await fetch(
-          `https://backend-seguros.campozanodevlab.com/api/usuarios/${editingUser.id}`,
-          {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(formData),
-          }
-        );
-        const updatedUser = await response.json();
+        const updatedUser = response.data;
         setUsuarios((prev) =>
           prev.map((usuario) =>
             usuario.id === updatedUser.id ? updatedUser : usuario
           )
         );
+  
         const userIp = await getUserIp();
         const attributesToCheck = [
           "Nombre",
@@ -202,21 +173,21 @@ const GestionarUsuario = () => {
         const editedAttribute = attributesToCheck.find(
           (key) => formData[key] !== previousUser[key]
         );
-
+  
         let logDetails = "";
         if (editedAttribute) {
           logDetails = `Atributo editado: ${editedAttribute}`; // Detalle del atributo editado
         }
-
+  
         const logData = {
           usuario_id: userId,
           accion: "Editó",
           detalles: `El Usuario ID: ${userId} editó al Usuario ID: ${editingUser.id}. ${logDetails}`,
           ip: userIp,
         };
-
-        fetchUsuarios();
+  
         await logAction(logData);
+        fetchUsuarios();
         setEditingUser(null);
       } catch (error) {
         setError("Error al actualizar el usuario");
@@ -224,6 +195,7 @@ const GestionarUsuario = () => {
       }
     });
   };
+  
 
   const styles = {
     body: {

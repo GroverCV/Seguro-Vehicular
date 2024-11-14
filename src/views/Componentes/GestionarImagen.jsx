@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { confirmAction } from "./modalComponentes/ModalConfirm";
 import Cloudinary from "./modalComponentes/Cloudinary";
-
+import { api } from "../../api/axios";
 
 const GestionarImagen = () => {
   const [tiposNotificacion, setTiposNotificacion] = useState([]);
@@ -10,18 +10,21 @@ const GestionarImagen = () => {
   const [editingTipoNotificacion, setEditingTipoNotificacion] = useState(null);
   const [formData, setFormData] = useState({});
   const [showForm, setShowForm] = useState(false);
-  
+
   const [imageToShow, setImageToShow] = useState("");
   const [showImageModal, setShowImageModal] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
   const indexOfLastTipo = currentPage * itemsPerPage;
   const indexOfFirstTipo = indexOfLastTipo - itemsPerPage;
-  const currentTipos = tiposNotificacion.slice(indexOfFirstTipo, indexOfLastTipo);
+  const currentTipos = tiposNotificacion.slice(
+    indexOfFirstTipo,
+    indexOfLastTipo
+  );
   const totalPages = Math.ceil(tiposNotificacion.length / itemsPerPage);
-   const paginate = (pageNumber) => setCurrentPage(pageNumber);
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
-   const handleImageUpload = (imageUrl) => {
+  const handleImageUpload = (imageUrl) => {
     setFormData((prevFormData) => ({
       ...prevFormData,
       descripcion: imageUrl, // Actualizar la descripción con la URL de la imagen
@@ -30,7 +33,7 @@ const GestionarImagen = () => {
 
   const handleImageClick = (imageUrl) => {
     setImageToShow(imageUrl); // Establecer la imagen seleccionada
-    setShowImageModal(true);  // Mostrar el modal
+    setShowImageModal(true); // Mostrar el modal
   };
 
   const closeModal = () => {
@@ -40,14 +43,8 @@ const GestionarImagen = () => {
 
   const fetchTiposNotificacion = async () => {
     try {
-      const response = await fetch(
-        "https://backend-seguros.campozanodevlab.com/api/tipo_notificacion"
-      );
-      if (!response.ok) {
-        throw new Error("Error al obtener los tipos de notificación");
-      }
-      const data = await response.json();
-      setTiposNotificacion(data);
+      const response = await api.get("/api/tipo_notificacion");
+      setTiposNotificacion(response.data);
     } catch (error) {
       setError(error.message);
     } finally {
@@ -58,9 +55,6 @@ const GestionarImagen = () => {
   useEffect(() => {
     fetchTiposNotificacion();
   }, []);
-
-
-  
 
   const styles = {
     body: {
@@ -184,10 +178,7 @@ const GestionarImagen = () => {
   const handleDelete = async (id) => {
     confirmAction(async () => {
       try {
-        await fetch(
-          `https://backend-seguros.campozanodevlab.com/api/tipo_notificacion/${id}`,
-          { method: "DELETE" }
-        );
+        await api.delete(`/api/tipo_notificacion/${id}`);
         setTiposNotificacion(
           tiposNotificacion.filter((tipo) => tipo.id !== id)
         );
@@ -210,13 +201,11 @@ const GestionarImagen = () => {
   const logAction = async (logData) => {
     const token = "simulated-token";
     try {
-      await fetch("https://backend-seguros.campozanodevlab.com/api/bitacora", {
-        method: "POST",
+      await api.post("/api/bitacora", logData, {
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(logData),
       });
     } catch (error) {
       console.error("Error al registrar la acción en la bitácora.");
@@ -228,20 +217,15 @@ const GestionarImagen = () => {
     e.preventDefault();
     confirmAction(async () => {
       try {
-        const response = await fetch(
-          editingTipoNotificacion
-            ? `https://backend-seguros.campozanodevlab.com/api/tipo_notificacion/${editingTipoNotificacion.id}`
-            : "https://backend-seguros.campozanodevlab.com/api/tipo_notificacion",
-          {
-            method: editingTipoNotificacion ? "PUT" : "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(formData),
-          }
-        );
+        const response = await api({
+          method: editingTipoNotificacion ? "PUT" : "POST",
+          url: editingTipoNotificacion
+            ? `/api/tipo_notificacion/${editingTipoNotificacion.id}`
+            : "/api/tipo_notificacion",
+          data: formData,
+        });
 
-        const updatedTipoNotificacion = await response.json();
+        const updatedTipoNotificacion = response.data;
 
         setTiposNotificacion((prev) =>
           editingTipoNotificacion
@@ -276,10 +260,7 @@ const GestionarImagen = () => {
         fetchTiposNotificacion();
         await logAction(logData);
       } catch (error) {
-        console.error(
-          "Error al actualizar o crear la Imagen:",
-          error
-        );
+        console.error("Error al actualizar o crear la Imagen:", error);
       }
     });
   };
@@ -329,11 +310,11 @@ const GestionarImagen = () => {
                     src={tipo.descripcion}
                     alt={tipo.nombre}
                     style={{
-                      width: '100px',
-                      height: '100px',
-                      objectFit: 'cover',
-                      borderRadius: '8px',
-                      cursor: 'pointer', // Cambia el cursor a "mano" cuando esté sobre la imagen
+                      width: "100px",
+                      height: "100px",
+                      objectFit: "cover",
+                      borderRadius: "8px",
+                      cursor: "pointer", // Cambia el cursor a "mano" cuando esté sobre la imagen
                     }}
                     onClick={() => handleImageClick(tipo.descripcion)} // Mostrar modal al hacer clic
                   />
@@ -381,9 +362,9 @@ const GestionarImagen = () => {
               src={imageToShow}
               alt="Imagen Grande"
               style={{
-                maxWidth: '80%',
-                maxHeight: '80%',
-                borderRadius: '10px',
+                maxWidth: "80%",
+                maxHeight: "80%",
+                borderRadius: "10px",
               }}
             />
           </div>
@@ -394,9 +375,7 @@ const GestionarImagen = () => {
         <>
           <div style={styles.overlay} onClick={handleCancel} />
           <div style={styles.modal}>
-            <h2>
-              {editingTipoNotificacion ? "Editar" : "Crear"} Imagen
-            </h2>
+            <h2>{editingTipoNotificacion ? "Editar" : "Crear"} Imagen</h2>
             <form onSubmit={handleSubmit}>
               <input
                 type="text"

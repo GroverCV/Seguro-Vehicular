@@ -1,10 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { confirmAction } from "./modalComponentes/ModalConfirm";
 import ModalAgenda from "./modalComponentes/ModalAgenda";
-
-
-
-
+import { api } from "../../api/axios";
 
 const GestionarAgenda = () => {
   const [citas, setCitas] = useState([]);
@@ -17,26 +14,18 @@ const GestionarAgenda = () => {
   const [showForm, setShowForm] = useState(false);
   const [showCalendar, setShowCalendar] = useState(false);
 
-
-
   const [currentPage, setCurrentPage] = useState(1);
-const itemsPerPage = 5;
-const indexOfLastCita = currentPage * itemsPerPage;
-const indexOfFirstCita = indexOfLastCita - itemsPerPage;
-const currentCitas = citas.slice(indexOfFirstCita, indexOfLastCita);
-const totalPages = Math.ceil(citas.length / itemsPerPage);
-const paginate = (pageNumber) => setCurrentPage(pageNumber);
+  const itemsPerPage = 5;
+  const indexOfLastCita = currentPage * itemsPerPage;
+  const indexOfFirstCita = indexOfLastCita - itemsPerPage;
+  const currentCitas = citas.slice(indexOfFirstCita, indexOfLastCita);
+  const totalPages = Math.ceil(citas.length / itemsPerPage);
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
   const fetchCitas = async () => {
     try {
-      const response = await fetch(
-        "https://backend-seguros.campozanodevlab.com/api/citas"
-      );
-      if (!response.ok) {
-        throw new Error("Error al obtener las citas");
-      }
-      const data = await response.json();
-      setCitas(data);
+      const response = await api.get("/api/citas"); // Usando la instancia de Axios
+      setCitas(response.data);
     } catch (error) {
       setError(error.message);
     } finally {
@@ -46,12 +35,8 @@ const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
   const fetchUsuarios = async () => {
     try {
-      const response = await fetch(
-        "https://backend-seguros.campozanodevlab.com/api/usuarios"
-      );
-      if (!response.ok) throw new Error("Error al obtener los usuarios");
-      const data = await response.json();
-      setUsuarios(data);
+      const response = await api.get("/api/usuarios"); // Usando la instancia de Axios
+      setUsuarios(response.data);
     } catch (error) {
       setError(error.message);
     } finally {
@@ -61,14 +46,8 @@ const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
   const fetchTipoCita = async () => {
     try {
-      const response = await fetch(
-        "https://backend-seguros.campozanodevlab.com/api/tipo_cita"
-      );
-      if (!response.ok) {
-        throw new Error("Error al obtener los tipos de cita");
-      }
-      const data = await response.json();
-      setTipoCita(data);
+      const response = await api.get("/api/tipo_cita"); // Usando la instancia de Axios
+      setTipoCita(response.data);
     } catch (error) {
       setError(error.message);
     } finally {
@@ -76,12 +55,112 @@ const paginate = (pageNumber) => setCurrentPage(pageNumber);
     }
   };
 
-
   useEffect(() => {
     fetchUsuarios();
     fetchTipoCita();
     fetchCitas();
   }, []);
+
+  const handleEdit = (cita) => {
+    setEditingCita(cita);
+    setFormData(cita);
+    setShowForm(true);
+  };
+
+  const getUserIp = async () => {
+    try {
+      const response = await fetch("https://api.ipify.org?format=json");
+      const data = await response.json();
+      return data.ip;
+    } catch (error) {
+      console.error("Error obteniendo IP:", error);
+      return "IP desconocida";
+    }
+  };
+
+  const userId = localStorage.getItem("userId");
+
+  const handleDelete = async (id) => {
+    confirmAction(async () => {
+      try {
+        await fetch(
+          `https://backend-seguros.campozanodevlab.com/api/citas/${id}`,
+          { method: "DELETE" }
+        );
+        setCitas(citas.filter((cita) => cita.id !== id));
+
+        const userIp = await getUserIp();
+        const logData = {
+          usuario_id: userId,
+          accion: "Eliminó",
+          detalles: `El Usuario ID: ${userId} eliminó la Cita ID: ${id}`,
+          ip: userIp,
+        };
+
+        await logAction(logData);
+      } catch (error) {
+        console.error("Error al eliminar la cita:", error);
+      }
+    });
+  };
+
+  const logAction = async (logData) => {
+    const token = "simulated-token";
+    try {
+      await api.post("/api/bitacora", logData, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+    } catch (error) {
+      console.error("Error al registrar la acción en la bitácora.");
+      console.error("Error al registrar la acción:", error);
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    confirmAction(async () => {
+      try {
+        const response = await api({
+          method: editingCita ? "put" : "post",
+          url: editingCita ? `/api/citas/${editingCita.id}` : "/api/citas",
+          data: formData,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+
+        const updatedCita = response.data;
+        setCitas((prev) =>
+          editingCita
+            ? prev.map((cita) =>
+                cita.id === updatedCita.id ? updatedCita : cita
+              )
+            : [...prev, updatedCita]
+        );
+
+        const userIp = await getUserIp();
+        const logData = {
+          usuario_id: userId,
+          accion: editingCita ? "Editó" : "Creó",
+          detalles: `El Usuario ID: ${userId} ${
+            editingCita ? "editó" : "creó"
+          } la Cita ID: ${editingCita ? editingCita.id : updatedCita.id}`,
+          ip: userIp,
+        };
+
+        await logAction(logData);
+
+        setEditingCita(null);
+        setShowForm(false);
+        fetchCitas();
+      } catch (error) {
+        console.error("Error al actualizar o crear la cita:", error);
+      }
+    });
+  };
 
   const styles = {
     body: {
@@ -179,121 +258,6 @@ const paginate = (pageNumber) => setCurrentPage(pageNumber);
     },
   };
 
-  const handleEdit = (cita) => {
-    setEditingCita(cita);
-    setFormData(cita);
-    setShowForm(true);
-  };
-
-
-
-  const getUserIp = async () => {
-    try {
-      const response = await fetch("https://api.ipify.org?format=json");
-      const data = await response.json();
-      return data.ip;
-    } catch (error) {
-      console.error("Error obteniendo IP:", error);
-      return "IP desconocida";
-    }
-  };
-  
-  const userId = localStorage.getItem("userId");
-  
-  const handleDelete = async (id) => {
-    confirmAction(async () => {
-      try {
-        await fetch(
-          `https://backend-seguros.campozanodevlab.com/api/citas/${id}`,
-          { method: "DELETE" }
-        );
-        setCitas(citas.filter((cita) => cita.id !== id));
-  
-        const userIp = await getUserIp();
-        const logData = {
-          usuario_id: userId,
-          accion: "Eliminó",
-          detalles: `El Usuario ID: ${userId} eliminó la Cita ID: ${id}`,
-          ip: userIp,
-        };
-  
-        await logAction(logData);
-      } catch (error) {
-        console.error("Error al eliminar la cita:", error);
-      }
-    });
-  };
-  
-  const logAction = async (logData) => {
-    const token = "simulated-token";
-    try {
-      await fetch("https://backend-seguros.campozanodevlab.com/api/bitacora", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(logData),
-      });
-    } catch (error) {
-      console.error("Error al registrar la acción en la bitácora.");
-      console.error("Error al registrar la acción:", error);
-    }
-  };
-  
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    confirmAction(async () => {
-      try {
-        
-        const response = await fetch(
-          editingCita
-            ? `https://backend-seguros.campozanodevlab.com/api/citas/${editingCita.id}`
-            : "https://backend-seguros.campozanodevlab.com/api/citas",
-          {
-            method: editingCita ? "PUT" : "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(formData),
-          }
-        );
-  
-        const updatedCita = await response.json();
-        setCitas((prev) =>
-          editingCita
-            ? prev.map((cita) =>
-                cita.id === updatedCita.id ? updatedCita : cita
-              )
-            : [...prev, updatedCita]
-        );
-  
-        const userIp = await getUserIp();
-        const logData = {
-          usuario_id: userId,
-          accion: editingCita ? "Editó" : "Creó",
-          detalles: `El Usuario ID: ${userId} ${
-            editingCita ? "editó" : "creó"
-          } la Cita ID: ${
-            editingCita ? editingCita.id : updatedCita.id
-          }`,
-          ip: userIp,
-        };
-  
-        await logAction(logData);
-  
-        setEditingCita(null);
-        setShowForm(false);
-        fetchCitas()
-      } catch (error) {
-        console.error("Error al actualizar o crear la cita:", error);
-      }
-    });
-  };
-  
-
-
-
   const handleCancel = () => {
     setEditingCita(null);
     setShowForm(false);
@@ -318,17 +282,15 @@ const paginate = (pageNumber) => setCurrentPage(pageNumber);
         Crear Cita
       </button>
 
-      
       <button style={styles.button} onClick={toggleCalendar}>
         {showCalendar ? "Ocultar Calendario" : "Ver Calendario"}
       </button>
       {showCalendar && (
         <div>
           <h2>Calendario</h2>
-          <ModalAgenda/>
+          <ModalAgenda />
         </div>
       )}
-    
 
       <table style={styles.table}>
         <thead>
@@ -346,7 +308,7 @@ const paginate = (pageNumber) => setCurrentPage(pageNumber);
           </tr>
         </thead>
         <tbody>
-        {currentCitas.map((cita, index) => (
+          {currentCitas.map((cita, index) => (
             <tr
               key={cita.id}
               style={index % 2 === 0 ? styles.trEven : styles.trOdd}
@@ -442,13 +404,15 @@ const paginate = (pageNumber) => setCurrentPage(pageNumber);
                 style={styles.input}
                 required
               />
-               <input
-            type="datetime-local"
-            value={formData.fecha || ""}
-            onChange={(e) => setFormData({ ...formData, fecha: e.target.value })}
-            style={styles.input}
-            required
-          />
+              <input
+                type="datetime-local"
+                value={formData.fecha || ""}
+                onChange={(e) =>
+                  setFormData({ ...formData, fecha: e.target.value })
+                }
+                style={styles.input}
+                required
+              />
               <input
                 style={styles.input}
                 type="text"
@@ -490,7 +454,7 @@ const paginate = (pageNumber) => setCurrentPage(pageNumber);
                 <option value="">Seleccionar Solicitante</option>
                 {usuarios.map((usuario) => (
                   <option key={usuario.id} value={usuario.id}>
-                    {usuario.nombre} {usuario.apellido}  -CI:{usuario.ci}
+                    {usuario.nombre} {usuario.apellido} -CI:{usuario.ci}
                   </option>
                 ))}
               </select>
@@ -506,7 +470,8 @@ const paginate = (pageNumber) => setCurrentPage(pageNumber);
                 <option value="">Seleccionar Recepcion</option>
                 {usuarios.map((usuario) => (
                   <option key={usuario.id} value={usuario.id}>
-                    {usuario.nombre} {usuario.apellido} -CI:{usuario.ci} :{usuario.tipoUsuario_id}
+                    {usuario.nombre} {usuario.apellido} -CI:{usuario.ci} :
+                    {usuario.tipoUsuario_id}
                   </option>
                 ))}
               </select>

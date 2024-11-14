@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Cloudinary from "./modalComponentes/Cloudinary";
 import { confirmAction } from "./modalComponentes/ModalConfirm";
+import { api } from "../../api/axios";
 
 
 const GestionarInformacion = () => {
@@ -38,22 +39,17 @@ const GestionarInformacion = () => {
     setImageToShow(""); // Limpiar la imagen cuando se cierre el modal
   };
 
-  const fetchTiposNotificacion = async () => {
-    try {
-      const response = await fetch(
-        "https://backend-seguros.campozanodevlab.com/api/tipo_notificacion"
-      );
-      if (!response.ok) {
-        throw new Error("Error al obtener los tipos de notificación");
-      }
-      const data = await response.json();
-      setTiposNotificacion(data);
-    } catch (error) {
-      setError(error.message);
-    } finally {
-      setLoading(false);
-    }
-  };
+  
+const fetchTiposNotificacion = async () => {
+  try {
+    const response = await api.get("/api/tipo_notificacion");
+    setTiposNotificacion(response.data);
+  } catch (error) {
+    setError(error.message);
+  } finally {
+    setLoading(false);
+  }
+};
 
   useEffect(() => {
     fetchTiposNotificacion();
@@ -184,65 +180,60 @@ const GestionarInformacion = () => {
   const handleDelete = async (id) => {
     confirmAction(async () => {
       try {
-        await fetch(
-          `https://backend-seguros.campozanodevlab.com/api/tipo_notificacion/${id}`,
-          { method: "DELETE" }
-        );
+        // Usamos Axios para eliminar el tipo de notificación
+        await api.delete(`/api/tipo_notificacion/${id}`);
+  
         setTiposNotificacion(
           tiposNotificacion.filter((tipo) => tipo.id !== id)
         );
-
+  
         const userIp = await getUserIp();
         const logData = {
           usuario_id: userId,
           accion: "Eliminó",
-          detalles: `el Usuario ID: ${userId} eliminó el Tipo Notificacion ID: ${id}`,
+          detalles: `El Usuario ID: ${userId} eliminó el Tipo Notificación ID: ${id}`,
           ip: userIp,
         };
-
+  
         await logAction(logData);
       } catch (error) {
         console.error("Error al eliminar el tipo de notificación:", error);
       }
     });
   };
-
+  
   const logAction = async (logData) => {
-    const token = "simulated-token";
+    const token = "simulated-token"; // Asegúrate de manejar el token correctamente
     try {
-      await fetch("https://backend-seguros.campozanodevlab.com/api/bitacora", {
-        method: "POST",
+      // Usamos Axios para registrar la acción en la bitácora
+      await api.post("/api/bitacora", logData, {
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(logData),
       });
     } catch (error) {
-      console.error("Error al registrar la acción en la bitácora.");
-      console.error("Error al registrar la acción:", error);
+      console.error("Error al registrar la acción en la bitácora:", error);
     }
   };
-
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
     confirmAction(async () => {
       try {
-        const response = await fetch(
-          editingTipoNotificacion
-            ? `https://backend-seguros.campozanodevlab.com/api/tipo_notificacion/${editingTipoNotificacion.id}`
-            : "https://backend-seguros.campozanodevlab.com/api/tipo_notificacion",
-          {
-            method: editingTipoNotificacion ? "PUT" : "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(formData),
-          }
-        );
-
-        const updatedTipoNotificacion = await response.json();
-
+        const response = await api({
+          method: editingTipoNotificacion ? "put" : "post",
+          url: editingTipoNotificacion
+            ? `/api/tipo_notificacion/${editingTipoNotificacion.id}`
+            : "/api/tipo_notificacion",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          data: formData,
+        });
+  
+        const updatedTipoNotificacion = response.data;
+  
         setTiposNotificacion((prev) =>
           editingTipoNotificacion
             ? prev.map((tipo) =>
@@ -252,38 +243,39 @@ const GestionarInformacion = () => {
               )
             : [...prev, updatedTipoNotificacion]
         );
-
+  
         // Restablecer el formulario después de la creación/modificación
         setFormData({});
         setEditingTipoNotificacion(null);
         setShowForm(false);
-
+  
         const userIp = await getUserIp();
-
+  
         const logData = {
           usuario_id: userId,
           accion: editingTipoNotificacion ? "Editó" : "Creó",
           detalles: `El Usuario ID: ${userId} ${
             editingTipoNotificacion ? "editó" : "subió"
-          } la Imagen ID: ${
+          } el Tipo Notificación ID: ${
             editingTipoNotificacion
               ? editingTipoNotificacion.id
               : updatedTipoNotificacion.id
           }`,
           ip: userIp,
         };
-
+  
         fetchTiposNotificacion();
         await logAction(logData);
       } catch (error) {
         console.error(
-          "Error al actualizar o crear la Imagen:",
+          "Error al actualizar o crear el Tipo de Notificación:",
           error
         );
       }
     });
   };
 
+  
   const handleCancel = () => {
     setEditingTipoNotificacion(null);
     setShowForm(false);

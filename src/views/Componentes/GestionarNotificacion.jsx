@@ -1,6 +1,7 @@
 import emailjs from "emailjs-com"; // Importa la biblioteca
 import React, { useEffect, useState } from "react";
 import { confirmAction } from "./modalComponentes/ModalConfirm";
+import { api } from "../../api/axios";
 
 const GestionarNotificacion = () => {
   const [notificaciones, setNotificaciones] = useState([]);
@@ -28,14 +29,8 @@ const GestionarNotificacion = () => {
 
   const fetchNotificaciones = async () => {
     try {
-      const response = await fetch(
-        "https://backend-seguros.campozanodevlab.com/api/notificacion"
-      );
-      if (!response.ok) {
-        throw new Error("Error al obtener las notificaciones");
-      }
-      const data = await response.json();
-      setNotificaciones(data);
+      const response = await api.get("/api/notificacion");
+      setNotificaciones(response.data);
     } catch (error) {
       setError(error.message);
     } finally {
@@ -45,12 +40,8 @@ const GestionarNotificacion = () => {
 
   const fetchUsuarios = async () => {
     try {
-      const response = await fetch(
-        "https://backend-seguros.campozanodevlab.com/api/usuarios"
-      );
-      if (!response.ok) throw new Error("Error al obtener los usuarios");
-      const data = await response.json();
-      setUsuarios(data);
+      const response = await api.get("/api/usuarios");
+      setUsuarios(response.data);
     } catch (error) {
       setError(error.message);
     }
@@ -58,14 +49,8 @@ const GestionarNotificacion = () => {
 
   const fetchTiposNotificacion = async () => {
     try {
-      const response = await fetch(
-        "https://backend-seguros.campozanodevlab.com/api/tipo_notificacion"
-      );
-      if (!response.ok) {
-        throw new Error("Error al obtener los tipos de notificación");
-      }
-      const data = await response.json();
-      setTiposNotificacion(data);
+      const response = await api.get("/api/tipo_notificacion");
+      setTiposNotificacion(response.data);
     } catch (error) {
       setError(error.message);
     }
@@ -195,10 +180,7 @@ const GestionarNotificacion = () => {
   const handleDelete = async (id) => {
     confirmAction(async () => {
       try {
-        await fetch(
-          `https://backend-seguros.campozanodevlab.com/api/notificacion/${id}`,
-          { method: "DELETE" }
-        );
+        await api.delete(`/api/notificacion/${id}`);
         setNotificaciones(
           notificaciones.filter((notificacion) => notificacion.id !== id)
         );
@@ -221,13 +203,11 @@ const GestionarNotificacion = () => {
   const logAction = async (logData) => {
     const token = "simulated-token";
     try {
-      await fetch("https://backend-seguros.campozanodevlab.com/api/bitacora", {
-        method: "POST",
+      await api.post("/api/bitacora", logData, {
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(logData),
       });
     } catch (error) {
       console.error("Error al registrar la acción en la bitácora.");
@@ -239,20 +219,15 @@ const GestionarNotificacion = () => {
     e.preventDefault();
     confirmAction(async () => {
       try {
-        const response = await fetch(
-          editingNotificacion
-            ? `https://backend-seguros.campozanodevlab.com/api/notificacion/${editingNotificacion.id}`
-            : "https://backend-seguros.campozanodevlab.com/api/notificacion",
-          {
-            method: editingNotificacion ? "PUT" : "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(formData),
-          }
-        );
+        const response = await api({
+          method: editingNotificacion ? "PUT" : "POST",
+          url: editingNotificacion
+            ? `/api/notificacion/${editingNotificacion.id}`
+            : "/api/notificacion",
+          data: formData,
+        });
 
-        const updatedNotificacion = await response.json();
+        const updatedNotificacion = response.data;
 
         setNotificaciones((prev) =>
           editingNotificacion
@@ -264,7 +239,6 @@ const GestionarNotificacion = () => {
             : [...prev, updatedNotificacion]
         );
 
-        // Enviar correo después de guardar la notificación
         const usuario = usuarios.find(
           (user) => user.id === formData.usuario_id
         );
@@ -464,7 +438,10 @@ const GestionarNotificacion = () => {
               <input
                 type="date"
                 placeholder="Fecha de Creación"
-                value={formData.fechaCreacion || new Date().toISOString().split("T")[0]}
+                value={
+                  formData.fechaCreacion ||
+                  new Date().toISOString().split("T")[0]
+                }
                 onChange={(e) =>
                   setFormData({ ...formData, fechaCreacion: e.target.value })
                 }
@@ -475,7 +452,9 @@ const GestionarNotificacion = () => {
               <input
                 type="date"
                 placeholder="Fecha de Envío"
-                value={formData.fechaEnvio || new Date().toISOString().split("T")[0]}
+                value={
+                  formData.fechaEnvio || new Date().toISOString().split("T")[0]
+                }
                 onChange={(e) =>
                   setFormData({ ...formData, fechaEnvio: e.target.value })
                 }

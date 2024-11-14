@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import axios from "axios";
+import React, { useEffect, useState } from "react";
+import { api } from "../api/axios";
 
 const styles = {
   wrapper: {
@@ -76,12 +76,10 @@ const Register = () => {
     const fetchData = async () => {
       try {
         const [tipoUsuarioRes, rolRes, paisRes, ciudadRes] = await Promise.all([
-          axios.get(
-            "https://backend-seguros.campozanodevlab.com/api/tipo_usuario"
-          ),
-          axios.get("https://backend-seguros.campozanodevlab.com/api/roles"),
-          axios.get("https://backend-seguros.campozanodevlab.com/api/pais"),
-          axios.get("https://backend-seguros.campozanodevlab.com/api/ciudad"),
+          api.get("/api/tipo_usuario"),
+          api.get("/api/roles"),
+          api.get("/api/pais"),
+          api.get("/api/ciudad"),
         ]);
 
         setTiposUsuario(tipoUsuarioRes.data);
@@ -117,14 +115,10 @@ const Register = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post(
-        "https://backend-seguros.campozanodevlab.com/api/usuarios",
-        formData
-      );
+      const response = await api.post("/api/usuarios", formData);
       console.log("Usuario registrado:", response.data);
-      setMensaje("Usuario registrado correctamente."); // Mensaje de éxito
+      setMensaje("Usuario registrado correctamente.");
 
-      // Registrar la acción en la bitácora
       const userIp = await getUserIp();
       const logData = {
         usuario_id: userId,
@@ -139,20 +133,18 @@ const Register = () => {
       setMensaje(
         "Error al registrar usuario: " +
           (error.response?.data?.message || "Error desconocido.")
-      ); // Mensaje de error
+      );
     }
   };
 
   const logAction = async (logData) => {
-    const token = "simulated-token"; // Reemplazar con el token real si es necesario
+    const token = "simulated-token";
     try {
-      await fetch("https://backend-seguros.campozanodevlab.com/api/bitacora", {
-        method: "POST",
+      await api.post("/api/bitacora", logData, {
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(logData),
       });
     } catch (error) {
       console.error("Error al registrar la acción en la bitácora:", error);
