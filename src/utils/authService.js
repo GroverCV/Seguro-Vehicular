@@ -4,12 +4,12 @@ import { jwtDecode } from "jwt-decode";
 
 // Función para guardar el token en el almacenamiento local
 export const guardarTokenEnLocalStorage = (token) => {
-    localStorage.setItem('token', token);
+    localStorage.setItem('access_token', token);
   };
   
   // Función para obtener el token del almacenamiento local
   export const obtenerTokenDeLocalStorage = () => {
-    return localStorage.getItem('token');
+    return localStorage.getItem('access_token');
   };
   
   // Función para verificar si el token ha expirado

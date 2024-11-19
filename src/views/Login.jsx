@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "../hook/userform";
 import { api } from "../api/axios";
+import { guardarTokenEnLocalStorage } from "../utils/authService";
 
 const styles = {
   wrapper: {
@@ -10,13 +11,13 @@ const styles = {
     alignItems: "flex-start",
     height: "100vh",
     backgroundImage:
-      "url('https://alianzaautomotriz.com/wp-content/uploads/2020/05/seguro-autos.jpg')", // Aquí va la URL de la imagen de fondo
-    backgroundSize: "cover", // Para que la imagen cubra toda la pantalla
-    backgroundPosition: "center", // Centrar la imagen de fondo
+      "url('https://alianzaautomotriz.com/wp-content/uploads/2020/05/seguro-autos.jpg')",
+    backgroundSize: "cover",
+    backgroundPosition: "center",
     padding: "20px",
   },
   form: {
-    backgroundColor: "rgba(255, 255, 255, 0.8)", // Fondo semitransparente para destacar el formulario
+    backgroundColor: "rgba(255, 255, 255, 0.8)",
     padding: "40px",
     borderRadius: "8px",
     boxShadow: "0 0 15px rgba(0,0,0,0.1)",
@@ -71,8 +72,8 @@ const styles = {
 
 export const Login = () => {
   const navigate = useNavigate();
-  const { name, password, onInputChange, onResetForm } = useForm({
-    name: "",
+  const { email, password, onInputChange, onResetForm } = useForm({
+    email: "",
     password: "",
   });
 
@@ -81,68 +82,34 @@ export const Login = () => {
   const onLogin = async (e) => {
     e.preventDefault();
     setError("");
-  
+
     try {
-      const response = await api.get("/api/usuarios");
-      const users = response.data;
-  
-      const user = users.find(
-        (user) => user.email === name && user.contrasena === password
-      );
-  
-      if (user) {
-        const token = "simulated-token"; // Cambiar a un token real si es necesario
-        localStorage.setItem("token", token);
-  
-        // Obtener la IP del usuario
-        const getUserIp = async () => {
-          try {
-            const response = await api.get("https://api.ipify.org?format=json");
-            return response.data.ip;
-          } catch (error) {
-            console.error("Error obteniendo IP:", error);
-            return "IP desconocida";
-          }
-        };
-  
-        const userIp = await getUserIp();
-  
-        // Datos a enviar a la bitácora
-        const logData = {
-          usuario_id: user.id, // Asegúrate de tener el ID del usuario
-          accion: "Inició Sesión",
-          detalles: "Ingreso al Sistema",
-          ip: userIp,
-        };
-  
-        // Enviar la acción a la bitácora
-        await api.post("/api/bitacora", logData, {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`, // Si es necesario un token para la autenticación
-          },
-        });
-  
-        localStorage.setItem("userId", user.id);
-        localStorage.setItem("userIp", userIp);
-  
-        // Navegar al dashboard
-        navigate("/dashboard", {
-          replace: true,
-          state: { logged: true, name: user.nombre },
-        });
-        window.location.reload();
-      } else {
-        setError("Email o contraseña incorrectos");
-      }
+      const response = await api.post("/api/login", {
+        email,
+        password,
+      });
+
+      const { access_token, usuario } = response.data;
+
+      // Guardar el token usando la función de authService
+      guardarTokenEnLocalStorage(access_token);
+
+      // Mostrar el token en la consola
+      console.log("Token obtenido:", access_token);
+
+      // Navegar al dashboard
+      navigate("/dashboard", {
+        replace: true,
+        state: { logged: true },
+      });
+      window.location.reload();
     } catch (error) {
-      setError("Error al autenticar. Inténtalo más tarde.");
+      console.log(error);
+      setError("Email o contraseña incorrectos. Inténtalo de nuevo.");
     }
-  
+
     onResetForm();
   };
-  
-
 
   return (
     <div style={styles.wrapper}>
@@ -152,17 +119,17 @@ export const Login = () => {
         <div style={styles.inputGroup}>
           <input
             type="email"
-            name="name"
-            id="name"
-            value={name}
+            name="email"
+            id="email"
+            value={email}
             onChange={onInputChange}
             required
             autoComplete="off"
             style={styles.input}
           />
           <label
-            htmlFor="name"
-            style={{ ...styles.label, ...(name ? styles.labelActive : {}) }}
+            htmlFor="email"
+            style={{ ...styles.label, ...(email ? styles.labelActive : {}) }}
           >
             Email:
           </label>
