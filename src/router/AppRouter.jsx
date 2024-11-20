@@ -31,6 +31,13 @@ import GestionarVehiculo from "../views/Componentes/GestionarVehiculo";
 import GenerarReporte from "../views/Componentes/GenerarReporte";
 import GestionarTipoUsuario from "../views/Componentes/GestionarTipoUsuario";
 import ModalAgendaAgente from "../views/Componentes/modalComponentes/ModalAgendaAgente";
+import GestionarPlanPago from "../views/Componentes/Pagos/GestionarPlanPago";
+import GestionarMotivoPago from "../views/Componentes/Pagos/GestionarMotivoPago";
+import AdministrarMetodoPago from "../views/Componentes/Pagos/AdministrarMetodoPago";
+import GestionarPoliza from "../views/Componentes/Pagos/GestionarPoliza";
+import GestionarCuota from "../views/Componentes/Pagos/GestionarCouta";
+import AdministrarPago from "../views/Componentes/Pagos/AdministrarPago";
+import Comprobante from "../views/Componentes/Pagos/Comprobante";
 
 
 export const AppRouter = () => {
@@ -71,6 +78,13 @@ export const AppRouter = () => {
           <Route path="gestionartipovehiculo" element={<GestionarTipoVehiculo/>} />
           <Route path="gestionarvalorcomercial" element={<GestionarValorComercial/>} />
           <Route path="gestionarvehiculo" element={<GestionarVehiculo/>} />
+          <Route path="gestionarplanpago" element={<GestionarPlanPago/>} />
+          <Route path="gestionarmotivopago" element={<GestionarMotivoPago/>} />
+          <Route path="administrarmetodopago" element={<AdministrarMetodoPago/>} />
+          <Route path="gestionarpoliza" element={<GestionarPoliza/>} />
+          <Route path="gestionarcouta" element={<GestionarCuota/>} />
+          <Route path="administrarpago" element={<AdministrarPago/>} />
+          <Route path="comprobante" element={<Comprobante/>} />
           <Route path="modalagendaagente" element={<ModalAgendaAgente/>} />
           <Route path="generarreporte" element={<GenerarReporte/>} />
         </Route>

@@ -293,6 +293,38 @@ const Sidebar = () => {
                 to: "/dashboard/gestionarnotificacion",
               },
               {
+                label: "CU11. Gestionar Motivo Pago",
+                to: "/dashboard/gestionarmotivopago",
+              },
+              {
+                label: "CU11. Administrar Metodo Pago",
+                to: "/dashboard/administrarmetodopago",
+              },
+              {
+                label: "CU11. GestionarPoliza",
+                to: "/dashboard/gestionarpoliza",
+              },
+
+              {
+                label: "CU11. Gestionar Couta",
+                to: "/dashboard/gestionarcouta",
+              },
+              
+              {
+                label: "CU11. Administrar Pago",
+                to: "/dashboard/administrarpago",
+              },
+
+              {
+                label: "CU11. Comprobante",
+                to: "/dashboard/comprobante",
+              },
+
+              {
+                label: "CU11. Gestionar Plan Pago",
+                to: "/dashboard/gestionarplanpago",
+              },
+              {
                 /*{
                 label: "CU12. Realizar tipo de pago",
                 to: "/dashboard/uploadImage",
