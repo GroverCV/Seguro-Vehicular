@@ -38,6 +38,7 @@ import GestionarPoliza from "../views/Componentes/Pagos/GestionarPoliza";
 import GestionarCuota from "../views/Componentes/Pagos/GestionarCouta";
 import AdministrarPago from "../views/Componentes/Pagos/AdministrarPago";
 import Comprobante from "../views/Componentes/Pagos/Comprobante";
+import Backup from "../views/Componentes/Backup";
 
 
 export const AppRouter = () => {
@@ -87,6 +88,8 @@ export const AppRouter = () => {
           <Route path="comprobante" element={<Comprobante/>} />
           <Route path="modalagendaagente" element={<ModalAgendaAgente/>} />
           <Route path="generarreporte" element={<GenerarReporte/>} />
+          <Route path="backup" element={<Backup/>} />
+
         </Route>
       </Routes>
     </>

@@ -379,17 +379,8 @@ const Sidebar = () => {
             }}
           >
             <NavLink
-              to="#"
+              to="/dashboard/backup"
               className="px-3 h-full flex items-center"
-              onClick={(e) => {
-                e.preventDefault();
-                const confirmed = window.confirm(
-                  "¿Estás seguro de que deseas realizar un backup?"
-                );
-                if (confirmed) {
-                  handleBackup();
-                }
-              }}
               style={({ isActive }) => ({
                 color: isActive ? sidebarStyles.itemActive.color : "#FFFFFF",
                 backgroundColor: isActive
