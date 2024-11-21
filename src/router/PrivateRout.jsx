@@ -6,7 +6,7 @@ export const PrivateRoute = ({ children }) => {
   const token = localStorage.getItem('access_token'); // Verificar el token
 
   // Si hay un token, permite el acceso a las rutas protegidas
-  return token ? children : <Navigate to="/dashboard" state={{ from: location }} />;
+  return token ? children : <Navigate to="/login" state={{ from: location }} />;
 };
 
 PrivateRoute.propTypes = {
