@@ -31,7 +31,7 @@ api.interceptors.response.use(
     if (error.response?.status === 401) {
       console.error("Token inválido o no autorizado. Redirigiendo al login...");
       // Opcional: Redirigir al usuario al inicio de sesión
-      window.location.href = "/login";
+      window.location.href = "/dasboard";
     }
     return Promise.reject(error);
   }
