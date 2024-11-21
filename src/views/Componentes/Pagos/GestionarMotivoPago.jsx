@@ -10,7 +10,7 @@ const GestionarMotivoPago = () => {
   const [error, setError] = useState(null);
   const [editingMotivoPago, setEditingMotivoPago] = useState(null);
   const [formData, setFormData] = useState({
-    estado: true,
+    estado: "Activo",
   });
   
   const [showForm, setShowForm] = useState(false);
@@ -121,17 +121,18 @@ const GestionarMotivoPago = () => {
         const updatedMotivoPago = response.data.data;
 
         setMotivosPago((prev) =>
-          editingotivoPago
-            ? prevM.map((motivo) =>
+          editingMotivoPago
+            ? prev.map((motivo) =>
                 motivo.id === updatedMotivoPago.id
                   ? updatedMotivoPago
                   : motivo
               )
             : [...prev, updatedMotivoPago]
         );
+        
 
         setFormData({
-          estado: true, 
+          estado: "Activo", 
         });
         setEditingMotivoPago(null);
         setShowForm(false);

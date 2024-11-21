@@ -11,11 +11,11 @@ const sidebarStyles = {
     padding: "0rem", // Espaciado interno
     display: "flex",
     flexDirection: "column",
-    boxShadow: "2px 0 5px rgba(0,0,0,0.5)",
+    boxShadow: "5px 0 5px rgba(0,0,0,0.5)",
   },
   header: {
     fontFamily: "Pacifico, cursive",
-    fontSize: "2.0rem", // Aumentar el tamaño del texto
+    fontSize: "2.5rem", // Aumentar el tamaño del texto
     color: "#FFFFFF", // Color blanco
     fontWeight: "bold",
     textAlign: "center",
@@ -26,7 +26,7 @@ const sidebarStyles = {
     borderRadius: "0.5rem",
     padding: "1rem 0rem", // Espaciado superior/inferior y lateral
     cursor: "pointer",
-    fontSize: "1.1rem", // Tamaño del texto para los ítems de la lista
+    fontSize: "1.5rem", // Tamaño del texto para los ítems de la lista
     color: "#FFFFFF", // Color blanco para los ítems
     textDecoration: "none",
     justifyContent: "flex-start", // Alinear el texto a la izquierda
@@ -188,147 +188,126 @@ const Sidebar = () => {
         <hr />
         <ul className="mt-3 font-bold">
           <SidebarItem
-            label="Usuarios y Agenda"
+            label="USUARIOS Y AGENDA"
             section="usuario"
             expanded={expanded.usuario}
             toggleExpand={toggleExpand}
             items={[
-              { label: "CU01. Administrar Inicio de Sesión", to: "/login" },
+              { label: "Registrar Usuario", to: "/dashboard/register" },
               {
-                label: "CU02. Administrar Cierre de Sesión",
-                onClick: () => setLogoutModalVisible(true),
-              },
-              { label: "CU03. Registrar Usuario", to: "/dashboard/register" },
-              {
-                label: "CU04. Gestionar Usuario",
+                label: "Gestionar Usuario",
                 to: "/dashboard/gestionarusuario",
               },
-              { label: "CU05. Gestionar Roles", to: "/dashboard/gestionarrol" },
+              { label: "Gestionar Roles", to: "/dashboard/gestionarrol" },
               {
-                label: "CU06. Asignar Permisos",
+                label: "Asignar Permisos",
                 to: "/dashboard/asignarpermisos",
               },
               {
-                label: "CU00. Gestionar Tipo Usuario",
+                label: "Gestionar Tipo Usuario",
                 to: "/dashboard/gestionartipousuario",
               },
               {
-                label: "CU09. Gestinoar Agenda",
+                label: "Gestinoar Agenda",
                 to: "/dashboard/gestionaragenda",
               },
 
               {
-                label: "CU08. Gestionar Tipo Cita",
+                label: "Gestionar Tipo Cita",
                 to: "/dashboard/gestionartipocita",
-              },
-              {
-                label: "CU23. Administrar Bitacora",
-                to: "/dashboard/administrarbitacora",
               },
             ]}
           />
 
           <SidebarItem
-            label="Vehiculos y Propietarios"
+            label="VEHICULOS"
             section="poliza"
             expanded={expanded.poliza}
             toggleExpand={toggleExpand}
             items={[
               {
-                label: "CU20. Gestionar Vehiculo",
+                label: "Gestionar Vehiculo",
                 to: "/dashboard/gestionarvehiculo",
               },
               {
-                label: "CU19. Gestionar Tipo Vehiculo",
+                label: "Gestionar Valor Comercial",
+                to: "/dashboard/gestionarvalorcomercial",
+              },
+              {
+                label: "Gestionar Depreciacion",
+                to: "/dashboard/gestionardepreciacion",
+              },
+
+              {
+                label: "Gestionar Tipo Vehiculo",
                 to: "/dashboard/gestionartipovehiculo",
               },
 
               {
-                label: "CU16. Gestionar Modelo",
+                label: "Gestionar Modelo",
                 to: "/dashboard/gestionarmodelo",
               },
               {
-                label: "CU15. Gestionar Marca",
+                label: "Gestionar Marca",
                 to: "/dashboard/gestionarmarca",
-              },
-
-              {
-                label: "CU17. Gestionar Valor Comercial",
-                to: "/dashboard/gestionarvalorcomercial",
-              },
-              {
-                label: "CU18. Gestionar Depreciacion",
-                to: "/dashboard/gestionardepreciacion",
-              },
-              {
-                label: "CU25. Gestionar Imagen",
-                to: "/dashboard/gestionarimagen",
               },
             ]}
           />
           <SidebarItem
-            label="Documentos e Incidentes"
+            label="INCIDENTES"
             section="incidente"
             expanded={expanded.incidente}
             toggleExpand={toggleExpand}
             items={[
               {
-                label: "CU13. Gestionar Informacion",
+                label: "Gestionar Informacion",
                 to: "/dashboard/gestionarinformacion",
+              },
+
+              {
+                label: "Gestionar Notificacion",
+                to: "/dashboard/gestionarnotificacion",
+              },
+              {
+                label: "Gestionar Tipo Notificacion",
+                to: "/dashboard/gestionartiponotificacion",
               },
             ]}
           />
           <SidebarItem
-            label="Pagos y Notificaciones"
+            label="POLIZA Y PAGOS"
             section="finanza"
             expanded={expanded.finanza}
             toggleExpand={toggleExpand}
             items={[
               {
-                label: "CU08. Gestionar Tipo Notificacion",
-                to: "/dashboard/gestionartiponotificacion",
-              },
-              {
-                label: "CU11. Gestionar Notificacion",
-                to: "/dashboard/gestionarnotificacion",
-              },
-              {
-                label: "CU11. Gestionar Motivo Pago",
-                to: "/dashboard/gestionarmotivopago",
-              },
-              {
-                label: "CU11. Administrar Metodo Pago",
-                to: "/dashboard/administrarmetodopago",
-              },
-              {
-                label: "CU11. GestionarPoliza",
+                label: "GestionarPoliza",
                 to: "/dashboard/gestionarpoliza",
               },
-
               {
-                label: "CU11. Gestionar Couta",
-                to: "/dashboard/gestionarcouta",
-              },
-              
-              {
-                label: "CU11. Administrar Pago",
+                label: "Administrar Pago",
                 to: "/dashboard/administrarpago",
               },
-
               {
-                label: "CU11. Comprobante",
+                label: "Comprobante",
                 to: "/dashboard/comprobante",
               },
 
               {
-                label: "CU11. Gestionar Plan Pago",
+                label: "Gestionar Couta",
+                to: "/dashboard/gestionarcouta",
+              },
+              {
+                label: "Gestionar Plan Pago",
                 to: "/dashboard/gestionarplanpago",
               },
               {
-                /*{
-                label: "CU12. Realizar tipo de pago",
-                to: "/dashboard/uploadImage",
-              },*/
+                label: "Gestionar Motivo Pago",
+                to: "/dashboard/gestionarmotivopago",
+              },
+              {
+                label: "Administrar Metodo Pago",
+                to: "/dashboard/administrarmetodopago",
               },
             ]}
           />
@@ -408,7 +387,7 @@ const Sidebar = () => {
                   "¿Estás seguro de que deseas realizar un backup?"
                 );
                 if (confirmed) {
-                  handleBackup(); 
+                  handleBackup();
                 }
               }}
               style={({ isActive }) => ({
@@ -422,7 +401,6 @@ const Sidebar = () => {
               REALIZAR BACKUP
             </NavLink>
           </li>
-
         </ul>
 
         {logoutModalVisible && (
