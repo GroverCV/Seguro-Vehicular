@@ -165,19 +165,6 @@ const Sidebar = () => {
     }));
   };
 
-  const handleBackup = async () => {
-    try {
-      const response = await axios.post(
-        "https://5b74-181-41-146-246.ngrok-free.app/api/backup"
-      );
-      console.log("Backup exitoso:", response);
-      alert("¡Backup realizado exitosamente!");
-    } catch (error) {
-      console.error("Error al realizar el backup:", error);
-      alert("Error al realizar el backup");
-    }
-  };
-
   return (
     <div style={{ display: "flex" }}>
       <div style={sidebarStyles.container}>
