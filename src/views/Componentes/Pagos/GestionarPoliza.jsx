@@ -4,13 +4,15 @@ import { confirmAction } from "../modalComponentes/ModalConfirm";
 
 const GestionarPoliza = () => {
   const [vehiculos, setVehiculos] = useState([]);
+  const [valorComercial, setValorComercial] = useState([]);
+
   const [usuarios, setUsuarios] = useState([]);
   const [polizas, setPolizas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [editingPoliza, setEditingPoliza] = useState(null);
   const [formData, setFormData] = useState({
-    estado: true,
+    estado: "activo",
   });
 
   const [showForm, setShowForm] = useState(false);
@@ -65,7 +67,20 @@ const GestionarPoliza = () => {
     fetchPolizas();
     fetchUsuarios();
     fetchVehiculos();
+    fetchValorComercial();
   }, []);
+
+  const fetchValorComercial = async () => {
+    setLoading(true);
+    try {
+      const response = await api.get("/api/valor_comercial");
+      setValorComercial(response.data);
+    } catch (error) {
+      message.error("Error al cargar los datos");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleEdit = async (id) => {
     try {
@@ -151,7 +166,7 @@ const GestionarPoliza = () => {
         );
 
         setFormData({
-          estado: true,
+          estado: "activo",
         });
         setEditingPoliza(null);
         setShowForm(false);
@@ -194,7 +209,7 @@ const GestionarPoliza = () => {
       <table style={styles.table}>
         <thead>
           <tr>
-          <th style={styles.th}>ID</th>
+            <th style={styles.th}>ID</th>
             <th style={styles.th}>Número de Póliza</th>
             <th style={styles.th}>Vehículo</th>
             <th style={styles.th}>Fecha Inicio</th>
@@ -287,40 +302,50 @@ const GestionarPoliza = () => {
           <div style={styles.modal}>
             <h2>{editingPoliza ? "Editar" : "Crear"} Póliza</h2>
             <form onSubmit={handleSubmit}>
-
               <label>
-        Número de Póliza:
-        {loading ? (
-          <p>Cargando pólizas...</p>
-        ) : (
-          <select
-            style={styles.input}
-            value={formData.numero_poliza || ""}
-            onChange={(e) =>
-              setFormData({
-                ...formData,
-                numero_poliza: e.target.value,
-              })
-            }
-          >
-            <option value="">Seleccione una póliza</option>
-            {polizas.map((poliza) => (
-              <option key={poliza.id} value={poliza.numero_poliza}>
-                {poliza.numero_poliza}
-              </option>
-            ))}
-          </select>
-        )}
-      </label>
+                Número de Póliza:
+                {loading ? (
+                  <p>Cargando pólizas...</p>
+                ) : (
+                  <input
+                    style={styles.input}
+                    type="text"
+                    value={formData.numero_poliza || ""}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        numero_poliza: e.target.value,
+                      })
+                    } // Permite editar el valor
+                  />
+                )}
+              </label>
 
               <label>
                 Vehículo:
                 <select
                   style={styles.input}
                   value={formData.vehiculo_id || ""}
-                  onChange={(e) =>
-                    setFormData({ ...formData, vehiculo_id: e.target.value })
-                  }
+                  onChange={(e) => {
+                    const vehiculoId = e.target.value;
+                    if (vehiculoId) {
+                      const montoTotalRandom = Math.floor(
+                        Math.random() * (60000 - 15000 + 1) + 15000
+                      ); // Generar número aleatorio entre 15000 y 60000
+                      let primaMensual = montoTotalRandom / 30; // Calcular prima mensual
+                      if (primaMensual < 3480) {
+                        primaMensual = 3480; // Asignar 3480 si es menor
+                      }
+                      setFormData({
+                        ...formData,
+                        vehiculo_id: vehiculoId,
+                        monto_total: montoTotalRandom,
+                        prima_mensual: primaMensual,
+                      });
+                    } else {
+                      setFormData({ ...formData, vehiculo_id: "" });
+                    }
+                  }}
                 >
                   <option value="">Selecciona un vehículo</option>{" "}
                   {/* opción por defecto */}
@@ -330,6 +355,33 @@ const GestionarPoliza = () => {
                     </option>
                   ))}
                 </select>
+              </label>
+
+              <label>
+                Monto Total:
+                <input
+                  style={styles.input}
+                  type="number"
+                  value={formData.monto_total || ""}
+                  readOnly // Hacer el campo de solo lectura si no deseas edición manual
+                />
+              </label>
+
+              <label>
+                Prima Mensual:
+                <input
+                  style={styles.input}
+                  type="number"
+                  value={formData.prima_mensual || ""}
+                  onChange={(e) => {
+                    const primaMensual = e.target.value;
+                    if (primaMensual < 3480) {
+                      setFormData({ ...formData, prima_mensual: 3480 }); // Asegurar que la prima no sea menor a 3480
+                    } else {
+                      setFormData({ ...formData, prima_mensual: primaMensual });
+                    }
+                  }}
+                />
               </label>
 
               <label>
@@ -354,41 +406,21 @@ const GestionarPoliza = () => {
                   }
                 />
               </label>
-              <label>
-                Monto Total:
-                <input
-                  style={styles.input}
-                  type="number"
-                  value={formData.monto_total || ""}
-                  onChange={(e) =>
-                    setFormData({ ...formData, monto_total: e.target.value })
-                  }
-                />
-              </label>
-              <label>
-                Prima Mensual:
-                <input
-                  style={styles.input}
-                  type="number"
-                  value={formData.prima_mensual || ""}
-                  onChange={(e) =>
-                    setFormData({ ...formData, prima_mensual: e.target.value })
-                  }
-                />
-              </label>
+
               <label>
                 Estado:
                 <select
                   style={styles.input}
-                  value={formData.estado || "Activo"}
+                  value={formData.estado}
                   onChange={(e) =>
                     setFormData({ ...formData, estado: e.target.value })
                   }
                 >
-                  <option value="Activo">Activo</option>
-                  <option value="Inactivo">Inactivo</option>
+                  <option value="activo">Activo</option>
+                  <option value="inactivo">Inactivo</option>
                 </select>
               </label>
+
               <label>
                 Documento URL:
                 <input

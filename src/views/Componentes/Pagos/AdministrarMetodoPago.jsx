@@ -9,7 +9,8 @@ const AdministrarMetodoPago = () => {
   const [error, setError] = useState(null);
   const [editingMetodoPago, setEditingMetodoPago] = useState(null);
   const [formData, setFormData] = useState({
-    estado: true,
+    estado: "activo",
+    configuracion_json: "{\"requiere_comprobante\":true}",
   });
   
   const [showForm, setShowForm] = useState(false);
@@ -50,6 +51,7 @@ const AdministrarMetodoPago = () => {
       setEditingMetodoPago(metodoPago);
       setFormData(metodoPago);
       setShowForm(true);
+      fetchMetodosPago();
     } catch (error) {
       console.error("Error al obtener los datos del metodo de pago:", error);
     }
@@ -130,7 +132,7 @@ const AdministrarMetodoPago = () => {
         );
 
         setFormData({
-          estado: true, 
+          estado: "activo", 
         });
         setEditingMetodoPago(null);
         setShowForm(false);
@@ -235,7 +237,7 @@ const AdministrarMetodoPago = () => {
       {showForm && (
         <div style={styles.overlay}>
           <div style={styles.modal}>
-            <h2>{editingMetodoPago ? "Editar" : "Crear"} Metodo Pago</h2>
+            <h2>{editingMetodoPago ? "Editar" : "Crear "} Metodo Pago</h2>
             <form onSubmit={handleSubmit}>
               <label>
                 Nombre:
@@ -272,6 +274,7 @@ const AdministrarMetodoPago = () => {
                   <option value="Inactivo">Inactivo</option>
                 </select>
               </label>
+
               <label>
                 Configuración JSON:
                 <textarea
@@ -285,6 +288,7 @@ const AdministrarMetodoPago = () => {
                   }
                 />
               </label>
+
               <div>
                 <button style={styles.submitButton} type="submit">
                   {editingMetodoPago ? "Actualizar" : "Crear"}

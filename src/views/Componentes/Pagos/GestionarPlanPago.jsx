@@ -11,7 +11,7 @@ const GestionarPlanPago = () => {
   const [error, setError] = useState(null);
   const [editingPlanPago, setEditingPlanPago] = useState(null);
   const [formData, setFormData] = useState({
-    estado: true,
+    estado: "activo",
   });
 
   const [showForm, setShowForm] = useState(false);
@@ -77,6 +77,7 @@ const GestionarPlanPago = () => {
       setEditingPlanPago(planPago);
       setFormData(planPago);
       setShowForm(true);
+      
     } catch (error) {
       console.error("Error al obtener los datos del plan de pago:", error);
     }
@@ -117,13 +118,15 @@ const GestionarPlanPago = () => {
         );
 
         setFormData({
-          estado: true,
+          estado: "activo",
         });
         setEditingPlanPago(null);
         setShowForm(false);
+        
       } catch (error) {
         console.error("Error al actualizar o crear el plan de pago:", error);
       }
+      fetchPlanesPago();
     });
   };
 
@@ -178,7 +181,9 @@ const GestionarPlanPago = () => {
                 <td style={styles.td}>{plan.numero_cuotas}</td>
                 <td style={styles.td}>{plan.estado}</td>
                 <td style={styles.td}>
-                  {usuario ? usuario.nombre : "Desconocido"}
+                  {usuario
+                    ? usuario.nombre + " " + usuario.apellido
+                    : "Desconocido"}
                 </td>
                 <td style={styles.td}>
                   <button
@@ -229,17 +234,33 @@ const GestionarPlanPago = () => {
             <form onSubmit={handleSubmit}>
               <label>
                 Poliza ID:
-                <input
+                <select
                   style={styles.input}
-                  type="text"
                   value={formData.poliza_id || ""}
-                  onChange={(e) =>
+                  onChange={(e) => {
+                    const selectedPolizaId = e.target.value;
+                    const selectedPoliza = polizas.find(
+                      (poliza) => poliza.id === selectedPolizaId
+                    );
+
+                    // Generar un monto total aleatorio entre 15,000 y 45,000
+                    const montoRandom =
+                      Math.floor(Math.random() * (45000 - 15000 + 1)) + 15000;
+
                     setFormData({
                       ...formData,
-                      poliza_id: e.target.value,
-                    })
-                  }
-                />
+                      poliza_id: selectedPolizaId,
+                      monto_total: selectedPoliza ? montoRandom : "", // Asignar monto aleatorio
+                    });
+                  }}
+                >
+                  <option value="">Seleccione una Póliza</option>
+                  {polizas.map((poliza) => (
+                    <option key={poliza.id} value={poliza.id}>
+                      {poliza.id} {/* Muestra solo el ID */}
+                    </option>
+                  ))}
+                </select>
               </label>
 
               <label>
@@ -295,21 +316,25 @@ const GestionarPlanPago = () => {
 
               <label>
                 Tipo Plan:
-                <input
+                <select
                   style={styles.input}
-                  type="text"
                   value={formData.tipo_plan || ""}
                   onChange={(e) =>
                     setFormData({ ...formData, tipo_plan: e.target.value })
                   }
-                />
+                >
+                  <option value="">Seleccione un plan</option>
+                  <option value="total">Pago Total</option>
+                  <option value="mensual">Mensual</option>
+                  <option value="trimestral">Trimestral</option>
+                  {/* Puedes agregar más opciones aquí */}
+                </select>
               </label>
 
               <label>
                 Número de Cuotas:
-                <input
+                <select
                   style={styles.input}
-                  type="number"
                   value={formData.numero_cuotas || ""}
                   onChange={(e) =>
                     setFormData({
@@ -317,7 +342,13 @@ const GestionarPlanPago = () => {
                       numero_cuotas: e.target.value,
                     })
                   }
-                />
+                >
+                  <option value="">Seleccione una opción</option>
+                  <option value="1">1</option>
+                  <option value="2">2</option>
+                  <option value="3">3</option>
+                  <option value="4">4</option>
+                </select>
               </label>
 
               <label>
@@ -329,8 +360,8 @@ const GestionarPlanPago = () => {
                     setFormData({ ...formData, estado: e.target.value })
                   }
                 >
-                  <option value={true}>Activo</option>
-                  <option value={false}>Inactivo</option>
+                  <option value="Activo">Activo</option>
+                  <option value="Inactivo">Inactivo</option>
                 </select>
               </label>
 
@@ -348,7 +379,7 @@ const GestionarPlanPago = () => {
                 >
                   {usuarios.map((usuario) => (
                     <option key={usuario.id} value={usuario.id}>
-                      {usuario.nombre}
+                      {usuario.nombre + " " + usuario.apellido}
                     </option>
                   ))}
                 </select>

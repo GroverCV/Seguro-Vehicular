@@ -10,7 +10,7 @@ const GestionarCuota = () => {
   const [error, setError] = useState(null);
   const [editingCuota, setEditingCuota] = useState(null);
   const [formData, setFormData] = useState({
-    estado: true,
+    estado: "activo",
   });
 
   const [showForm, setShowForm] = useState(false);
@@ -101,7 +101,7 @@ const GestionarCuota = () => {
         );
 
         setFormData({
-          estado: true,
+          estado: "activo",
         });
         setEditingCuota(null);
         setShowForm(false);
@@ -226,16 +226,21 @@ const GestionarCuota = () => {
               </label>
 
               <label>
-                Número de Cuota:
-                <input
-                  style={styles.input}
-                  type="number"
-                  value={formData.numero_cuota || ""}
-                  onChange={(e) =>
-                    setFormData({ ...formData, numero_cuota: e.target.value })
-                  }
-                />
-              </label>
+  Número de Cuota:
+  <select
+    style={styles.input}
+    value={formData.numero_cuota || ""}
+    onChange={(e) =>
+      setFormData({ ...formData, numero_cuota: e.target.value })
+    }
+  >
+    <option value="1">1</option>
+    <option value="2">2</option>
+    <option value="3">3</option>
+    <option value="4">4</option>
+  </select>
+</label>
+
 
               <label>
                 Monto de Cuota:
@@ -250,16 +255,19 @@ const GestionarCuota = () => {
               </label>
 
               <label>
-                Estado Cuota:
-                <input
-                  style={styles.input}
-                  type="text"
-                  value={formData.estado_cuota || ""}
-                  onChange={(e) =>
-                    setFormData({ ...formData, estado_cuota: e.target.value })
-                  }
-                />
-              </label>
+  Estado Cuota:
+  <select
+    style={styles.input}
+    value={formData.estado_cuota || ""}
+    onChange={(e) =>
+      setFormData({ ...formData, estado_cuota: e.target.value })
+    }
+  >
+    <option value="Pagado">Pagado</option>
+    <option value="Pendiente">Pendiente</option>
+  </select>
+</label>
+
 
               <label>
                 Fecha Vencimiento:
@@ -289,18 +297,19 @@ const GestionarCuota = () => {
               </label>
 
               <label>
-                Estado:
-                <select
-                  style={styles.input}
-                  value={formData.estado || true}
-                  onChange={(e) =>
-                    setFormData({ ...formData, estado: e.target.value })
-                  }
-                >
-                  <option value={true}>Activo</option>
-                  <option value={false}>Inactivo</option>
-                </select>
-              </label>
+  Estado:
+  <select
+    style={styles.input}
+    value={formData.estado || "Activo"}  // Default value is "Activo"
+    onChange={(e) =>
+      setFormData({ ...formData, estado: e.target.value })
+    }
+  >
+    <option value="Activo">Activo</option>
+    <option value="Inactivo">Inactivo</option>
+  </select>
+</label>
+
 
               <button type="submit" style={styles.submitButton}>
                 {editingCuota ? "Actualizar" : "Crear"}

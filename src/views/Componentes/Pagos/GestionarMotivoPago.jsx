@@ -5,14 +5,14 @@ import { confirmAction } from "../modalComponentes/ModalConfirm";
 
 const GestionarMotivoPago = () => {
   const [motivosPago, setMotivosPago] = useState([]);
-  
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [editingMotivoPago, setEditingMotivoPago] = useState(null);
   const [formData, setFormData] = useState({
     estado: "Activo",
   });
-  
+
   const [showForm, setShowForm] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
@@ -73,9 +73,7 @@ const GestionarMotivoPago = () => {
     confirmAction(async () => {
       try {
         await api.delete(`/api/motivo_pago/${id}`);
-        setMotivosPago(
-          motivosPago.filter((motivo) => motivo.id !== id)
-        );
+        setMotivosPago(motivosPago.filter((motivo) => motivo.id !== id));
 
         const userIp = await getUserIp();
         const logData = {
@@ -123,16 +121,13 @@ const GestionarMotivoPago = () => {
         setMotivosPago((prev) =>
           editingMotivoPago
             ? prev.map((motivo) =>
-                motivo.id === updatedMotivoPago.id
-                  ? updatedMotivoPago
-                  : motivo
+                motivo.id === updatedMotivoPago.id ? updatedMotivoPago : motivo
               )
             : [...prev, updatedMotivoPago]
         );
-        
 
         setFormData({
-          estado: "Activo", 
+          estado: "Activo",
         });
         setEditingMotivoPago(null);
         setShowForm(false);
@@ -145,9 +140,7 @@ const GestionarMotivoPago = () => {
           detalles: `El Usuario ID: ${userId} ${
             editingMotivoPago ? "editó" : "creó"
           } el Motivo Pago ID: ${
-            editingMotivoPago
-              ? editingMotivoPago.id
-              : updatedMotivoPago.id
+            editingMotivoPago ? editingMotivoPago.id : updatedMotivoPago.id
           }`,
           ip: userIp,
         };
