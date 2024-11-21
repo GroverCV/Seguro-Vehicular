@@ -5,6 +5,12 @@ import Highlighter from "react-highlight-words";
 import { confirmAction } from "./modalComponentes/ModalConfirm";
 import Cloudinary from "./modalComponentes/Cloudinary";
 import { api } from "../../api/axios";
+import jsPDF from "jspdf";
+import "jspdf-autotable";
+import * as XLSX from "xlsx";
+
+
+
 
 const GestionarVehiculo = () => {
   const [loading, setLoading] = useState(true);
@@ -24,6 +30,94 @@ const GestionarVehiculo = () => {
   const [imageToShow, setImageToShow] = useState("");
 
   const [currentPage, setCurrentPage] = useState(1); // Página actual
+
+  const downloadPDF = () => {
+    if (!formData.propietario_id) {
+      alert("Por favor, selecciona un propietario para descargar su reporte.");
+      return;
+    }
+
+    const vehiculosFiltrados = vehiculos.filter(
+      (vehiculo) => vehiculo.propietario_id === parseInt(formData.propietario_id)
+    );
+
+    if (vehiculosFiltrados.length === 0) {
+      alert("No hay vehículos para el propietario seleccionado.");
+      return;
+    }
+
+    const doc = new jsPDF();
+    doc.text("Reporte de Vehículos por Propietario", 14, 20);
+
+    const tableColumn = ["ID", "Año", "Placa", "Kilometraje", "Marca", "Modelo"];
+    const tableRows = vehiculosFiltrados.map((vehiculo) => {
+      const marca =
+        marcas.find((marca) => marca.id === vehiculo.marca_id)?.nombre || "N/A";
+      const modelo =
+        modelos.find((modelo) => modelo.id === vehiculo.modelo_id)?.nombre ||
+        "N/A";
+
+      return [
+        vehiculo.id,
+        vehiculo.anio,
+        vehiculo.placa,
+        vehiculo.kilometraje,
+        marca,
+        modelo,
+      ];
+    });
+
+    doc.autoTable({
+      head: [tableColumn],
+      body: tableRows,
+      startY: 30,
+    });
+
+    doc.save(`reporte_vehiculos_propietario_${formData.propietario_id}.pdf`);
+  };
+
+  const downloadExcel = () => {
+    if (!formData.propietario_id) {
+      alert("Por favor, selecciona un propietario para descargar su reporte.");
+      return;
+    }
+
+    const vehiculosFiltrados = vehiculos.filter(
+      (vehiculo) => vehiculo.propietario_id === parseInt(formData.propietario_id)
+    );
+
+    if (vehiculosFiltrados.length === 0) {
+      alert("No hay vehículos para el propietario seleccionado.");
+      return;
+    }
+
+    const worksheet = XLSX.utils.json_to_sheet(
+      vehiculosFiltrados.map((vehiculo) => ({
+        ID: vehiculo.id,
+        Año: vehiculo.anio,
+        Placa: vehiculo.placa,
+        Kilometraje: vehiculo.kilometraje,
+        Marca:
+          marcas.find((marca) => marca.id === vehiculo.marca_id)?.nombre ||
+          "N/A",
+        Modelo:
+          modelos.find((modelo) => modelo.id === vehiculo.modelo_id)?.nombre ||
+          "N/A",
+      }))
+    );
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(
+      workbook,
+      worksheet,
+      `Vehículos Propietario ${formData.propietario_id}`
+    );
+    XLSX.writeFile(
+      workbook,
+      `reporte_vehiculos_propietario_${formData.propietario_id}.xlsx`
+    );
+  };
+
+
 
   const fetchUsuarios = async () => {
     try {
@@ -409,12 +503,75 @@ const GestionarVehiculo = () => {
     },
   ];
 
+   
+   
+
   if (loading) return <div>Cargando...</div>;
   if (error) return <div>Error: {error}</div>;
 
   return (
     <div style={styles.body}>
       <h1 style={styles.h1}>GESTIONAR VEHÍCULOS</h1>
+
+      <div style={{ display: "flex", gap: "15px", marginBottom: "20px", alignItems: "center" }}>
+  <select
+    value={formData.propietario_id || ""}
+    onChange={(e) =>
+      setFormData({ ...formData, propietario_id: e.target.value })
+    }
+    style={{
+      width: "250px",
+      padding: "10px",
+      borderRadius: "4px",
+      border: "1px solid #ccc",
+    }}
+  >
+    <option value="">Seleccionar Propietario</option>
+    {usuarios.map((usuario) => (
+      <option key={usuario.id} value={usuario.id}>
+        {`${usuario.nombre} ${usuario.apellido} - CI: ${usuario.ci}`}
+      </option>
+    ))}
+  </select>
+
+  <Button
+    onClick={downloadPDF}
+    type="primary"
+    disabled={!formData.propietario_id}
+    style={{
+      backgroundColor: "#007bff",
+      borderColor: "#007bff",
+      color: "#fff",
+      padding: "10px 20px",
+      fontSize: "14px",
+      borderRadius: "5px",
+    }}
+  >
+    Descargar PDF
+  </Button>
+  <Button
+    onClick={downloadExcel}
+    type="default"
+    disabled={!formData.propietario_id}
+    style={{
+      backgroundColor: "#f5f5f5",
+      borderColor: "#dcdcdc",
+      color: "#333",
+      padding: "10px 20px",
+      fontSize: "14px",
+      borderRadius: "5px",
+    }}
+  >
+    Descargar Excel
+  </Button>
+</div>
+
+
+      <div style={{ display: "flex", gap: "15px" }}>
+
+
+
+  </div>
       <Button
         type="primary"
         onClick={() => {
