@@ -230,27 +230,35 @@ const GestionarPlanPago = () => {
           <div style={styles.modal}>
             <h2>{editingPlanPago ? "Editar" : "Crear"} Plan de Pago</h2>
             <form onSubmit={handleSubmit}>
-              <label>
-                Poliza ID:
-                <select
-                  style={styles.input}
-                  value={formData.poliza_id || ""}
-                  onChange={(e) => {
-                    const selectedPolizaId = e.target.value;
-                    setFormData({
-                      ...formData,
-                      poliza_id: selectedPolizaId, // Solo se actualiza el poliza_id
-                    });
-                  }}
-                >
-                  <option value="">Seleccione una Póliza</option>
-                  {polizas.map((poliza) => (
-                    <option key={poliza.id} value={poliza.id}>
-                      {poliza.id} {/* Muestra solo el ID */}
-                    </option>
-                  ))}
-                </select>
-              </label>
+              <select
+                style={styles.input}
+                value={formData.poliza_id || ""}
+                onChange={(e) => {
+                  const selectedMontoTotal = e.target.value;
+                  const selectedPoliza = polizas.find(
+                    (poliza) => poliza.monto_total === selectedMontoTotal
+                  );
+
+                  setFormData({
+                    ...formData,
+                    poliza_id: selectedPoliza ? selectedPoliza.id : "", // Guarda el ID de la póliza
+                    monto_total: selectedMontoTotal, // Guarda el monto total
+                  });
+                }}
+              >
+                <option value="">Seleccione una Póliza</option>
+                {formData.poliza_id && (
+                  <option value={formData.poliza_id} disabled>
+                    ha seleccionado: {formData.poliza_id}{" "}
+                    {/* Mensaje indicando la selección */}
+                  </option>
+                )}
+                {polizas.map((poliza) => (
+                  <option key={poliza.id} value={poliza.monto_total}>
+                    {poliza.id} {/* Muestra solo el ID */}
+                  </option>
+                ))}
+              </select>
 
               <label>
                 Monto Total:
