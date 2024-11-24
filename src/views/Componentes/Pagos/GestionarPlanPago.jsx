@@ -148,14 +148,16 @@ const GestionarPlanPago = () => {
           <tr>
             <th style={styles.th}>ID</th>
             <th style={styles.th}>Poliza ID</th>
-            <th style={styles.th}>Monto Total</th>
+            <th style={styles.th}>Usuario Registro</th>
+            <th style={styles.th}>Costo Poliza</th>
+            <th style={styles.th}>Tipo Plan</th>
+            <th style={styles.th}>Cuotas</th>
+            <th style={styles.th}>Saldo en cuotas</th>
+
             <th style={styles.th}>Fecha Inicio</th>
             <th style={styles.th}>Fecha Fin</th>
-            <th style={styles.th}>Saldo</th>
-            <th style={styles.th}>Tipo Plan</th>
-            <th style={styles.th}>Número de Cuotas</th>
             <th style={styles.th}>Estado</th>
-            <th style={styles.th}>Usuario Registro</th>
+
             <th style={styles.th}>Acciones</th>
           </tr>
         </thead>
@@ -171,18 +173,20 @@ const GestionarPlanPago = () => {
               >
                 <td style={styles.td}>{plan.id}</td>
                 <td style={styles.td}>{plan.poliza_id}</td>
-                <td style={styles.td}>{plan.monto_total}</td>
-                <td style={styles.td}>{plan.fecha_inicio}</td>
-                <td style={styles.td}>{plan.fecha_fin}</td>
-                <td style={styles.td}>{plan.saldo}</td>
-                <td style={styles.td}>{plan.tipo_plan}</td>
-                <td style={styles.td}>{plan.numero_cuotas}</td>
-                <td style={styles.td}>{plan.estado}</td>
                 <td style={styles.td}>
                   {usuario
                     ? usuario.nombre + " " + usuario.apellido
                     : "Desconocido"}
                 </td>
+                <td style={styles.td}>{plan.monto_total}</td>
+                <td style={styles.td}>{plan.tipo_plan}</td>
+                <td style={styles.td}>{plan.numero_cuotas}</td>
+                <td style={styles.td}>{plan.saldo}</td>
+
+                <td style={styles.td}>{plan.fecha_inicio}</td>
+                <td style={styles.td}>{plan.fecha_fin}</td>
+                <td style={styles.td}>{plan.estado}</td>
+
                 <td style={styles.td}>
                   <button
                     style={styles.button}
@@ -243,25 +247,51 @@ const GestionarPlanPago = () => {
                     ...formData,
                     poliza_id: selectedPoliza ? selectedPoliza.id : "", // Guarda el ID de la póliza
                     monto_total: selectedMontoTotal, // Guarda el monto total
+                    saldo: selectedMontoTotal, // Guarda el saldo
+                    usuario_registro_id: selectedPoliza
+                      ? selectedPoliza.usuario_registro_id
+                      : "", // Guarda solo el ID
                   });
                 }}
               >
                 <option value="">Seleccione una Póliza</option>
                 {formData.poliza_id && (
                   <option value={formData.poliza_id} disabled>
-                    ha seleccionado: {formData.poliza_id}{" "}
-                    {/* Mensaje indicando la selección */}
+                    ha seleccionado la poliza: {formData.poliza_id}
                   </option>
                 )}
                 {polizas.map((poliza) => (
                   <option key={poliza.id} value={poliza.monto_total}>
-                    {poliza.id} {/* Muestra solo el ID */}
+                    {poliza.id}
                   </option>
                 ))}
               </select>
 
               <label>
-                Monto Total:
+                Usuario:
+                <input
+                  style={styles.input}
+                  type="text"
+                  value={
+                    // Muestra el nombre completo del usuario si se ha seleccionado una póliza
+                    formData.usuario_registro_id
+                      ? usuarios.find(
+                          (usuario) =>
+                            usuario.id === formData.usuario_registro_id
+                        )?.nombre +
+                        " " +
+                        usuarios.find(
+                          (usuario) =>
+                            usuario.id === formData.usuario_registro_id
+                        )?.apellido
+                      : ""
+                  }
+                  readOnly // El campo es solo lectura, ya que el valor se auto llena
+                />
+              </label>
+
+              <label>
+                Costo de Poliza:
                 <input
                   style={styles.input}
                   type="number"
@@ -272,6 +302,55 @@ const GestionarPlanPago = () => {
                       monto_total: e.target.value,
                     })
                   }
+                />
+              </label>
+
+              <label>
+                Tipo Plan:
+                <select
+                  style={styles.input}
+                  value={formData.tipo_plan || ""}
+                  onChange={(e) =>
+                    setFormData({ ...formData, tipo_plan: e.target.value })
+                  }
+                >
+                  <option value="">Seleccione un plan</option>
+                  <option value="total">Pago Total</option>
+                  <option value="mensual">Mensual</option>
+                  <option value="trimestral">Trimestral</option>
+                  {/* Puedes agregar más opciones aquí */}
+                </select>
+              </label>
+              <label>
+                Número de Cuotas:
+                <select
+                  style={styles.input}
+                  value={formData.numero_cuotas || ""}
+                  onChange={(e) => {
+                    const cuotas = e.target.value;
+                    const saldoDividido = formData.monto_total / (cuotas || 1); // Divide el monto total entre el número de cuotas
+                    setFormData({
+                      ...formData,
+                      numero_cuotas: cuotas,
+                      saldo: saldoDividido, // Actualiza el saldo dividido
+                    });
+                  }}
+                >
+                  <option value="">Seleccione la cuota</option>
+                  <option value="1">1</option>
+                  <option value="2">2</option>
+                  <option value="3">3</option>
+                  <option value="4">4</option>
+                </select>
+              </label>
+
+              <label>
+                Saldo dividida en cuotas:
+                <input
+                  style={styles.input}
+                  type="number"
+                  value={formData.saldo || ""}
+                  readOnly
                 />
               </label>
 
@@ -300,55 +379,6 @@ const GestionarPlanPago = () => {
               </label>
 
               <label>
-                Saldo:
-                <input
-                  style={styles.input}
-                  type="number"
-                  value={formData.saldo || ""}
-                  onChange={(e) =>
-                    setFormData({ ...formData, saldo: e.target.value })
-                  }
-                />
-              </label>
-
-              <label>
-                Tipo Plan:
-                <select
-                  style={styles.input}
-                  value={formData.tipo_plan || ""}
-                  onChange={(e) =>
-                    setFormData({ ...formData, tipo_plan: e.target.value })
-                  }
-                >
-                  <option value="">Seleccione un plan</option>
-                  <option value="total">Pago Total</option>
-                  <option value="mensual">Mensual</option>
-                  <option value="trimestral">Trimestral</option>
-                  {/* Puedes agregar más opciones aquí */}
-                </select>
-              </label>
-
-              <label>
-                Número de Cuotas:
-                <select
-                  style={styles.input}
-                  value={formData.numero_cuotas || ""}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      numero_cuotas: e.target.value,
-                    })
-                  }
-                >
-                  <option value="">Seleccione una opción</option>
-                  <option value="1">1</option>
-                  <option value="2">2</option>
-                  <option value="3">3</option>
-                  <option value="4">4</option>
-                </select>
-              </label>
-
-              <label>
                 Estado:
                 <select
                   style={styles.input}
@@ -359,26 +389,6 @@ const GestionarPlanPago = () => {
                 >
                   <option value="Activo">Activo</option>
                   <option value="Inactivo">Inactivo</option>
-                </select>
-              </label>
-
-              <label>
-                Usuario de Registro:
-                <select
-                  style={styles.input}
-                  value={formData.usuario_registro_id || ""}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      usuario_registro_id: e.target.value,
-                    })
-                  }
-                >
-                  {usuarios.map((usuario) => (
-                    <option key={usuario.id} value={usuario.id}>
-                      {usuario.nombre + " " + usuario.apellido}
-                    </option>
-                  ))}
                 </select>
               </label>
 
