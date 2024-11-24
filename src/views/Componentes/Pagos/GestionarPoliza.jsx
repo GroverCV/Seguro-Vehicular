@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { api } from "../../../api/axios";
 import { confirmAction } from "../modalComponentes/ModalConfirm";
+import Cloudinary from "../modalComponentes/Cloudinary";
 
 const GestionarPoliza = () => {
   const [vehiculos, setVehiculos] = useState([]);
@@ -11,6 +12,9 @@ const GestionarPoliza = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [editingPoliza, setEditingPoliza] = useState(null);
+
+  const [showImageModal, setShowImageModal] = useState(false);
+  const [imageToShow, setImageToShow] = useState("");
   const [formData, setFormData] = useState({
     estado: "activo",
   });
@@ -27,6 +31,17 @@ const GestionarPoliza = () => {
   const totalPages = Math.ceil(
     Array.isArray(polizas) ? polizas.length / itemsPerPage : 0
   );
+
+  const handleImageClick = (imageUrl) => {
+    setImageToShow(imageUrl); // Establecer la imagen seleccionada
+    setShowImageModal(true); // Mostrar el modal
+  };
+  const handleImageUpload = (imageUrl) => {
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      url_imagen: imageUrl, // Actualizar la descripción con la URL de la imagen
+    }));
+  };
 
   const fetchPolizas = async () => {
     setLoading(true);
@@ -422,14 +437,22 @@ const GestionarPoliza = () => {
               </label>
 
               <label>
-                Documento URL:
-                <input
-                  style={styles.input}
-                  type="url"
-                  value={formData.documento_url || ""}
-                  onChange={(e) =>
-                    setFormData({ ...formData, documento_url: e.target.value })
+                <Cloudinary
+                  onImageUpload={
+                    (imageUrl) =>
+                      setFormData({ ...formData, documento_url: imageUrl }) // Guardar la URL de la imagen en documento_url
                   }
+                />
+                <label htmlFor="documento_url">URL Imagen:</label>
+                <input
+                  type="text"
+                  id="documento_url"
+                  name="documento_url"
+                  value={formData.documento_url || ""}
+                  readOnly
+                  required
+                  style={styles.input}
+                  onClick={() => handleImageClick(formData.documento_url)}
                 />
               </label>
 

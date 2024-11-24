@@ -77,7 +77,6 @@ const GestionarPlanPago = () => {
       setEditingPlanPago(planPago);
       setFormData(planPago);
       setShowForm(true);
-      
     } catch (error) {
       console.error("Error al obtener los datos del plan de pago:", error);
     }
@@ -122,7 +121,6 @@ const GestionarPlanPago = () => {
         });
         setEditingPlanPago(null);
         setShowForm(false);
-        
       } catch (error) {
         console.error("Error al actualizar o crear el plan de pago:", error);
       }
@@ -239,18 +237,9 @@ const GestionarPlanPago = () => {
                   value={formData.poliza_id || ""}
                   onChange={(e) => {
                     const selectedPolizaId = e.target.value;
-                    const selectedPoliza = polizas.find(
-                      (poliza) => poliza.id === selectedPolizaId
-                    );
-
-                    // Generar un monto total aleatorio entre 15,000 y 45,000
-                    const montoRandom =
-                      Math.floor(Math.random() * (45000 - 15000 + 1)) + 15000;
-
                     setFormData({
                       ...formData,
-                      poliza_id: selectedPolizaId,
-                      monto_total: selectedPoliza ? montoRandom : "", // Asignar monto aleatorio
+                      poliza_id: selectedPolizaId, // Solo se actualiza el poliza_id
                     });
                   }}
                 >
