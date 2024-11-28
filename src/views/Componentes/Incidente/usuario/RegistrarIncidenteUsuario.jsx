@@ -14,7 +14,7 @@ const RegistrarLugar = () => {
   const [error, setError] = useState(null);
   const [editingIncidente, setEditingIncidente] = useState(null);
 
-  const [showForm, setShowForm] = useState(true);
+  const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState({
     poliza_id: "",
     tipo_incidente_id: "",
@@ -175,19 +175,34 @@ const RegistrarLugar = () => {
             : [...prev, updatedIncidente]
         );
 
+        // Limpia el formulario después de registrar
         setFormData({
           poliza_id: "",
           tipo_incidente_id: "",
           fecha_incidente: "",
           descripcion: "",
-          ubicacion: "",
-          monto_estimado: "",
           estado: "en_proceso",
-          cobertura_id: "",
-          usuario_registro_id: "",
+          cobertura_id: 1,
+          usuario_registro_id: 1,
+          imagen_1: "",
+          imagen_2: "",
+          imagen_3: "",
+          imagen_4: "",
+          descripcion_imagen: "",
+          maps_url: "",
+          fecha_reporte: "",
+          estado_reporte: "",
+          url_imagen: "",
+          oficial_cargo: "",
+          observacion: "",
         });
+
         setEditingIncidente(null);
         setShowForm(false);
+
+        // Mensaje de éxito
+        alert("¡Acaba de registrar un incidente exitosamente!");
+
         fetchIncidentes();
       } catch (error) {
         console.error("Error al actualizar o crear el incidente:", error);
@@ -230,154 +245,11 @@ const RegistrarLugar = () => {
         Registrar Incidente
       </button>
 
-      <table style={styles.table}>
-        <thead>
-          <tr>
-            <th style={styles.th}>ID</th>
-            <th style={styles.th}>Póliza</th>
-            <th style={styles.th}>Tipo Incidente</th>
-            <th style={styles.th}>Fecha Incidente</th>
-            <th style={styles.th}>Descripción</th>
-            <th style={styles.th}>Estado</th>
-            <th style={styles.th}>Usuario Registro</th>
-            <th style={styles.th}>IMAGEN1</th>
-            <th style={styles.th}>IMAGEN2</th>
-            <th style={styles.th}>IMAGNE3</th>
-            <th style={styles.th}>IMAGEN4</th>
-            <th style={styles.th}>DESCRIPCION</th>
-            <th style={styles.th}>MAPA</th>
-            <th style={styles.th}>Oficial</th>
-            <th style={styles.th}>fecha_reporte</th>
-            <th style={styles.th}>url_imagen</th>
-            <th style={styles.th}>observacion</th>
-            <th style={styles.th}>estado_reporte</th>
-            <th style={styles.th}>Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
-          {incidentes.map((incidente, index) => {
-            const usuario = usuarios.find(
-              (u) => u.id === incidente.usuario_registro_id
-            );
-            return (
-              <tr
-                key={incidente.id}
-                style={index % 2 === 0 ? styles.trEven : styles.trOdd}
-              >
-                <td style={styles.td}>{incidente.id}</td>
-                <td style={styles.td}>
-                  {polizas.find((poliza) => poliza.id === incidente.poliza_id)
-                    ?.numero_poliza || "Desconocido"}
-                </td>
-                <td style={styles.td}>
-                  {getTipoIncidenteNombre(incidente.tipo_incidente_id)}
-                </td>
-                <td style={styles.td}>{incidente.fecha_incidente}</td>
-                <td style={styles.td}>{incidente.descripcion}</td>
-                <td style={styles.td}>{incidente.estado}</td>
-                <td style={styles.td}>
-                  {usuario
-                    ? usuario.nombre + " " + usuario.apellido
-                    : "Desconocido"}
-                </td>
-
-                <td style={styles.td}>
-                  {incidente.imagen_1 && (
-                    <img
-                      src={incidente.imagen_1}
-                      alt="Imagen 1"
-                      style={{ width: "100px", height: "auto" }}
-                    />
-                  )}
-                </td>
-                <td style={styles.td}>
-                  {incidente.imagen_2 && (
-                    <img
-                      src={incidente.imagen_2}
-                      alt="Imagen 2"
-                      style={{ width: "100px", height: "auto" }}
-                    />
-                  )}
-                </td>
-                <td style={styles.td}>
-                  {incidente.imagen_3 && (
-                    <img
-                      src={incidente.imagen_3}
-                      alt="Imagen 3"
-                      style={{ width: "100px", height: "auto" }}
-                    />
-                  )}
-                </td>
-                <td style={styles.td}>
-                  {incidente.imagen_4 && (
-                    <img
-                      src={incidente.imagen_4}
-                      alt="Imagen 4"
-                      style={{ width: "100px", height: "auto" }}
-                    />
-                  )}
-                </td>
-
-                <td style={styles.td}>{incidente.descripcion_imagen}</td>
-
-                <td style={styles.td}>{incidente.maps_url}</td>
-
-                <td style={styles.td}>{incidente.oficial_cargo}</td>
-                <td style={styles.td}>{incidente.fecha_reporte}</td>
-                <td style={styles.td}>
-                  {incidente.imagen_4 && (
-                    <img
-                      src={incidente.url_imagen}
-                      alt="Imagen 4"
-                      style={{ width: "100px", height: "auto" }}
-                    />
-                  )}
-                </td>
-                <td style={styles.td}>{incidente.observacion}</td>
-                <td style={styles.td}>{incidente.estado_reporte}</td>
-
-                <td style={styles.td}>
-                  <button
-                    style={styles.button}
-                    onClick={() => handleEdit(incidente.id)}
-                  >
-                    Editar
-                  </button>
-                </td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
-
       {showForm && (
         <div style={styles.overlay}>
           <div style={styles.modal}>
             <h2>{editingIncidente ? "Editar" : "Registrar"} Incidente</h2>
             <form onSubmit={handleSubmit}>
-              <label>
-                Usuario Registro ID:
-                <select
-                  style={styles.input}
-                  value={formData.usuario_registro_id || ""}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      usuario_registro_id: e.target.value,
-                    })
-                  }
-                >
-                  <option value="" disabled>
-                    Seleccionar ID de usuario
-                  </option>
-                  {usuarios.map((usuario) => (
-                    <option key={usuario.id} value={usuario.id}>
-                      {usuario.id} - {usuario.nombre} {usuario.apellido}{" "}
-                    </option>
-                  ))}
-                </select>
-              </label>
-
               <label>
                 Póliza:
                 <select
@@ -447,8 +319,6 @@ const RegistrarLugar = () => {
                 />
               </label>
 
-             
-
               <Cloudinary onImageUpload={handleImageUpload1} />
               <textarea
                 placeholder="enlace"
@@ -477,19 +347,6 @@ const RegistrarLugar = () => {
                 readOnly // Este campo se llenará automáticamente con la URL de la imagen
               />
 
-              <label>
-                Descripción:
-                <textarea
-                  style={styles.input}
-                  value={formData.descripcion_imagen || ""}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      descripcion_imagen: e.target.value,
-                    })
-                  }
-                />
-              </label>
               <form>
                 <label>
                   Ubicación:
@@ -514,7 +371,6 @@ const RegistrarLugar = () => {
                   </button>
                 </div>
               </form>
-             
 
               <button type="submit" style={styles.submitButton}>
                 Guardar

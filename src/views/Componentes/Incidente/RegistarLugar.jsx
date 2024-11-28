@@ -176,7 +176,7 @@ const RegistrarLugar = () => {
           tipo_incidente_id: "",
           fecha_incidente: "",
           descripcion: "",
-          ubicacion: "",
+          maps_url: "",
           monto_estimado: "",
           estado: "en_proceso",
           cobertura_id: "",
@@ -206,7 +206,7 @@ const RegistrarLugar = () => {
           const lng = position.coords.longitude;
           const locationLink = `https://www.google.com/maps?q=${lat},${lng}`;
           setCurrentLocation({ lat, lng, link: locationLink });
-          setFormData({ ...formData, ubicacion: locationLink }); // Guardar el enlace en el formulario
+          setFormData({ ...formData, maps_url: locationLink }); // Guardar el enlace en el formulario
         },
         (error) => {
           alert("No se pudo obtener la ubicación. Intenta de nuevo.");
@@ -246,7 +246,8 @@ const RegistrarLugar = () => {
             <th style={styles.th}>DESCRIPCION</th>
             <th style={styles.th}>Acciones</th>*/}
             <th style={styles.th}>ID</th>
-            <th style={styles.th}>MAPA</th>
+            <th style={styles.th}>Ubicacion</th>
+            <th style={styles.th}>Mapa</th>
             <th style={styles.th}>Acciones</th>
             {/*<th style={styles.th}>ID</th>
             <th style={styles.th}>Oficial</th>
@@ -346,6 +347,19 @@ const RegistrarLugar = () => {
 
                 <td style={styles.td}>{incidente.id}</td>
                 <td style={styles.td}>{incidente.maps_url}</td>
+                <td style={styles.td}>
+                  <iframe
+                    width="200"
+                    height="150"
+                    style={{ border: "none" }}
+                    loading="lazy"
+                    allowFullScreen
+                    src={`https://www.google.com/maps?q=${encodeURIComponent(
+                      incidente.maps_url
+                    )}&output=embed`}
+                  ></iframe>
+                </td>
+
                 <td style={styles.td}>
                   <button
                     style={styles.button}
@@ -545,9 +559,9 @@ const RegistrarLugar = () => {
                   <input
                     type="text"
                     style={styles.input}
-                    value={formData.ubicacion || ""}
+                    value={formData.maps_url || ""}
                     onChange={(e) =>
-                      setFormData({ ...formData, ubicacion: e.target.value })
+                      setFormData({ ...formData, maps_url: e.target.value })
                     }
                   />
                 </label>
@@ -615,7 +629,7 @@ const RegistrarLugar = () => {
                     })
                   }
                 />
-              </label>
+              </label>*/}
 
               <button type="submit" style={styles.submitButton}>
                 Guardar
@@ -626,7 +640,7 @@ const RegistrarLugar = () => {
                 onClick={handleCancel}
               >
                 Cancelar
-              </button>*/}
+              </button>
             </form>
           </div>
         </div>

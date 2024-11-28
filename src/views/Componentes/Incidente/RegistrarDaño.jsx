@@ -569,7 +569,7 @@ const RegistrarDaño = () => {
                     })
                   }
                 />
-              </label>
+              </label>*/}
 
               <button type="submit" style={styles.submitButton}>
                 Guardar
@@ -580,7 +580,7 @@ const RegistrarDaño = () => {
                 onClick={handleCancel}
               >
                 Cancelar
-              </button>*/}
+              </button>
             </form>
           </div>
         </div>

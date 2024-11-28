@@ -221,7 +221,7 @@ const RegistrarReportePolicial = () => {
 
   return (
     <div style={styles.body}>
-      <h1 style={styles.h1}>REGISTRAR DAÑO</h1>
+      <h1 style={styles.h1}>REGISTRAR REPORTE POLICIAL</h1>
       {/*<button style={styles.submitButton} onClick={() => setShowForm(true)}>
         Registrar Incidente
       </button>*/}
@@ -561,8 +561,8 @@ const RegistrarReportePolicial = () => {
                     Seleccionar mi ubicación
                   </button>
                 </div>
-              </form>
-              {/*<label>
+              </form>*/}
+              <label>
                 Oficial a Cargo
                 <input
                   type="text"
@@ -575,7 +575,7 @@ const RegistrarReportePolicial = () => {
                     })
                   }
                 />
-              </label>*/}
+              </label>
 
 
 
@@ -615,6 +615,21 @@ const RegistrarReportePolicial = () => {
                     })
                   }
                 />
+              </label>
+
+              <label>
+                Estado:
+                <select
+                  style={styles.input}
+                  value={formData.estado_reporte || ""}
+                  onChange={(e) =>
+                    setFormData({ ...formData, estado_reporte: e.target.value })
+                  }
+                >
+                  <option value="en_proceso">En Proceso</option>
+                  <option value="resuelto">Resuelto</option>
+                  <option value="cerrado">Cerrado</option>
+                </select>
               </label>
 
               <button type="submit" style={styles.submitButton}>
