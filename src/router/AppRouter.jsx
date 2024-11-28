@@ -39,6 +39,12 @@ import GestionarCuota from "../views/Componentes/Pagos/GestionarCouta";
 import AdministrarPago from "../views/Componentes/Pagos/AdministrarPago";
 import Comprobante from "../views/Componentes/Pagos/Comprobante";
 import Backup from "../views/Componentes/Backup";
+import GestionarTipoIncidente from "../views/Componentes/Incidente/GestionarTipoIncidente";
+import AdministrarIncidente from "../views/Componentes/Incidente/AdministrarIncidente";
+import RegistarLugar from "../views/Componentes/Incidente/RegistarLugar";
+import RegistrarDaño from "../views/Componentes/Incidente/RegistrarDaño";
+import RegistrarReportePolicial from "../views/Componentes/Incidente/RegistrarReportePolicial";
+import RegistrarIncidenteUsuario from "../views/Componentes/Incidente/usuario/RegistrarIncidenteUsuario";
 
 
 export const AppRouter = () => {
@@ -88,6 +94,14 @@ export const AppRouter = () => {
           <Route path="comprobante" element={<Comprobante/>} />
           <Route path="modalagendaagente" element={<ModalAgendaAgente/>} />
           <Route path="backup" element={<Backup/>} />
+
+          <Route path="gestionartipoincidente" element={<GestionarTipoIncidente/>} />
+          <Route path="administrarincidente" element={<AdministrarIncidente/>} />
+          <Route path="registrarlugar" element={<RegistarLugar/>} />
+          <Route path="registrardaño" element={<RegistrarDaño/>} />
+          <Route path="registrarreportepolicial" element={<RegistrarReportePolicial/>} />
+
+          <Route path="registrarincidenteusuario" element={<RegistrarIncidenteUsuario/>} />
         </Route>
       </Routes>
     </>

@@ -247,10 +247,30 @@ const Sidebar = () => {
             toggleExpand={toggleExpand}
             items={[
               {
+                label: "Administrar Incidente",
+                to: "/dashboard/administrarincidente",
+              },
+              
+              {
+                label: "Registrar Daño",
+                to: "/dashboard/registrardaño",
+              },
+              {
+                label: "Registrar Lugar",
+                to: "/dashboard/registrarlugar",
+              },
+              {
+                label: "Registrar Reporte Policial",
+                to: "/dashboard/registrarreportepolicial",
+              },
+              {
+                label: "GestionarTipoIncidente",
+                to: "/dashboard/gestionartipoincidente",
+              },
+              {
                 label: "Gestionar Informacion",
                 to: "/dashboard/gestionarinformacion",
               },
-
               {
                 label: "Gestionar Notificacion",
                 to: "/dashboard/gestionarnotificacion",

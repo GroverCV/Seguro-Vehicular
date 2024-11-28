@@ -7,6 +7,7 @@ import Informacion from "./menu/Informacion";
 import Inicio from "./menu/Inicio";
 import Notificaciones from "./menu/Notificaciones";
 import Poliza from "./menu/Poliza";
+import RegistrarIncidenteUsuario from "./Componentes/Incidente/usuario/RegistrarIncidenteUsuario";
 
 const styles = {
   container: {
@@ -65,10 +66,10 @@ export const Home = () => {
         </button>
         <button
           style={styles.iconButton}
-          onClick={() => handleNavigation("/", "informacion")}
+          onClick={() => handleNavigation("/", "registrarincidenteusuario")}
         >
           <FaInfoCircle style={styles.icon} />
-          <span style={styles.label}>Información</span>
+          <span style={styles.label}>Registrar incidente</span>
         </button>
         <button
           style={styles.iconButton}
@@ -103,7 +104,7 @@ export const Home = () => {
       <div style={styles.content}>
         {selectedButton === "inicio" && <Inicio />}
         {selectedButton === "contacto" && <Contacto />}
-        {selectedButton === "informacion" && <Informacion />}
+        {selectedButton === "registrarincidenteusuario" && <RegistrarIncidenteUsuario />}
         {selectedButton === "poliza" && <Poliza />}
         {selectedButton === "calendario" && <Calendario />}
         {selectedButton === "notificaciones" && <Notificaciones />}
