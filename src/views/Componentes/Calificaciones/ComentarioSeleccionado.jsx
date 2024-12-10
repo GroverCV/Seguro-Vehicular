@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { api } from "../../../api/axios";
 import { confirmAction } from "../modalComponentes/ModalConfirm";
 
-const GestionarComentario = () => {
+const ComentarioSeleccionado = () => {
   const [tiposCita, setTiposCita] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -10,7 +10,7 @@ const GestionarComentario = () => {
   const [formData, setFormData] = useState({});
   const [showForm, setShowForm] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
+  const itemsPerPage = 5;
   const [selectedComments, setSelectedComments] = useState([]); // Estado para comentarios seleccionados
 
   const indexOfLastTipoCita = currentPage * itemsPerPage;
@@ -24,9 +24,9 @@ const GestionarComentario = () => {
   const fetchTiposCita = async () => {
     try {
       const response = await api.get("/api/tipo_cita");
-      // Filtramos los tipos de cita que no contienen "666"
-      const tiposCitaFiltrados = response.data.filter(
-        (tipoCita) => !tipoCita.nombre.includes("666")
+      // Filtramos los tipos de cita que contienen "666"
+      const tiposCitaFiltrados = response.data.filter((tipoCita) =>
+        tipoCita.nombre.includes("666")
       );
       setTiposCita(tiposCitaFiltrados); // Actualizamos el estado con los tipos de cita filtrados
       fetchTiposCita();
@@ -143,14 +143,23 @@ const GestionarComentario = () => {
 
   return (
     <div style={styles.body}>
-      <h1 style={styles.h1}>ADMINISTRAR COMENTARIOS</h1>
+      <h1 style={styles.h1}>COMENTARIOS SELECCIONADOS</h1>
+      <button
+        style={styles.submitButton}
+        onClick={() => {
+          setShowForm(true);
+          setFormData({});
+        }}
+      >
+        Crear Comentario
+      </button>
       <table style={styles.table}>
         <thead>
           <tr>
             <th style={styles.th}>ID</th>
             <th style={styles.th}>Comentario</th>
             <th style={styles.th}>Calificación</th>
-            <th style={styles.th}>Mejor Comentario</th> {/* Columna de selección */}
+            <th style={styles.th}>Seleccionar</th> {/* Columna de selección */}
             <th style={styles.th}>Acciones</th>
           </tr>
         </thead>
@@ -166,7 +175,6 @@ const GestionarComentario = () => {
                 {"★".repeat(tipoCita.descripcion)}{" "}
                 {/* Esto repetirá las estrellas según el valor de descripcion */}
               </td>
-
               <td style={styles.td}>
                 <input
                   type="checkbox"
@@ -241,21 +249,23 @@ const GestionarComentario = () => {
                 <option value="">Selecciona una calificación</option>
                 {[...Array(5)].map((_, i) => (
                   <option key={i + 1} value={i + 1}>
-                    {i + 1}
+                    {i + 1} estrellas
                   </option>
                 ))}
               </select>
 
-              <button type="submit" style={styles.submitButton}>
-                {editingTipoCita ? "Actualizar" : "Crear"}
-              </button>
-              <button
-                type="button"
-                style={styles.cancelButton}
-                onClick={handleCancel}
-              >
-                Cancelar
-              </button>
+              <div style={styles.formActions}>
+                <button type="submit" style={styles.submitButton}>
+                  {editingTipoCita ? "Actualizar" : "Crear"}
+                </button>
+                <button
+                  type="button"
+                  style={styles.cancelButton}
+                  onClick={handleCancel}
+                >
+                  Cancelar
+                </button>
+              </div>
             </form>
           </div>
         </>
@@ -263,16 +273,9 @@ const GestionarComentario = () => {
     </div>
   );
 };
-
-export default GestionarComentario;
+export default ComentarioSeleccionado;
 
 const styles = {
-  checkbox: {
-    transform: "scale(2)", // Aumenta el tamaño del checkbox
-    margin: "0 auto", // Centra el checkbox si es necesario
-    cursor: "pointer", // Cambia el cursor para indicar que es interactivo
-  },
-
   body: {
     fontFamily: "Arial, sans-serif",
     backgroundColor: "#f9f9f9",
@@ -289,6 +292,11 @@ const styles = {
     marginTop: "20px",
     backgroundColor: "#fff",
     boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
+  },
+  checkbox: {
+    transform: "scale(2)", // Aumenta el tamaño del checkbox
+    margin: "0 auto", // Centra el checkbox si es necesario
+    cursor: "pointer", // Cambia el cursor para indicar que es interactivo
   },
   th: {
     padding: "12px 15px",

@@ -332,12 +332,12 @@ const Sidebar = () => {
               },
               
               {
-                label: "Registrar Daño",
-                to: "/dashboard/registrardaño",
+                label: "Cafilicacion General",
+                to: "/dashboard/calificaciongeneral",
               },
               {
-                label: "Registrar Lugar",
-                to: "/dashboard/registrarlugar",
+                label: "Seleccion Comentario",
+                to: "/dashboard/comentarioseleccionado",
               },
         
             ]}

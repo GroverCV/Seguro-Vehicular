@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { confirmAction } from "./modalComponentes/ModalConfirm";
 import { api } from "../../api/axios";
+import { confirmAction } from "./modalComponentes/ModalConfirm";
 
 const GestionarTipoCita = () => {
   const [tiposCita, setTiposCita] = useState([]);
@@ -34,105 +34,6 @@ const GestionarTipoCita = () => {
     fetchTiposCita();
   }, []);
 
-  const styles = {
-    body: {
-      fontFamily: "Arial, sans-serif",
-      backgroundColor: "#f9f9f9",
-      margin: 0,
-      padding: "20px",
-    },
-    h1: {
-      textAlign: "center",
-      color: "#333",
-    },
-    table: {
-      width: "100%",
-      borderCollapse: "collapse",
-      marginTop: "20px",
-      backgroundColor: "#fff",
-      boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
-    },
-    th: {
-      padding: "12px 15px",
-      textAlign: "left",
-      borderBottom: "1px solid #ddd",
-      backgroundColor: "#007bff",
-      color: "white",
-    },
-    td: {
-      padding: "12px 15px",
-      textAlign: "left",
-      borderBottom: "1px solid #ddd",
-    },
-    trEven: {
-      backgroundColor: "#f9f9f9",
-    },
-    trOdd: {
-      backgroundColor: "#ffffff",
-    },
-    button: {
-      marginRight: "10px",
-      padding: "5px 10px",
-      cursor: "pointer",
-    },
-    modal: {
-      position: "fixed",
-      top: "50%",
-      left: "50%",
-      transform: "translate(-50%, -50%)",
-      backgroundColor: "white",
-      padding: "20px",
-      borderRadius: "8px",
-      boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
-      zIndex: 1000,
-      width: "700px", // Aumentar el ancho del modal
-      maxHeight: "80%", // Limitar la altura máxima
-      overflowY: "auto", // Hacer scroll si es necesario
-    },
-    overlay: {
-      position: "fixed",
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      backgroundColor: "rgba(0, 0, 0, 0.5)",
-      zIndex: 999,
-    },
-    input: {
-      width: "100%",
-      padding: "10px",
-      margin: "5px 0",
-      borderRadius: "4px",
-      border: "1px solid #ccc",
-      minHeight: "40px", // Altura mínima
-      resize: "vertical", // Permitir redimensionar verticalmente
-    },
-    submitButton: {
-      padding: "10px 15px",
-      backgroundColor: "#007bff",
-      color: "white",
-      border: "none",
-      borderRadius: "4px",
-      cursor: "pointer",
-    },
-    pagination: {
-      display: "flex",
-      justifyContent: "center",
-      marginTop: "20px",
-    },
-    pageButton: {
-      padding: "10px 15px",
-      margin: "0 5px",
-      cursor: "pointer",
-      border: "1px solid #007bff",
-      backgroundColor: "white",
-      color: "#007bff",
-    },
-    activePageButton: {
-      backgroundColor: "#007bff",
-      color: "white",
-    },
-  };
 
   const handleEdit = (tipoCita) => {
     setEditingTipoCita(tipoCita);
@@ -343,3 +244,103 @@ const GestionarTipoCita = () => {
 };
 
 export default GestionarTipoCita;
+
+const styles = {
+  body: {
+    fontFamily: "Arial, sans-serif",
+    backgroundColor: "#f9f9f9",
+    margin: 0,
+    padding: "20px",
+  },
+  h1: {
+    textAlign: "center",
+    color: "#333",
+  },
+  table: {
+    width: "100%",
+    borderCollapse: "collapse",
+    marginTop: "20px",
+    backgroundColor: "#fff",
+    boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
+  },
+  th: {
+    padding: "12px 15px",
+    textAlign: "left",
+    borderBottom: "1px solid #ddd",
+    backgroundColor: "#007bff",
+    color: "white",
+  },
+  td: {
+    padding: "12px 15px",
+    textAlign: "left",
+    borderBottom: "1px solid #ddd",
+  },
+  trEven: {
+    backgroundColor: "#f9f9f9",
+  },
+  trOdd: {
+    backgroundColor: "#ffffff",
+  },
+  button: {
+    marginRight: "10px",
+    padding: "5px 10px",
+    cursor: "pointer",
+  },
+  modal: {
+    position: "fixed",
+    top: "50%",
+    left: "50%",
+    transform: "translate(-50%, -50%)",
+    backgroundColor: "white",
+    padding: "20px",
+    borderRadius: "8px",
+    boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
+    zIndex: 1000,
+    width: "700px", // Aumentar el ancho del modal
+    maxHeight: "80%", // Limitar la altura máxima
+    overflowY: "auto", // Hacer scroll si es necesario
+  },
+  overlay: {
+    position: "fixed",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    zIndex: 999,
+  },
+  input: {
+    width: "100%",
+    padding: "10px",
+    margin: "5px 0",
+    borderRadius: "4px",
+    border: "1px solid #ccc",
+    minHeight: "40px", // Altura mínima
+    resize: "vertical", // Permitir redimensionar verticalmente
+  },
+  submitButton: {
+    padding: "10px 15px",
+    backgroundColor: "#007bff",
+    color: "white",
+    border: "none",
+    borderRadius: "4px",
+    cursor: "pointer",
+  },
+  pagination: {
+    display: "flex",
+    justifyContent: "center",
+    marginTop: "20px",
+  },
+  pageButton: {
+    padding: "10px 15px",
+    margin: "0 5px",
+    cursor: "pointer",
+    border: "1px solid #007bff",
+    backgroundColor: "white",
+    color: "#007bff",
+  },
+  activePageButton: {
+    backgroundColor: "#007bff",
+    color: "white",
+  },
+};

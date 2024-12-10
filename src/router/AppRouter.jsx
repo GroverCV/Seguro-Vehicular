@@ -46,6 +46,8 @@ import Register from "../views/Register";
 import { PrivateRoute } from "./PrivateRout";
 import Calificaciones from "../views/menu/Calificaciones";
 import GestionarComentario from "../views/Componentes/Calificaciones/GestionarComentario";
+import CalificacionGeneral from "../views/Componentes/Calificaciones/CalificacionGeneral";
+import ComentarioSeleccionado from "../views/Componentes/Calificaciones/ComentarioSeleccionado";
 
 
 export const AppRouter = () => {
@@ -105,6 +107,8 @@ export const AppRouter = () => {
 
           <Route path="registrarincidenteusuario" element={<RegistrarIncidenteUsuario/>} />
           <Route path="gestionarcomentario" element={<GestionarComentario/>} />
+          <Route path="calificaciongeneral" element={<CalificacionGeneral/>} />
+          <Route path="comentarioseleccionado" element={<ComentarioSeleccionado/>} />
         </Route>
       </Routes>
     </>

@@ -1,23 +1,29 @@
-
-
 import React, { useEffect, useState } from "react";
+import { api } from "../../../api/axios";
+import { confirmAction } from "../modalComponentes/ModalConfirm";
 
 const CalificacionUsuario = () => {
-  const [notificaciones, setNotificaciones] = useState([]);
-  const [tiposNotificacion, setTiposNotificacion] = useState([]);
+  const [tiposCita, setTiposCita] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [ip, setIp] = useState("");
+  const [editingTipoCita, setEditingTipoCita] = useState(null);
+  const [formData, setFormData] = useState({});
+  const [showForm, setShowForm] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
 
-  // Fetch notificaciones
-  const fetchNotificaciones = async () => {
+  const indexOfLastTipoCita = currentPage * itemsPerPage;
+  const indexOfFirstTipoCita = indexOfLastTipoCita - itemsPerPage;
+  const currentTiposCita = tiposCita.slice(
+    indexOfFirstTipoCita,
+    indexOfLastTipoCita
+  );
+  const totalPages = Math.ceil(tiposCita.length / itemsPerPage);
+
+  const fetchTiposCita = async () => {
     try {
-      const response = await fetch(
-        "https://backend-seguros.campozanodevlab.com/api/notificacion"
-      );
-      if (!response.ok) throw new Error("Error al obtener las notificaciones");
-      const data = await response.json();
-      setNotificaciones(data);
+      const response = await api.get("/api/tipo_cita");
+      setTiposCita(response.data);
     } catch (error) {
       setError(error.message);
     } finally {
@@ -25,166 +31,332 @@ const CalificacionUsuario = () => {
     }
   };
 
-  // Fetch tipos de notificación
-  const fetchTiposNotificacion = async () => {
-    try {
-      const response = await fetch(
-        "https://backend-seguros.campozanodevlab.com/api/tipo_notificacion"
-      );
-      if (!response.ok)
-        throw new Error("Error al obtener los tipos de notificación");
-      const data = await response.json();
-      setTiposNotificacion(data);
-    } catch (error) {
-      setError(error.message);
-    }
+  useEffect(() => {
+    fetchTiposCita();
+  }, []);
+
+  const handleEdit = (tipoCita) => {
+    setEditingTipoCita(tipoCita);
+    setFormData(tipoCita);
+    setShowForm(true);
   };
 
-  // Fetch IP address
-  const fetchIp = async () => {
+  const getUserIp = async () => {
     try {
       const response = await fetch("https://api.ipify.org?format=json");
       const data = await response.json();
-      setIp(data.ip);
+      return data.ip;
     } catch (error) {
-      console.error("Error al obtener la IP:", error);
+      console.error("Error obteniendo IP:", error);
+      return "IP desconocida";
     }
   };
 
-  // Registrar en Bitácora
-  const registrarBitacora = async () => {
-    const userId = parseInt(localStorage.getItem("userId"), 10);
+  const userId = localStorage.getItem("userId");
 
-    const bitacoraEntry = {
-      usuario_id: userId,
-      accion: "Visitó Notificaciones",
-      detalles: "Revisó notificaciones",
-      ip: ip,
-    };
+  const handleDelete = async (id) => {
+    confirmAction(async () => {
+      try {
+        await api.delete(`/api/tipo_cita/${id}`);
+        setTiposCita(tiposCita.filter((tipo) => tipo.id !== id));
 
+        const userIp = await getUserIp();
+        const logData = {
+          usuario_id: userId,
+          accion: "Eliminó",
+          detalles: `el Usuario ID: ${userId} eliminó el Tipo Cita ID: ${id}`,
+          ip: userIp,
+        };
+
+        await logAction(logData);
+      } catch (error) {
+        console.error("Error al eliminar el tipo de cita:", error);
+      }
+    });
+  };
+
+  const logAction = async (logData) => {
+    const token = "simulated-token";
     try {
-      const response = await fetch(
-        "https://backend-seguros.campozanodevlab.com/api/bitacora",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(bitacoraEntry),
-        }
-      );
-      if (!response.ok) throw new Error("Error al registrar en bitácora");
-      console.log("Registro en bitácora exitoso");
+      await api.post("/api/bitacora", logData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
     } catch (error) {
-      console.error("Error al registrar en bitácora:", error);
+      console.error("Error al registrar la acción en la bitácora.");
+      console.error("Error al registrar la acción:", error);
     }
   };
 
-  useEffect(() => {
-    fetchIp();
-    fetchNotificaciones();
-    fetchTiposNotificacion();
-  }, []);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    confirmAction(async () => {
+      try {
+        const response = await api({
+          method: editingTipoCita ? "put" : "post",
+          url: editingTipoCita
+            ? `/api/tipo_cita/${editingTipoCita.id}`
+            : "/api/tipo_cita",
+          data: formData,
+        });
 
-  useEffect(() => {
-    if (ip) {
-      registrarBitacora(); // Solo registra en bitácora después de obtener la IP
-    }
-  }, [ip]);
+        const updatedTipoCita = response.data;
 
-  const userId = parseInt(localStorage.getItem("userId"), 10);
+        setTiposCita((prev) =>
+          editingTipoCita
+            ? prev.map((tipo) =>
+                tipo.id === updatedTipoCita.id ? updatedTipoCita : tipo
+              )
+            : [...prev, updatedTipoCita]
+        );
 
-  // Filtrar notificaciones por usuario
-  const notificacionesFiltradas = notificaciones.filter(
-    (notificacion) => notificacion.usuario_id === userId
-  );
+        setFormData({});
+        setEditingTipoCita(null);
+        setShowForm(false);
 
-  const styles = {
-    container: {
-      display: "flex",
-      flexDirection: "column",
-      gap: "20px",
-      padding: "20px",
-      maxWidth: "800px",
-      margin: "auto",
-      backgroundColor: "#f5f5f5",
-    },
-    card: {
-      display: "flex",
-      flexDirection: "column",
-      padding: "20px",
-      backgroundColor: "#ffffff",
-      boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
-      borderRadius: "10px",
-      transition: "transform 0.3s ease",
-    },
-    cardHover: {
-      transform: "scale(1.02)",
-    },
-    header: {
-      display: "flex",
-      justifyContent: "space-between",
-      alignItems: "center",
-      marginBottom: "10px",
-    },
-    date: {
-      fontSize: "0.9em",
-      color: "#888",
-    },
-    tipoNotificacion: {
-      backgroundColor: "#007bff",
-      color: "white",
-      padding: "5px 10px",
-      borderRadius: "5px",
-      fontSize: "0.85em",
-    },
-    descripcion: {
-      fontSize: "1em",
-      lineHeight: "1.5",
-      color: "#333",
-    },
+        const userIp = await getUserIp();
+
+        const logData = {
+          usuario_id: userId,
+          accion: editingTipoCita ? "Editó" : "Creó",
+          detalles: `El Usuario ID: ${userId} ${
+            editingTipoCita ? "editó" : "creó"
+          } el Tipo Cita ID: ${
+            editingTipoCita ? editingTipoCita.id : updatedTipoCita.id
+          }`,
+          ip: userIp,
+        };
+        fetchTiposCita();
+        await logAction(logData);
+      } catch (error) {
+        console.error("Error al actualizar o crear el tipo de cita:", error);
+      }
+    });
+  };
+
+  const handleCancel = () => {
+    setEditingTipoCita(null);
+    setShowForm(false);
   };
 
   if (loading) return <div>Cargando...</div>;
   if (error) return <div>Error: {error}</div>;
 
   return (
-    <div style={styles.container}>
-      <h1>Notificaciones</h1>
-      {notificacionesFiltradas.length > 0 ? (
-        notificacionesFiltradas.map((notificacion, index) => {
-          const tipoNotificacion = tiposNotificacion.find(
-            (tipo) => tipo.id === notificacion.tipo_id
-          );
-
-          return (
-            <div
-              key={notificacion.id}
-              style={{
-                ...styles.card,
-                ...(index % 2 === 0 ? styles.cardHover : {}),
-              }}
+    <div style={styles.body}>
+      <h1 style={styles.h1}>Comenta para poder mejorar</h1>
+      <button
+        style={styles.submitButton}
+        onClick={() => {
+          setShowForm(true);
+          setFormData({});
+        }}
+      >
+        Crear Tipo Cita
+      </button>
+      <table style={styles.table}>
+        <thead>
+          <tr>
+            <th style={styles.th}>Nombre</th>
+            <th style={styles.th}>Descripción</th>
+            <th style={styles.th}>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          {currentTiposCita.map((tipoCita, index) => (
+            <tr
+              key={tipoCita.id}
+              style={index % 2 === 0 ? styles.trEven : styles.trOdd}
             >
-              <div style={styles.header}>
-                <span style={styles.date}>
-                  {new Date(notificacion.fechaEnvio).toLocaleDateString() ||
-                    "No definida"}
-                </span>
-                <span style={styles.tipoNotificacion}>
-                  {tipoNotificacion?.nombre || "No definido"}
-                </span>
-              </div>
-              <p style={styles.descripcion}>
-                {tipoNotificacion?.descripcion || "No definida"}
-              </p>
-            </div>
-          );
-        })
-      ) : (
-        <p>No hay notificaciones disponibles para este usuario.</p>
+              <td style={styles.td}>{tipoCita.nombre}</td>
+              <td style={styles.td}>
+                {"★".repeat(tipoCita.descripcion)}{" "}
+                {/* Esto repetirá las estrellas según el valor de descripcion */}
+              </td>
+              <td style={styles.td}>
+                <button
+                  style={styles.button}
+                  onClick={() => handleEdit(tipoCita)}
+                >
+                  Editar
+                </button>
+                <button
+                  style={styles.button}
+                  onClick={() => handleDelete(tipoCita.id)}
+                >
+                  Eliminar
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
+      {/* Paginación */}
+      <div style={styles.pagination}>
+        {Array.from({ length: totalPages }, (_, index) => (
+          <button
+            key={index + 1}
+            style={{
+              ...styles.pageButton,
+              ...(currentPage === index + 1 ? styles.activePageButton : {}),
+            }}
+            onClick={() => setCurrentPage(index + 1)}
+          >
+            {index + 1}
+          </button>
+        ))}
+      </div>
+
+      {showForm && (
+        <>
+          <div style={styles.overlay} onClick={handleCancel}></div>
+          <div style={styles.modal}>
+            <h2>{editingTipoCita ? "Editar Tipo Cita" : "Crear Tipo Cita"}</h2>
+            <form onSubmit={handleSubmit}>
+              <input
+                type="text"
+                style={styles.input}
+                placeholder="Nombre"
+                value={formData.nombre || ""}
+                onChange={(e) =>
+                  setFormData({ ...formData, nombre: e.target.value })
+                }
+                required
+              />
+              <select
+                style={styles.input}
+                value={formData.descripcion || ""}
+                onChange={(e) =>
+                  setFormData({ ...formData, descripcion: e.target.value })
+                }
+                required
+              >
+                <option value="">Selecciona una calificación</option>
+                <option value="1">★</option>
+                <option value="2">★★</option>
+                <option value="3">★★★</option>
+                <option value="4">★★★★</option>
+                <option value="5">★★★★★</option>
+              </select>
+
+              <button type="submit" style={styles.submitButton}>
+                {editingTipoCita ? "Actualizar" : "Crear"}
+              </button>
+              <button
+                type="button"
+                onClick={handleCancel}
+                style={styles.cancelButton}
+              >
+                Cancelar
+              </button>
+            </form>
+          </div>
+        </>
       )}
     </div>
   );
 };
 
 export default CalificacionUsuario;
+
+const styles = {
+  body: {
+    fontFamily: "Arial, sans-serif",
+    backgroundColor: "#f9f9f9",
+    margin: 0,
+    padding: "20px",
+  },
+  h1: {
+    textAlign: "center",
+    color: "#333",
+  },
+  table: {
+    width: "100%",
+    borderCollapse: "collapse",
+    marginTop: "20px",
+    backgroundColor: "#fff",
+    boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
+  },
+  th: {
+    padding: "12px 15px",
+    textAlign: "left",
+    borderBottom: "1px solid #ddd",
+    backgroundColor: "#007bff",
+    color: "white",
+  },
+  td: {
+    padding: "12px 15px",
+    textAlign: "left",
+    borderBottom: "1px solid #ddd",
+  },
+  trEven: {
+    backgroundColor: "#f9f9f9",
+  },
+  trOdd: {
+    backgroundColor: "#ffffff",
+  },
+  button: {
+    marginRight: "10px",
+    padding: "5px 10px",
+    cursor: "pointer",
+  },
+  modal: {
+    position: "fixed",
+    top: "50%",
+    left: "50%",
+    transform: "translate(-50%, -50%)",
+    backgroundColor: "white",
+    padding: "20px",
+    borderRadius: "8px",
+    boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
+    zIndex: 1000,
+    width: "700px", // Aumentar el ancho del modal
+    maxHeight: "80%", // Limitar la altura máxima
+    overflowY: "auto", // Hacer scroll si es necesario
+  },
+  overlay: {
+    position: "fixed",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    zIndex: 999,
+  },
+  input: {
+    width: "100%",
+    padding: "10px",
+    margin: "5px 0",
+    borderRadius: "4px",
+    border: "1px solid #ccc",
+    minHeight: "40px", // Altura mínima
+    resize: "vertical", // Permitir redimensionar verticalmente
+  },
+  submitButton: {
+    padding: "10px 15px",
+    backgroundColor: "#007bff",
+    color: "white",
+    border: "none",
+    borderRadius: "4px",
+    cursor: "pointer",
+  },
+  pagination: {
+    display: "flex",
+    justifyContent: "center",
+    marginTop: "20px",
+  },
+  pageButton: {
+    padding: "10px 15px",
+    margin: "0 5px",
+    cursor: "pointer",
+    border: "1px solid #007bff",
+    backgroundColor: "white",
+    color: "#007bff",
+  },
+  activePageButton: {
+    backgroundColor: "#007bff",
+    color: "white",
+  },
+};
