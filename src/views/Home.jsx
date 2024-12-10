@@ -1,13 +1,21 @@
 import React, { useState } from "react";
-import { FaBell, FaCalendarAlt, FaHome, FaInfoCircle, FaPhone, FaShieldAlt } from "react-icons/fa";
+import {
+  FaBell,
+  FaCalendarAlt,
+  FaHome,
+  FaInfoCircle,
+  FaPhone,
+  FaShieldAlt,
+  FaStar,
+} from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
+import RegistrarIncidenteUsuario from "./Componentes/Incidente/usuario/RegistrarIncidenteUsuario";
 import Calendario from "./menu/Calendario";
+import Calificaciones from "./menu/Calificaciones";
 import Contacto from "./menu/Contacto";
-import Informacion from "./menu/Informacion";
 import Inicio from "./menu/Inicio";
 import Notificaciones from "./menu/Notificaciones";
 import Poliza from "./menu/Poliza";
-import RegistrarIncidenteUsuario from "./Componentes/Incidente/usuario/RegistrarIncidenteUsuario";
 
 const styles = {
   container: {
@@ -99,15 +107,26 @@ export const Home = () => {
           <FaBell style={styles.icon} />
           <span style={styles.label}>Notificaciones</span>
         </button>
+
+        <button
+          style={styles.iconButton}
+          onClick={() => handleNavigation("/", "calificaciones")}
+        >
+          <FaStar style={styles.icon} />
+          <span style={styles.label}>Calificaciones</span>
+        </button>
       </div>
 
       <div style={styles.content}>
         {selectedButton === "inicio" && <Inicio />}
         {selectedButton === "contacto" && <Contacto />}
-        {selectedButton === "registrarincidenteusuario" && <RegistrarIncidenteUsuario />}
+        {selectedButton === "registrarincidenteusuario" && (
+          <RegistrarIncidenteUsuario />
+        )}
         {selectedButton === "poliza" && <Poliza />}
         {selectedButton === "calendario" && <Calendario />}
         {selectedButton === "notificaciones" && <Notificaciones />}
+        {selectedButton === "calificaciones" && <Calificaciones />}
       </div>
     </div>
   );

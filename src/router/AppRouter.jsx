@@ -3,48 +3,48 @@ import Navbar from "../Navbar";
 import CerrarSesion from "../views/CerrarSesion";
 import AdministrarBitacora from "../views/Componentes/AdministrarBitacora";
 import AsignarPermisos from "../views/Componentes/AsignarPermisos";
+import Backup from "../views/Componentes/Backup";
 import GestionarAgenda from "../views/Componentes/GestionarAgenda";
+import GestionarDepreciacion from "../views/Componentes/GestionarDepreciacion";
 import GestionarImagen from "../views/Componentes/GestionarImagen";
 import GestionarInformacion from "../views/Componentes/GestionarInformacion";
 import GestionarMarca from "../views/Componentes/GestionarMarca";
+import GestionarModelo from "../views/Componentes/GestionarModelo";
 import GestionarNotificacion from "../views/Componentes/GestionarNotificacion";
 import GestionarRol from "../views/Componentes/GestionarRol";
 import GestionarTipoCita from "../views/Componentes/GestionarTipoCita";
 import GestionarTipoNotificacion from "../views/Componentes/GestionarTipoNotificacion";
+import GestionarTipoUsuario from "../views/Componentes/GestionarTipoUsuario";
+import GestionarTipoVehiculo from "../views/Componentes/GestionarTipoVehiculo";
 import GestionarUsuario from "../views/Componentes/GestionarUsuario";
+import GestionarValorComercial from "../views/Componentes/GestionarValorComercial";
+import GestionarVehiculo from "../views/Componentes/GestionarVehiculo";
+import AdministrarIncidente from "../views/Componentes/Incidente/AdministrarIncidente";
+import GestionarTipoIncidente from "../views/Componentes/Incidente/GestionarTipoIncidente";
+import RegistarLugar from "../views/Componentes/Incidente/RegistarLugar";
+import RegistrarDaño from "../views/Componentes/Incidente/RegistrarDaño";
+import RegistrarReportePolicial from "../views/Componentes/Incidente/RegistrarReportePolicial";
+import RegistrarIncidenteUsuario from "../views/Componentes/Incidente/usuario/RegistrarIncidenteUsuario";
+import ModalAgendaAgente from "../views/Componentes/modalComponentes/ModalAgendaAgente";
+import AdministrarMetodoPago from "../views/Componentes/Pagos/AdministrarMetodoPago";
+import AdministrarPago from "../views/Componentes/Pagos/AdministrarPago";
+import Comprobante from "../views/Componentes/Pagos/Comprobante";
+import GestionarCuota from "../views/Componentes/Pagos/GestionarCouta";
+import GestionarMotivoPago from "../views/Componentes/Pagos/GestionarMotivoPago";
+import GestionarPlanPago from "../views/Componentes/Pagos/GestionarPlanPago";
+import GestionarPoliza from "../views/Componentes/Pagos/GestionarPoliza";
 import Dashboard from "../views/Dashboard";
 import Home from "../views/Home";
 import Login from "../views/Login";
-import Register from "../views/Register";
 import Calendario from "../views/menu/Calendario";
 import Contacto from "../views/menu/Contacto";
 import Informacion from "../views/menu/Informacion";
 import Inicio from "../views/menu/Inicio";
 import Notificaciones from "../views/menu/Notificaciones";
 import Poliza from "../views/menu/Poliza";
+import Register from "../views/Register";
 import { PrivateRoute } from "./PrivateRout";
-import GestionarModelo from "../views/Componentes/GestionarModelo";
-import GestionarDepreciacion from "../views/Componentes/GestionarDepreciacion";
-import GestionarTipoVehiculo from "../views/Componentes/GestionarTipoVehiculo";
-import GestionarValorComercial from "../views/Componentes/GestionarValorComercial";
-import GestionarVehiculo from "../views/Componentes/GestionarVehiculo";
-import GenerarReporte from "../views/Componentes/GenerarReporte";
-import GestionarTipoUsuario from "../views/Componentes/GestionarTipoUsuario";
-import ModalAgendaAgente from "../views/Componentes/modalComponentes/ModalAgendaAgente";
-import GestionarPlanPago from "../views/Componentes/Pagos/GestionarPlanPago";
-import GestionarMotivoPago from "../views/Componentes/Pagos/GestionarMotivoPago";
-import AdministrarMetodoPago from "../views/Componentes/Pagos/AdministrarMetodoPago";
-import GestionarPoliza from "../views/Componentes/Pagos/GestionarPoliza";
-import GestionarCuota from "../views/Componentes/Pagos/GestionarCouta";
-import AdministrarPago from "../views/Componentes/Pagos/AdministrarPago";
-import Comprobante from "../views/Componentes/Pagos/Comprobante";
-import Backup from "../views/Componentes/Backup";
-import GestionarTipoIncidente from "../views/Componentes/Incidente/GestionarTipoIncidente";
-import AdministrarIncidente from "../views/Componentes/Incidente/AdministrarIncidente";
-import RegistarLugar from "../views/Componentes/Incidente/RegistarLugar";
-import RegistrarDaño from "../views/Componentes/Incidente/RegistrarDaño";
-import RegistrarReportePolicial from "../views/Componentes/Incidente/RegistrarReportePolicial";
-import RegistrarIncidenteUsuario from "../views/Componentes/Incidente/usuario/RegistrarIncidenteUsuario";
+import Calificaciones from "../views/menu/Calificaciones";
 
 
 export const AppRouter = () => {
@@ -60,6 +60,7 @@ export const AppRouter = () => {
         <Route path="/informacion" element={<Informacion />} />
         <Route path="/calendario" element={<Calendario />} />
         <Route path="/notificaciones" element={<Notificaciones />} />
+        <Route path="/calificaciones" element={<Calificaciones />} />
         <Route path="/poliza" element={<Poliza/>} />
         <Route path="/login" element={<Login />} />
 

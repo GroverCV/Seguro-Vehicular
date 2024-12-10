@@ -3,6 +3,7 @@ import { Badge, Calendar, Spin, Modal, List } from 'antd';
 import dayjs from 'dayjs';
 import axios from 'axios';
 import '../CSS/ModalAgendaUsuario.css';
+import { api } from '../../../api/axios';
 
 const ModalAgendaUsuario = () => {
   const [loading, setLoading] = useState(true);
@@ -14,16 +15,18 @@ const ModalAgendaUsuario = () => {
   const [usuarios, setUsuarios] = useState({});
   const [ip, setIp] = useState("");
 
-  const userId = Number(localStorage.getItem("userId"));
+  const userId = parseInt(localStorage.getItem("user_id"), 10);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const citasResponse = await axios.get("https://backend-seguros.campozanodevlab.com/api/citas");
+        const citasResponse = await api.get("/api/citas"); // Usando la instancia 'api'
+
         const citasDelUsuario = citasResponse.data.filter(cita => cita.solicitante_id === userId);
         setCitas(citasDelUsuario);
 
-        const usuariosResponse = await axios.get("https://backend-seguros.campozanodevlab.com/api/usuarios");
+        const usuariosResponse = await api.get("/api/usuarios"); // Usando la instancia 'api'
+
         const usuariosData = {};
         usuariosResponse.data.forEach(usuario => {
           usuariosData[usuario.id] = { nombre: usuario.nombre, apellido: usuario.apellido };

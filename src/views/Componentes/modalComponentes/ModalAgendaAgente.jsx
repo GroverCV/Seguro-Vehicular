@@ -3,6 +3,7 @@ import { Badge, Calendar, Spin, Modal, List } from 'antd';
 import dayjs from 'dayjs';
 import axios from 'axios';
 import '../CSS/ModalAgendaUsuario.css';
+import { api } from '../../../api/axios';
 
 const ModalAgendaAgente = () => {
   const [loading, setLoading] = useState(true);
@@ -15,21 +16,23 @@ const ModalAgendaAgente = () => {
   const [ip, setIp] = useState("");
 
   // Obtener el ID del usuario autenticado
-  const userId = Number(localStorage.getItem("userId"));
+  const userId = parseInt(localStorage.getItem("user_id"), 10);
 
   // Obtener datos de citas y usuarios
   useEffect(() => {
     const fetchData = async () => {
       try {
         // Obtener citas
-        const citasResponse = await axios.get("https://backend-seguros.campozanodevlab.com/api/citas");
+        const citasResponse = await api.get("/api/citas"); // Usando la instancia 'api'
+
 
         // Filtrar solo las citas del usuario autenticado
         const citasDelUsuario = citasResponse.data.filter(cita => cita.recepcion_id === userId);
         setCitas(citasDelUsuario);
 
         // Obtener todos los usuarios
-        const usuariosResponse = await axios.get("https://backend-seguros.campozanodevlab.com/api/usuarios");
+        const usuariosResponse = await api.get("/api/usuarios"); // Usando la instancia 'api'
+
         const usuariosData = {};
         usuariosResponse.data.forEach(usuario => {
           usuariosData[usuario.id] = { nombre: usuario.nombre, apellido: usuario.apellido }; // Suponiendo que los campos son nombre y apellido

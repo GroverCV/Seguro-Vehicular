@@ -89,13 +89,15 @@ export const Login = () => {
         password,
       });
 
-      const { access_token, usuario } = response.data;
+      const { access_token, user } = response.data;
 
       // Guardar el token usando la función de authService
-      guardarTokenEnLocalStorage(access_token);
 
-      // Mostrar el token en la consola
+      guardarTokenEnLocalStorage(access_token, user.email, user.id);
+
+      // Mostrar el token y los datos del usuario en la consola
       console.log("Token obtenido:", access_token);
+      console.log("Usuario obtenido:", user.id);
 
       // Navegar al dashboard
       navigate("/dashboard", {

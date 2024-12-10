@@ -78,31 +78,36 @@ const GestionarAgenda = () => {
     }
   };
 
-  const userId = localStorage.getItem("userId");
+  const userId = parseInt(localStorage.getItem("user_id"), 10);
 
   const handleDelete = async (id) => {
     confirmAction(async () => {
       try {
-        await fetch(
-          `https://backend-seguros.campozanodevlab.com/api/citas/${id}`,
-          { method: "DELETE" }
-        );
+        // Realizar la solicitud DELETE utilizando axios
+        await api.delete(`/api/citas/${id}`);
+  
+        // Actualizar el estado de citas eliminando la cita eliminada
         setCitas(citas.filter((cita) => cita.id !== id));
-
+  
+        // Obtener la IP del usuario
         const userIp = await getUserIp();
+  
+        // Crear los datos del log
         const logData = {
           usuario_id: userId,
           accion: "Eliminó",
           detalles: `El Usuario ID: ${userId} eliminó la Cita ID: ${id}`,
           ip: userIp,
         };
-
+  
+        // Registrar la acción en la bitácora
         await logAction(logData);
       } catch (error) {
         console.error("Error al eliminar la cita:", error);
       }
     });
   };
+  
 
   const logAction = async (logData) => {
     const token = "simulated-token";

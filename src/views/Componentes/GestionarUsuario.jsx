@@ -18,62 +18,63 @@ const GestionarUsuario = () => {
   const [tipoUsuarios, setTipoUsuario] = useState([]);
   const [ciudades, setCiudad] = useState([]);
   const [paises, setPais] = useState([]);
+  const userId = parseInt(localStorage.getItem("user_id"), 10);
+  const token = localStorage.getItem("access_token");
 
   const fetchUsuarios = async () => {
-  try {
-    const response = await api.get("/api/usuarios");
-    setUsuarios(response.data);
-  } catch (error) {
-    setError(error.message);
-  } finally {
-    setLoading(false);
-  }
-};
+    try {
+      const response = await api.get("/api/usuarios");
+      setUsuarios(response.data);
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-const fetchTipoUsuario = async () => {
-  try {
-    const response = await api.get("/api/tipo_usuario");
-    setTipoUsuario(response.data); // setTipoUsuarios es un estado que almacena los tipos de usuario
-  } catch (error) {
-    setError(error.message);
-  } finally {
-    setLoading(false);
-  }
-};
+  const fetchTipoUsuario = async () => {
+    try {
+      const response = await api.get("/api/tipo_usuario");
+      setTipoUsuario(response.data); // setTipoUsuarios es un estado que almacena los tipos de usuario
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-const fetchCiudad = async () => {
-  try {
-    const response = await api.get("/api/ciudad");
-    setCiudad(response.data); // setCiudades es un estado que almacena las ciudades
-  } catch (error) {
-    setError(error.message);
-  } finally {
-    setLoading(false);
-  }
-};
+  const fetchCiudad = async () => {
+    try {
+      const response = await api.get("/api/ciudad");
+      setCiudad(response.data); // setCiudades es un estado que almacena las ciudades
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-const fetchPais = async () => {
-  try {
-    const response = await api.get("/api/pais");
-    setPais(response.data); // setPaises es un estado que almacena los países
-  } catch (error) {
-    setError(error.message);
-  } finally {
-    setLoading(false);
-  }
-};
+  const fetchPais = async () => {
+    try {
+      const response = await api.get("/api/pais");
+      setPais(response.data); // setPaises es un estado que almacena los países
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-const fetchRoles = async () => {
-  try {
-    const response = await api.get("/api/roles");
-    setRoles(response.data);
-  } catch (error) {
-    setError(error.message);
-  } finally {
-    setLoading(false);
-  }
-};
-
+  const fetchRoles = async () => {
+    try {
+      const response = await api.get("/api/roles");
+      setRoles(response.data);
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     fetchUsuarios();
@@ -87,8 +88,6 @@ const fetchRoles = async () => {
     setEditingUser(usuario);
     setFormData(usuario);
   };
-
-  const userId = localStorage.getItem("userId");
 
   const getUserIp = async () => {
     try {
@@ -106,7 +105,7 @@ const fetchRoles = async () => {
       try {
         await api.delete(`/api/usuarios/${id}`);
         setUsuarios(usuarios.filter((usuario) => usuario.id !== id));
-  
+
         const userIp = await getUserIp();
         const logData = {
           usuario_id: userId,
@@ -114,7 +113,7 @@ const fetchRoles = async () => {
           detalles: `El Usuario ID: ${userId} eliminó el Usuario ID: ${id}`,
           ip: userIp,
         };
-  
+
         await logAction(logData);
       } catch (error) {
         setError("Error al eliminar el usuario");
@@ -122,9 +121,8 @@ const fetchRoles = async () => {
       }
     });
   };
-  
+
   const logAction = async (logData) => {
-    const token = "simulated-token"; // Aquí deberías usar un token válido si es necesario
     try {
       await api.post("/api/bitacora", logData, {
         headers: {
@@ -136,15 +134,17 @@ const fetchRoles = async () => {
       console.error("Error al registrar la acción en la bitácora:", error);
     }
   };
-  
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     confirmAction(async () => {
       try {
         // Obtener el usuario que se está editando antes de la actualización
-        const previousUserResponse = await api.get(`/api/usuarios/${editingUser.id}`);
+        const previousUserResponse = await api.get(
+          `/api/usuarios/${editingUser.id}`
+        );
         const previousUser = previousUserResponse.data;
-  
+
         const response = await api.put(
           `/api/usuarios/${editingUser.id}`,
           formData,
@@ -156,7 +156,7 @@ const fetchRoles = async () => {
             usuario.id === updatedUser.id ? updatedUser : usuario
           )
         );
-  
+
         const userIp = await getUserIp();
         const attributesToCheck = [
           "Nombre",
@@ -173,19 +173,19 @@ const fetchRoles = async () => {
         const editedAttribute = attributesToCheck.find(
           (key) => formData[key] !== previousUser[key]
         );
-  
+
         let logDetails = "";
         if (editedAttribute) {
           logDetails = `Atributo editado: ${editedAttribute}`; // Detalle del atributo editado
         }
-  
+
         const logData = {
           usuario_id: userId,
           accion: "Editó",
           detalles: `El Usuario ID: ${userId} editó al Usuario ID: ${editingUser.id}. ${logDetails}`,
           ip: userIp,
         };
-  
+
         await logAction(logData);
         fetchUsuarios();
         setEditingUser(null);
@@ -194,86 +194,6 @@ const fetchRoles = async () => {
         console.error("Error al actualizar el usuario:", error);
       }
     });
-  };
-  
-
-  const styles = {
-    body: {
-      fontFamily: "Arial, sans-serif",
-      backgroundColor: "#f9f9f9",
-      margin: 0,
-      padding: "20px",
-    },
-    h1: {
-      textAlign: "center",
-      color: "#333",
-    },
-    table: {
-      width: "100%",
-      borderCollapse: "collapse",
-      marginTop: "20px",
-      backgroundColor: "#fff",
-      boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
-    },
-    th: {
-      padding: "12px 15px",
-      textAlign: "left",
-      borderBottom: "1px solid #ddd",
-      backgroundColor: "#007bff",
-      color: "white",
-    },
-    td: {
-      padding: "12px 15px",
-      textAlign: "left",
-      borderBottom: "1px solid #ddd",
-    },
-    trEven: {
-      backgroundColor: "#f9f9f9",
-    },
-    trOdd: {
-      backgroundColor: "#ffffff",
-    },
-    button: {
-      marginRight: "10px",
-      padding: "5px 10px",
-      cursor: "pointer",
-    },
-    modal: {
-      position: "fixed",
-      top: "50%",
-      left: "50%",
-      transform: "translate(-50%, -50%)",
-      backgroundColor: "white",
-      padding: "20px",
-      borderRadius: "8px",
-      boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
-      zIndex: 1000,
-      width: "400px",
-    },
-    overlay: {
-      position: "fixed",
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      backgroundColor: "rgba(0, 0, 0, 0.5)",
-      zIndex: 999,
-    },
-    input: {
-      width: "100%",
-      padding: "10px",
-      margin: "5px 0",
-      borderRadius: "4px",
-      border: "1px solid #ccc",
-    },
-    submitButton: {
-      padding: "10px 15px",
-      backgroundColor: "#007bff",
-      color: "white",
-      border: "none",
-      borderRadius: "4px",
-      cursor: "pointer",
-    },
   };
 
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
@@ -624,3 +544,82 @@ const fetchRoles = async () => {
 };
 
 export default GestionarUsuario;
+
+const styles = {
+  body: {
+    fontFamily: "Arial, sans-serif",
+    backgroundColor: "#f9f9f9",
+    margin: 0,
+    padding: "20px",
+  },
+  h1: {
+    textAlign: "center",
+    color: "#333",
+  },
+  table: {
+    width: "100%",
+    borderCollapse: "collapse",
+    marginTop: "20px",
+    backgroundColor: "#fff",
+    boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
+  },
+  th: {
+    padding: "12px 15px",
+    textAlign: "left",
+    borderBottom: "1px solid #ddd",
+    backgroundColor: "#007bff",
+    color: "white",
+  },
+  td: {
+    padding: "12px 15px",
+    textAlign: "left",
+    borderBottom: "1px solid #ddd",
+  },
+  trEven: {
+    backgroundColor: "#f9f9f9",
+  },
+  trOdd: {
+    backgroundColor: "#ffffff",
+  },
+  button: {
+    marginRight: "10px",
+    padding: "5px 10px",
+    cursor: "pointer",
+  },
+  modal: {
+    position: "fixed",
+    top: "50%",
+    left: "50%",
+    transform: "translate(-50%, -50%)",
+    backgroundColor: "white",
+    padding: "20px",
+    borderRadius: "8px",
+    boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
+    zIndex: 1000,
+    width: "400px",
+  },
+  overlay: {
+    position: "fixed",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    zIndex: 999,
+  },
+  input: {
+    width: "100%",
+    padding: "10px",
+    margin: "5px 0",
+    borderRadius: "4px",
+    border: "1px solid #ccc",
+  },
+  submitButton: {
+    padding: "10px 15px",
+    backgroundColor: "#007bff",
+    color: "white",
+    border: "none",
+    borderRadius: "4px",
+    cursor: "pointer",
+  },
+};

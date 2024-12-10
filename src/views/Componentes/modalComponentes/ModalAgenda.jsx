@@ -3,6 +3,7 @@ import { Badge, Calendar, Spin, Modal, List } from 'antd';
 import dayjs from 'dayjs';
 import axios from 'axios';
 import '../CSS/ModalAgendaUsuario.css';
+import { api } from '../../../api/axios';
 
 const ModalAgenda = () => {
   const [loading, setLoading] = useState(true);
@@ -18,11 +19,13 @@ const ModalAgenda = () => {
     const fetchData = async () => {
       try {
         // Obtener citas
-        const citasResponse = await axios.get("https://backend-seguros.campozanodevlab.com/api/citas");
+        const citasResponse = await api.get("/api/citas"); // Usando la instancia 'api'
+
         setCitas(citasResponse.data);
 
         // Obtener todos los usuarios
-        const usuariosResponse = await axios.get("https://backend-seguros.campozanodevlab.com/api/usuarios");
+        const usuariosResponse = await api.get("/api/usuarios"); // Usando la instancia 'api'
+
         const usuariosData = {};
         usuariosResponse.data.forEach(usuario => {
           usuariosData[usuario.id] = { nombre: usuario.nombre, apellido: usuario.apellido }; // Suponiendo que los campos son nombre y apellido

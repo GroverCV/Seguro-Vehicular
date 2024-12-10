@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from "react";
-import { api } from "../../../api/axios";
 
-const ModalNotificacionesUsuario = () => {
+
+import React, { useEffect, useState } from "react";
+
+const CalificacionUsuario = () => {
   const [notificaciones, setNotificaciones] = useState([]);
   const [tiposNotificacion, setTiposNotificacion] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -11,19 +12,29 @@ const ModalNotificacionesUsuario = () => {
   // Fetch notificaciones
   const fetchNotificaciones = async () => {
     try {
-      const response = await api.get("/api/notificacion");
-      setNotificaciones(response.data);
+      const response = await fetch(
+        "https://backend-seguros.campozanodevlab.com/api/notificacion"
+      );
+      if (!response.ok) throw new Error("Error al obtener las notificaciones");
+      const data = await response.json();
+      setNotificaciones(data);
     } catch (error) {
       setError(error.message);
     } finally {
       setLoading(false);
     }
   };
+
   // Fetch tipos de notificación
   const fetchTiposNotificacion = async () => {
     try {
-      const response = await api.get("/api/tipo_notificacion");
-      setTiposNotificacion(response.data);
+      const response = await fetch(
+        "https://backend-seguros.campozanodevlab.com/api/tipo_notificacion"
+      );
+      if (!response.ok)
+        throw new Error("Error al obtener los tipos de notificación");
+      const data = await response.json();
+      setTiposNotificacion(data);
     } catch (error) {
       setError(error.message);
     }
@@ -42,6 +53,8 @@ const ModalNotificacionesUsuario = () => {
 
   // Registrar en Bitácora
   const registrarBitacora = async () => {
+    const userId = parseInt(localStorage.getItem("userId"), 10);
+
     const bitacoraEntry = {
       usuario_id: userId,
       accion: "Visitó Notificaciones",
@@ -50,12 +63,16 @@ const ModalNotificacionesUsuario = () => {
     };
 
     try {
-      const response = await api.post("/api/bitacora", bitacoraEntry, {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      
+      const response = await fetch(
+        "https://backend-seguros.campozanodevlab.com/api/bitacora",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(bitacoraEntry),
+        }
+      );
       if (!response.ok) throw new Error("Error al registrar en bitácora");
       console.log("Registro en bitácora exitoso");
     } catch (error) {
@@ -75,13 +92,58 @@ const ModalNotificacionesUsuario = () => {
     }
   }, [ip]);
 
-  // Obtener el userId desde localStorage
-  const userId = parseInt(localStorage.getItem("user_id"), 10);
+  const userId = parseInt(localStorage.getItem("userId"), 10);
 
-  // Filtrar las notificaciones por el userId
+  // Filtrar notificaciones por usuario
   const notificacionesFiltradas = notificaciones.filter(
     (notificacion) => notificacion.usuario_id === userId
   );
+
+  const styles = {
+    container: {
+      display: "flex",
+      flexDirection: "column",
+      gap: "20px",
+      padding: "20px",
+      maxWidth: "800px",
+      margin: "auto",
+      backgroundColor: "#f5f5f5",
+    },
+    card: {
+      display: "flex",
+      flexDirection: "column",
+      padding: "20px",
+      backgroundColor: "#ffffff",
+      boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+      borderRadius: "10px",
+      transition: "transform 0.3s ease",
+    },
+    cardHover: {
+      transform: "scale(1.02)",
+    },
+    header: {
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginBottom: "10px",
+    },
+    date: {
+      fontSize: "0.9em",
+      color: "#888",
+    },
+    tipoNotificacion: {
+      backgroundColor: "#007bff",
+      color: "white",
+      padding: "5px 10px",
+      borderRadius: "5px",
+      fontSize: "0.85em",
+    },
+    descripcion: {
+      fontSize: "1em",
+      lineHeight: "1.5",
+      color: "#333",
+    },
+  };
 
   if (loading) return <div>Cargando...</div>;
   if (error) return <div>Error: {error}</div>;
@@ -119,56 +181,10 @@ const ModalNotificacionesUsuario = () => {
           );
         })
       ) : (
-        <p>No tiene notificaciones</p>
+        <p>No hay notificaciones disponibles para este usuario.</p>
       )}
     </div>
   );
 };
 
-export default ModalNotificacionesUsuario;
-
-const styles = {
-  container: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "20px",
-    padding: "20px",
-    maxWidth: "800px",
-    margin: "auto",
-    backgroundColor: "#f5f5f5",
-  },
-  card: {
-    display: "flex",
-    flexDirection: "column",
-    padding: "20px",
-    backgroundColor: "#ffffff",
-    boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
-    borderRadius: "10px",
-    transition: "transform 0.3s ease",
-  },
-  cardHover: {
-    transform: "scale(1.02)",
-  },
-  header: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: "10px",
-  },
-  date: {
-    fontSize: "0.9em",
-    color: "#888",
-  },
-  tipoNotificacion: {
-    backgroundColor: "#007bff",
-    color: "white",
-    padding: "5px 10px",
-    borderRadius: "5px",
-    fontSize: "0.85em",
-  },
-  descripcion: {
-    fontSize: "1em",
-    lineHeight: "1.5",
-    color: "#333",
-  },
-};
+export default CalificacionUsuario;
