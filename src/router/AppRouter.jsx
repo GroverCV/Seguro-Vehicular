@@ -45,6 +45,7 @@ import Poliza from "../views/menu/Poliza";
 import Register from "../views/Register";
 import { PrivateRoute } from "./PrivateRout";
 import Calificaciones from "../views/menu/Calificaciones";
+import GestionarComentario from "../views/Componentes/Calificaciones/GestionarComentario";
 
 
 export const AppRouter = () => {
@@ -103,6 +104,7 @@ export const AppRouter = () => {
           <Route path="registrarreportepolicial" element={<RegistrarReportePolicial/>} />
 
           <Route path="registrarincidenteusuario" element={<RegistrarIncidenteUsuario/>} />
+          <Route path="gestionarcomentario" element={<GestionarComentario/>} />
         </Route>
       </Routes>
     </>

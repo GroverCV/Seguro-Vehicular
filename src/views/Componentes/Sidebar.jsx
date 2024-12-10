@@ -318,6 +318,31 @@ const Sidebar = () => {
               },
             ]}
           />
+
+
+<SidebarItem
+            label="Comentarios"
+            section="comentarios"
+            expanded={expanded.comentarios}
+            toggleExpand={toggleExpand}
+            items={[
+              {
+                label: "Administrar Comentarios",
+                to: "/dashboard/gestionarcomentario",
+              },
+              
+              {
+                label: "Registrar Daño",
+                to: "/dashboard/registrardaño",
+              },
+              {
+                label: "Registrar Lugar",
+                to: "/dashboard/registrarlugar",
+              },
+        
+            ]}
+          />
+
           <li
             style={{
               ...sidebarStyles.listItem,
