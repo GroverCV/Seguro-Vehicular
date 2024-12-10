@@ -41,22 +41,7 @@ const ComentarioSeleccionado = () => {
     fetchTiposCita();
   }, []);
 
-  const handleEdit = (tipoCita) => {
-    setEditingTipoCita(tipoCita);
-    setFormData(tipoCita);
-    setShowForm(true);
-  };
-
-  const handleDelete = async (id) => {
-    confirmAction(async () => {
-      try {
-        await api.delete(`/api/tipo_cita/${id}`);
-        setTiposCita(tiposCita.filter((tipo) => tipo.id !== id));
-      } catch (error) {
-        console.error("Error al eliminar el tipo de cita:", error);
-      }
-    });
-  };
+ 
 
   const handleSelectComment = async (id) => {
     setSelectedComments((prevSelected) => {
@@ -144,23 +129,14 @@ const ComentarioSeleccionado = () => {
   return (
     <div style={styles.body}>
       <h1 style={styles.h1}>COMENTARIOS SELECCIONADOS</h1>
-      <button
-        style={styles.submitButton}
-        onClick={() => {
-          setShowForm(true);
-          setFormData({});
-        }}
-      >
-        Crear Comentario
-      </button>
       <table style={styles.table}>
         <thead>
           <tr>
             <th style={styles.th}>ID</th>
             <th style={styles.th}>Comentario</th>
             <th style={styles.th}>Calificación</th>
-            <th style={styles.th}>Seleccionar</th> {/* Columna de selección */}
-            <th style={styles.th}>Acciones</th>
+            <th style={styles.th}>Destacado</th> {/* Columna de selección */}
+
           </tr>
         </thead>
         <tbody>
@@ -184,20 +160,7 @@ const ComentarioSeleccionado = () => {
                 />
               </td>
 
-              <td style={styles.td}>
-                <button
-                  style={styles.button}
-                  onClick={() => handleEdit(tipoCita)}
-                >
-                  Editar
-                </button>
-                <button
-                  style={styles.button}
-                  onClick={() => handleDelete(tipoCita.id)}
-                >
-                  Eliminar
-                </button>
-              </td>
+             
             </tr>
           ))}
         </tbody>
