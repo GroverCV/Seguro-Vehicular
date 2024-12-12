@@ -129,6 +129,7 @@ const GestionarComentario = () => {
         fetchTiposCita();
       } catch (error) {
         console.error("Error al actualizar o crear el tipo de cita:", error);
+        fetchTiposCita();
       }
     });
   };

@@ -96,6 +96,7 @@ export const Navbar = () => {
   return (
     <>
       <header style={styles.header}>
+        
         <Link to="/dashboard" style={styles.Titulo}>
           <FaCar style={styles.carIcon} onClick={handleCarClick} />{" "}
         </Link>

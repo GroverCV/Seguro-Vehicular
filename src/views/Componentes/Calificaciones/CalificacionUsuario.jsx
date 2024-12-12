@@ -9,21 +9,14 @@ const CalificacionUsuario = () => {
   const [editingTipoCita, setEditingTipoCita] = useState(null);
   const [formData, setFormData] = useState({});
   const [showForm, setShowForm] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5;
-
-  const indexOfLastTipoCita = currentPage * itemsPerPage;
-  const indexOfFirstTipoCita = indexOfLastTipoCita - itemsPerPage;
-  const currentTiposCita = tiposCita.slice(
-    indexOfFirstTipoCita,
-    indexOfLastTipoCita
-  );
-  const totalPages = Math.ceil(tiposCita.length / itemsPerPage);
 
   const fetchTiposCita = async () => {
     try {
       const response = await api.get("/api/tipo_cita");
-      setTiposCita(response.data);
+      const filteredData = response.data
+        .filter((tipoCita) => tipoCita.descripcion > 0)
+        .sort((a, b) => b.id - a.id); // Orden descendente
+      setTiposCita(filteredData);
     } catch (error) {
       setError(error.message);
     } finally {
@@ -41,52 +34,15 @@ const CalificacionUsuario = () => {
     setShowForm(true);
   };
 
-  const getUserIp = async () => {
-    try {
-      const response = await fetch("https://api.ipify.org?format=json");
-      const data = await response.json();
-      return data.ip;
-    } catch (error) {
-      console.error("Error obteniendo IP:", error);
-      return "IP desconocida";
-    }
-  };
-
-  const userId = localStorage.getItem("userId");
-
   const handleDelete = async (id) => {
     confirmAction(async () => {
       try {
         await api.delete(`/api/tipo_cita/${id}`);
         setTiposCita(tiposCita.filter((tipo) => tipo.id !== id));
-
-        const userIp = await getUserIp();
-        const logData = {
-          usuario_id: userId,
-          accion: "Eliminó",
-          detalles: `el Usuario ID: ${userId} eliminó el Tipo Cita ID: ${id}`,
-          ip: userIp,
-        };
-
-        await logAction(logData);
       } catch (error) {
         console.error("Error al eliminar el tipo de cita:", error);
       }
     });
-  };
-
-  const logAction = async (logData) => {
-    const token = "simulated-token";
-    try {
-      await api.post("/api/bitacora", logData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-    } catch (error) {
-      console.error("Error al registrar la acción en la bitácora.");
-      console.error("Error al registrar la acción:", error);
-    }
   };
 
   const handleSubmit = async (e) => {
@@ -102,7 +58,6 @@ const CalificacionUsuario = () => {
         });
 
         const updatedTipoCita = response.data;
-
         setTiposCita((prev) =>
           editingTipoCita
             ? prev.map((tipo) =>
@@ -110,25 +65,10 @@ const CalificacionUsuario = () => {
               )
             : [...prev, updatedTipoCita]
         );
-
         setFormData({});
         setEditingTipoCita(null);
         setShowForm(false);
-
-        const userIp = await getUserIp();
-
-        const logData = {
-          usuario_id: userId,
-          accion: editingTipoCita ? "Editó" : "Creó",
-          detalles: `El Usuario ID: ${userId} ${
-            editingTipoCita ? "editó" : "creó"
-          } el Tipo Cita ID: ${
-            editingTipoCita ? editingTipoCita.id : updatedTipoCita.id
-          }`,
-          ip: userIp,
-        };
         fetchTiposCita();
-        await logAction(logData);
       } catch (error) {
         console.error("Error al actualizar o crear el tipo de cita:", error);
       }
@@ -145,7 +85,9 @@ const CalificacionUsuario = () => {
 
   return (
     <div style={styles.body}>
-      <h1 style={styles.h1}>Comenta para poder mejorar</h1>
+      <h1 style={styles.h1}>
+        Da tu opinion, ayudanos a dar un mejor el servicio
+      </h1>
       <button
         style={styles.submitButton}
         onClick={() => {
@@ -153,66 +95,24 @@ const CalificacionUsuario = () => {
           setFormData({});
         }}
       >
-        Crear Tipo Cita
+        Agrega un Comentario
       </button>
-      <table style={styles.table}>
-        <thead>
-          <tr>
-            <th style={styles.th}>Nombre</th>
-            <th style={styles.th}>Descripción</th>
-            <th style={styles.th}>Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
-          {currentTiposCita.map((tipoCita, index) => (
-            <tr
-              key={tipoCita.id}
-              style={index % 2 === 0 ? styles.trEven : styles.trOdd}
-            >
-              <td style={styles.td}>{tipoCita.nombre}</td>
-              <td style={styles.td}>
-                {"★".repeat(tipoCita.descripcion)}{" "}
-                {/* Esto repetirá las estrellas según el valor de descripcion */}
-              </td>
-              <td style={styles.td}>
-                <button
-                  style={styles.button}
-                  onClick={() => handleEdit(tipoCita)}
-                >
-                  Editar
-                </button>
-                <button
-                  style={styles.button}
-                  onClick={() => handleDelete(tipoCita.id)}
-                >
-                  Eliminar
-                </button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
 
-      {/* Paginación */}
-      <div style={styles.pagination}>
-        {Array.from({ length: totalPages }, (_, index) => (
-          <button
-            key={index + 1}
-            style={{
-              ...styles.pageButton,
-              ...(currentPage === index + 1 ? styles.activePageButton : {}),
-            }}
-            onClick={() => setCurrentPage(index + 1)}
-          >
-            {index + 1}
-          </button>
+      <div style={styles.cardContainer}>
+        {tiposCita.map((tipoCita) => (
+          <div key={tipoCita.id} style={styles.card}>
+            <h3 style={styles.cardTitle}>{tipoCita.nombre}</h3>
+            <p style={styles.cardDescription}>
+              {"★".repeat(tipoCita.descripcion)}
+            </p>
+            <div style={styles.cardActions}></div>
+          </div>
         ))}
       </div>
 
       {showForm && (
-        <>
-          <div style={styles.overlay} onClick={handleCancel}></div>
-          <div style={styles.modal}>
+        <div style={styles.modalOverlay}>
+          <div style={styles.modalContent}>
             <h2>{editingTipoCita ? "Editar Tipo Cita" : "Crear Tipo Cita"}</h2>
             <form onSubmit={handleSubmit}>
               <input
@@ -240,123 +140,126 @@ const CalificacionUsuario = () => {
                 <option value="4">★★★★</option>
                 <option value="5">★★★★★</option>
               </select>
-
-              <button type="submit" style={styles.submitButton}>
-                {editingTipoCita ? "Actualizar" : "Crear"}
-              </button>
-              <button
-                type="button"
-                onClick={handleCancel}
-                style={styles.cancelButton}
-              >
-                Cancelar
-              </button>
+              <div style={styles.formActions}>
+                <button type="submit" style={styles.submitButton}>
+                  {editingTipoCita ? "Actualizar" : "Crear"}
+                </button>
+                <button
+                  type="button"
+                  onClick={handleCancel}
+                  style={styles.cancelButton}
+                >
+                  Cancelar
+                </button>
+              </div>
             </form>
           </div>
-        </>
+        </div>
       )}
     </div>
   );
 };
 
 export default CalificacionUsuario;
-
 const styles = {
   body: {
     fontFamily: "Arial, sans-serif",
-    backgroundColor: "#f9f9f9",
-    margin: 0,
+    backgroundColor: "#f5f5f5",
     padding: "20px",
   },
   h1: {
     textAlign: "center",
     color: "#333",
   },
-  table: {
-    width: "100%",
-    borderCollapse: "collapse",
-    marginTop: "20px",
-    backgroundColor: "#fff",
-    boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
-  },
-  th: {
-    padding: "12px 15px",
-    textAlign: "left",
-    borderBottom: "1px solid #ddd",
-    backgroundColor: "#007bff",
-    color: "white",
-  },
-  td: {
-    padding: "12px 15px",
-    textAlign: "left",
-    borderBottom: "1px solid #ddd",
-  },
-  trEven: {
-    backgroundColor: "#f9f9f9",
-  },
-  trOdd: {
-    backgroundColor: "#ffffff",
-  },
-  button: {
-    marginRight: "10px",
-    padding: "5px 10px",
-    cursor: "pointer",
-  },
-  modal: {
-    position: "fixed",
-    top: "50%",
-    left: "50%",
-    transform: "translate(-50%, -50%)",
-    backgroundColor: "white",
-    padding: "20px",
-    borderRadius: "8px",
-    boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
-    zIndex: 1000,
-    width: "700px", // Aumentar el ancho del modal
-    maxHeight: "80%", // Limitar la altura máxima
-    overflowY: "auto", // Hacer scroll si es necesario
-  },
-  overlay: {
-    position: "fixed",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-    zIndex: 999,
-  },
-  input: {
-    width: "100%",
-    padding: "10px",
-    margin: "5px 0",
-    borderRadius: "4px",
-    border: "1px solid #ccc",
-    minHeight: "40px", // Altura mínima
-    resize: "vertical", // Permitir redimensionar verticalmente
-  },
   submitButton: {
-    padding: "10px 15px",
+    display: "block",
+    margin: "20px auto",
+    padding: "10px 20px",
     backgroundColor: "#007bff",
     color: "white",
     border: "none",
-    borderRadius: "4px",
+    borderRadius: "5px",
     cursor: "pointer",
   },
-  pagination: {
+  cardContainer: {
+    display: "flex",
+    flexWrap: "wrap",
+    gap: "20px",
+    justifyContent: "center",
+  },
+  card: {
+    backgroundColor: "white",
+    borderRadius: "8px",
+    boxShadow: "0 2px 5px rgba(0, 0, 0, 0.1)",
+    padding: "15px",
+    width: "250px",
+    textAlign: "center",
+  },
+  cardTitle: {
+    fontSize: "18px",
+    fontWeight: "bold",
+  },
+  cardDescription: {
+    margin: "10px 0",
+    color: "#888",
+  },
+  cardActions: {
+    display: "flex",
+    justifyContent: "space-around",
+  },
+  editButton: {
+    backgroundColor: "#ffc107",
+    color: "white",
+    border: "none",
+    padding: "5px 10px",
+    borderRadius: "5px",
+    cursor: "pointer",
+  },
+  deleteButton: {
+    backgroundColor: "#dc3545",
+    color: "white",
+    border: "none",
+    padding: "5px 10px",
+    borderRadius: "5px",
+    cursor: "pointer",
+  },
+  modalOverlay: {
+    position: "fixed",
+    top: 0,
+    left: 0,
+    width: "100%",
+    height: "100%",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
     display: "flex",
     justifyContent: "center",
-    marginTop: "20px",
+    alignItems: "center",
+    zIndex: 1000,
   },
-  pageButton: {
-    padding: "10px 15px",
-    margin: "0 5px",
-    cursor: "pointer",
-    border: "1px solid #007bff",
+  modalContent: {
     backgroundColor: "white",
-    color: "#007bff",
+    padding: "20px",
+    borderRadius: "8px",
+    width: "90%",
+    maxWidth: "500px",
   },
-  activePageButton: {
-    backgroundColor: "#007bff",
+  input: {
+    display: "block",
+    width: "100%",
+    margin: "10px 0",
+    padding: "10px",
+    border: "1px solid #ccc",
+    borderRadius: "5px",
+  },
+  formActions: {
+    display: "flex",
+    justifyContent: "space-between",
+  },
+  cancelButton: {
+    backgroundColor: "gray",
     color: "white",
+    border: "none",
+    padding: "5px 10px",
+    borderRadius: "5px",
+    cursor: "pointer",
   },
 };
